@@ -8,8 +8,8 @@ PROGRAM  = get_minimax_grids
 # "make" builds all
 all: $(PROGRAM) realclean
 
-get_minimax_grids: kinds.o init_types.o read_input.o init_minimax.o
-	$(FC) $(FFLAGS) $(F90FLAGS) -o $@ kinds.o init_types.o read_input.o init_minimax.o  
+get_minimax_grids: kinds.o init_grids.o init_types.o read_input.o main.o
+	$(FC) $(FFLAGS) $(F90FLAGS) -o $@ kinds.o init_grids.o init_types.o read_input.o main.o  
 
 %.o: %.f90
 	$(FC) $(FFLAGS) $(F90FLAGS) -o $@ -c $<
