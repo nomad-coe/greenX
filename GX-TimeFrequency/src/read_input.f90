@@ -2,13 +2,13 @@ MODULE read_input
 
  USE kinds,       ONLY: sp, dp,&
                         default_string_length
- USE init_types,  ONLY: input_type
-                     ! matrix_structure_type
+ USE init_types,  ONLY: input_type,&
+                        minimax_type
  IMPLICIT NONE
  
  PRIVATE
 
- PUBLIC :: parse_command_line!, read_or_generate_matrix
+ PUBLIC :: parse_command_line, read_eigenvalues
 
   
 CONTAINS
@@ -55,91 +55,56 @@ SUBROUTINE parse_command_line(input)
      CASE("-output")
        input%output = .TRUE.
      END SELECT
-
-   IF(.NOT.(input%have_grid_size.OR.input%have_eigenvalues .OR.input%have_nhomo)) THEN
-      write(*,'(A50)') "Give the gridsize, File with DFT eigenvalue and the HOMO state"
-      STOP 
-   ENDIF
   ENDDO
+
+  IF(.NOT.(input%have_grid_size.AND.input%have_eigenvalues &
+           .AND.input%have_nhomo)) THEN
+     write(*,'(A62)') "Give the gridsize, file with DFT eigenvalue" //&
+                      " and the HOMO state"
+     STOP 
+  ENDIF
  
 END SUBROUTINE parse_command_line
 
-!SUBROUTINE read_r_generate_matrix(input,structure,matrix_A,matrix_B)
-!
-! TYPE(input_type), INTENT(IN)                     :: input
-! TYPE(matrix_structure_type), INTENT(INOUT)       :: structure
-! REAL(KIND=dp),DIMENSION(:,:),ALLOCATABLE,&
-!   INTENT(INOUT)                                  :: matrix_A, matrix_B   
-!
-! INTEGER                                          :: rowA, colA,&
-!                                                     rowB, colB
-! INTEGER                                          :: irow, icol, stat
-! INTEGER                                          :: seed
-!
-! IF(input%have_matrix_file)THEN
-!    OPEN(unit=50,file=input%matrix_file,status='old',IOSTAT=stat)
-!
-!
-!    READ(50,*) rowA, colA
-!    
-!    ALLOCATE(matrix_A(rowA,colA))
-!
-!    DO icol=1,colA
-!     DO irow=1,rowA
-!        READ(50,*) matrix_A(irow,icol)
-!     END DO
-!    END DO
-!
-!    READ(50,*) rowB, colB
-!
-!    ALLOCATE(matrix_B(rowB,colB))
-!
-!    IF(colA /= rowB) THEN
-!      WRITE(*,*)'column A not equal row B'
-!      STOP
-!    ENDIF
-!
-!    DO icol=1,colB
-!     DO irow=1,rowB
-!        READ(50,*) matrix_B(irow,icol)
-!     END DO
-!    END DO
-!
-!    CLOSE(50)
-! ELSE 
-!    READ(input%mdimension,'(I6)')  rowA
-!    READ(input%mdimension,'(I6)')  colA
-!    READ(input%mdimension,'(I6)')  rowB
-!    READ(input%mdimension,'(I6)')  colB
-!    ALLOCATE(matrix_A(rowA,colA))
-!    ALLOCATE(matrix_B(rowB,colB))
-!    seed=1299
-!    DO icol=1,colA
-!     DO irow=1,rowA
-!        matrix_A(irow,icol) = RAND(seed)
-!        seed=seed+1000*irow*icol
-!     END DO
-!    END DO
-!
-!    DO icol=1,colB
-!     DO irow=1,rowB
-!        matrix_B(irow,icol) = RAND(seed)
-!        seed=seed+1000*irow*icol
-!     END DO
-!    END DO
-! ENDIF
-!
-!  structure%rowA=rowA 
-!  structure%colA=colA 
-!  structure%rowB=rowB 
-!  structure%colB=colB
-!
-!  IF(input%have_block) THEN
-!    READ(input%mblock,'(I6)')  structure%nblock
-!  ELSE
-!    structure%nblock = 16
-!  ENDIF 
+!****************************************************************
+!> brief reading eigenvalues from file, expects eigenvalues 
+!>       in a.u. 
+!****************************************************************
+SUBROUTINE read_eigenvalues(input,minimax)
 
-!END SUBROUTINE
+  TYPE(input_type), INTENT(IN)                     :: input
+  TYPE(minimax_type), INTENT(INOUT)                :: minimax
 
-END MODULE read_input
+  INTEGER                                          :: i, nlines, stat
+   
+  IF(input%have_nhomo) THEN
+    READ(input%npoints,'(I6)') minimax%npoints
+  ENDIF
+
+  IF(input%have_nhomo) THEN
+    READ(input%nhomo,'(I6)') minimax%nhomo
+  ENDIF
+
+  IF(input%have_eigenvalues)THEN
+     nlines = 0
+     OPEN(unit=50,file=input%eigenvaluefile,status='old',IOSTAT=stat)
+     DO
+       READ(50,*,iostat=stat)
+       IF (stat/=0) EXIT
+       nlines = nlines + 1
+     END DO
+     CLOSE(50)
+     minimax%nstates =  nlines 
+
+     ALLOCATE(minimax%eigenvalues(nlines))
+
+     OPEN(unit=51,file=input%eigenvaluefile,status='old',IOSTAT=stat)
+     DO i = 1, minimax%nstates
+       READ(51,*) minimax%eigenvalues(i)
+     ENDDO 
+     CLOSE(51)
+  ENDIF
+ 
+END SUBROUTINE
+
+END MODULE read_input 

@@ -20,7 +20,11 @@ MODULE init_types
  END TYPE input_type
 !***************************************************************************
  TYPE minimax_type
+   INTEGER                                             :: nhomo
+   INTEGER                                             :: npoints
+   INTEGER                                             :: nstates
    REAL(KIND=dp)                                       :: erange
+   REAL(KIND=dp), DIMENSION(:), ALLOCATABLE            :: eigenvalues
    REAL(KIND=dp), DIMENSION(:), ALLOCATABLE            :: grid
    REAL(KIND=dp), DIMENSION(:), ALLOCATABLE            :: weights 
  END TYPE minimax_type
