@@ -126,22 +126,53 @@ SUBROUTINE read_freq_grid(npoints,filepath,grid,weights,erange)
 
   CHARACTER(LEN=default_string_length)                       :: filename
   CHARACTER(LEN=default_string_length)                       :: str_npoints
-  INTEGER                                                    :: i, stat
-
+  CHARACTER(LEN=default_string_length)                       :: line, ch 
+  CHARACTER(LEN=default_string_length), DIMENSION(3)         :: tempStr
+  INTEGER                                                    :: i, stat, istr
+  INTEGER                                                    :: lastpos
+  REAL(KIND=dp)                                              :: lower_range,&
+                                                                upper_range
   WRITE(str_npoints,*) npoints
-
   filename = TRIM(filepath) // TRIM(ADJUSTL(str_npoints)) // "_freq_points.dat"
-  OPEN(unit=62,file=filename,status='old',IOSTAT=stat)
-  ! now start reading the file at the right position
 
-  !DO i =  1, 2*npoints
-  !  IF(i.le.npoints) THEN
-  !    READ(62,*) grid(i)
-  !  ELSE
-  !    READ(62,*) weights(i)
-  !  ENDDO
-  !ENDDO
+  OPEN(unit=62,file=filename,status='old',IOSTAT=stat)
+  DO
+    READ(62,'(A)',end=999) line                                ! read in whole line
+    lastpos=-1                                                 ! start position when reading line from left to right
+    istr = 0
+    !*** find 'Erange' lines in file
+    DO i=1,LEN(line)
+      ch=line(i:i)                                             ! read character at position i
+      IF(ch/='E'.AND.i==1) EXIT                                ! if not start with E (i.e. Erange) skip
+      IF((ch==' '.OR.i==LEN(line)).AND.lastpos/= -1) THEN      ! if space: end of number or end of line?
+        istr = istr + 1
+        READ(line(lastpos:i-1),*) tempStr(istr)                !lastpos is always start of string or number
+        lastpos = -1
+      ENDIF
+      IF(ch/=' '.AND.lastpos==-1) THEN
+        lastpos=i
+      END IF
+    ENDDO
+    !*** read grid/weights if it is the right Erange
+    IF(istr > 0 ) THEN
+      READ(tempStr(2),*) lower_range
+      READ(tempStr(3),*) upper_range
+      IF(erange > lower_range.AND.erange <= upper_range) THEN
+        DO i =  1, 2*npoints
+          IF(i <= npoints) THEN
+            READ(62,*) grid(i)
+          ELSE
+            READ(62,*) weights(i-npoints)
+          ENDIF
+        ENDDO
+      ENDIF
+      EXIT
+    ENDIF
+    
+  ENDDO
+  999 continue
   CLOSE(62)
+
 
 END SUBROUTINE read_freq_grid
 

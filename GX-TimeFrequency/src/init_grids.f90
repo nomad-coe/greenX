@@ -27,14 +27,12 @@ FUNCTION get_erange_non_periodic(eigenvalues,nhomo) RESULT(erange)
 
 
   nspin = SIZE(eigenvalues,2)
-  write(*,*) "nspin", nspin
   emax_old = -1.E50_dp
   emin_old = 1.E50_dp
 
   DO ispin = 1, nspin
     emin = eigenvalues(nhomo(ispin) + 1, ispin) - eigenvalues(nhomo(ispin),ispin)
     emax = MAXVAL(eigenvalues(:,ispin)) -  MINVAL(eigenvalues(:,ispin))
-    write(*,*) "emin, emax first", emin, emax, emax_old, emin_old
     emin = MIN(emin,emin_old)
     emax = MAX(emax,emax_old)
     emin_old = emin

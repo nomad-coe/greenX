@@ -14,6 +14,7 @@ PROGRAM init_minimax
 
   TYPE(input_type)                            :: input
   TYPE(minimax_type)                          :: minimax
+  INTEGER                                     :: i
   REAL(KIND=dp)                               :: erange
 
   CALL parse_command_line(input)
@@ -26,7 +27,15 @@ PROGRAM init_minimax
   ENDIF
   CALL read_freq_grid(minimax%npoints,input%filepath,minimax%grid,&
                       minimax%weights,erange)
-  
+ 
+  IF(input%output) THEN
+    DO i=1,minimax%npoints
+      WRITE(*,*) "grid", minimax%grid(i)
+    ENDDO
+    DO i=1,minimax%npoints
+      WRITE(*,*) "weights", minimax%weights(i)
+    ENDDO
+  ENDIF 
   !CALL scale_grids...
   CALL deallocate_minimax_structure(minimax)
 
