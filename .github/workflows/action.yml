@@ -1,0 +1,45 @@
+name: CI Tests
+
+on: [push, pull_request]
+
+jobs:
+  GNU:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04]
+        compiler: [gfortran-9]
+
+    env:
+      FC: ${{ matrix.compiler }}
+
+    name: ${{ matrix.os }} / ${{ matrix.compiler }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.7'
+
+      - name: Install Cmake
+        run: pip3 install cmake
+
+      - name: Install python dependencies
+        run: pip3 install numpy pytest
+
+      - name: Build
+        run: |
+          mkdir -p build
+          cd build
+          cmake ../
+          make -j$(nproc)
+
+      - name: Run Tests
+        run: |
+          CWD=$(pwd) && export PYTHONPATH="${CWD}/python":$PYTHONPATH
+          cd build
+          ctest -j1 --output-on-failure

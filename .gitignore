@@ -1,0 +1,26 @@
+# .gitignore for GreenX
+
+# Build files
+*.o
+*.mod
+
+# Build directories
+build/
+cmake-build-debug/
+cmake-build-release/
+
+# Binaries
+*.exe
+
+# Libs
+*.a
+
+# IDE files
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+
+# Backups
+*~

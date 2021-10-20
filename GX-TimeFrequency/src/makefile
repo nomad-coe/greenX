@@ -3,13 +3,15 @@ FFLAGS = -O3 -ffree-line-length-none -mtune=native -march=native
 F90FLAGS = $(FFLAGS)
 FFLAGS_NO = -O0 -ffree-line-length-none -g
 
-PROGRAM  = get_minimax_grids
+PROGRAM = test_minimax.exe
 
 # "make" builds all
 all: $(PROGRAM) realclean
 
-get_minimax_grids: kinds.o init_grids.o init_types.o read_input.o main.o
-	$(FC) $(FFLAGS) $(F90FLAGS) -o $@ kinds.o init_grids.o init_types.o read_input.o main.o  
+vpath %.f90 src parsers
+
+test_minimax.exe: kinds.o parse_minimax.o parse_utils.o eigen_utilities.o minimax.o read_cmd_line.o test_minimax.o
+	$(FC) $(FFLAGS) $(F90FLAGS) -o $@ kinds.o parse_minimax.o parse_utils.o eigen_utilities.o minimax.o read_cmd_line.o test_minimax.o
 
 %.o: %.f90
 	$(FC) $(FFLAGS) $(F90FLAGS) -o $@ -c $<
@@ -22,5 +24,3 @@ realclean:
 
 distclean: realclean
 	rm -f *~ $(PROGRAM) 
-
-
