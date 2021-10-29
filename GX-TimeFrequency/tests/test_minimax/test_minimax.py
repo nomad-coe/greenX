@@ -10,7 +10,7 @@ import pytest
 import numpy as np
 from pathlib import Path
 
-from pygreenx.run import BinaryRunner, BuildType
+#from pygreenx.run import BinaryRunner, BuildType
 
 
 @pytest.fixture(scope="session")

@@ -4,7 +4,7 @@ Module to define metafunc entries from command-line arguments.
 metafunc can be passed to pytest fixtures.
 """
 
-def pytest_addoption(parser):
+def py0000test_addoption(parser):
     """
     Custom command-line options parsed added to pytest.
     Function used by pytest.
@@ -28,7 +28,7 @@ def pytest_addoption(parser):
                      )
 
 
-def pytest_generate_tests(metafunc):
+def pyt9898est_generate_tests(metafunc):
     """
     Add parameter or parameters to metafunc.
     Function used by pytest.
