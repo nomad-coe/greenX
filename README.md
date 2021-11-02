@@ -43,6 +43,16 @@ cd python
 pip install -e .
 ```
 
+One notes that the user may wish to change the scope of `pip install` to the
+Python user install directory of their platform. Typically `~/.local/`. This
+can be achieved with:
+
+```bash
+pip install --user -e .
+```
+
+unless working in a virtual environment, in which case it is not required.  
+
 The test suite can now be run with CMake's ctest command:
 
  ```bash
