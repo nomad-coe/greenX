@@ -3,14 +3,14 @@ Minimax frequency grid regression tests
 
 Run from GreenX's root:
 
-pytest -s GX-TimeFrequency/tests/test_minimax/test_minimax.py --root <GREENX_ROOT> --binary <MINIMAX_TEST.EXE>
+pytest -s GX-TimeFrequency/tests/test_minimax/test_minimax.py --root <GREENX_ROOT> --binary path/to/<MINIMAX_TEST.EXE>
 
 """
 import pytest
 import numpy as np
 from pathlib import Path
 
-from python.run import BinaryRunner, BuildType
+from pygreenx.run import BinaryRunner, BuildType
 
 
 @pytest.fixture(scope="session")

@@ -1,5 +1,5 @@
 """
-Module to run executable
+Module to run an executable
 """
 import os
 import pathlib

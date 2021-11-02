@@ -40,6 +40,6 @@ jobs:
 
       - name: Run Tests
         run: |
-          CWD=$(pwd) && export PYTHONPATH="${CWD}/python":$PYTHONPATH
+          cd python && pip install -e . && cd ../
           cd build
           ctest -j1 --output-on-failure
