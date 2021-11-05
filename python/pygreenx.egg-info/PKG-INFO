@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: pygreenx
+Version: 0.0.1
+Summary: Python tools and API for the GreenX library
+Home-page: UNKNOWN
+Author: Alexander Buccheri # Add all contributors
+License: Apache 2
+Platform: unix
+Platform: linux
+Platform: osx
+Requires-Python: >=3.7
+
+UNKNOWN
+
