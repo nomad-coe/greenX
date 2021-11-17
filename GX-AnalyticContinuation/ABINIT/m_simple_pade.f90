@@ -66,7 +66,7 @@ end function pade
 function test()
     complex(dpc):: test
     integer, parameter :: n = 300
-    complex(dpc),parameter :: zz = (0.1,0.0) 
+    complex(dpc),parameter :: zz = (1.0,1.0) 
 
     complex(dpc), parameter :: j = (0._dp,1._dp)
   

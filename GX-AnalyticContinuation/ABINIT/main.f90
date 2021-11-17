@@ -5,7 +5,7 @@ program  main
     
     !write(*,*) pade(n,z,f,zz)
 
-    complex(dpc),parameter :: zz = (0.1,0.0) 
+    complex(dpc),parameter :: zz = (1.0,1.0) 
 
 
     write(*,*) 'pade =', test(), 'original_function=', cos(zz) 
