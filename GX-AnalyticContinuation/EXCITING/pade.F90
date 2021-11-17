@@ -142,9 +142,9 @@ function test() result(h)
         
         
         !z(i) = 0.1 * i
-        ih(i) = i  *j
+        iw(i) = i  *j
 
-        iw(i) = cos(ih(i))
+        ih(i) = cos(iw(i))
 
 !        write(*,*) ih(i) , iw(i)
     enddo
