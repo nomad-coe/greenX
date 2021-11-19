@@ -22,8 +22,10 @@ module minimax
      integer, dimension(2)                               :: n_homo       !! Index of HOMO for spin up and spin down
      real(kind=dp)                                       :: e_range      !! Energy range (should be named ratio?)
      real(kind=dp), dimension(:,:), allocatable          :: eigenvalues  !! Eigenvalues
-     real(kind=dp), dimension(:), allocatable            :: grid         !! Minimax grid
-     real(kind=dp), dimension(:), allocatable            :: weights      !! Grid weights
+     real(kind=dp), dimension(:), allocatable            :: grid_freq         !! Minimax grid
+     real(kind=dp), dimension(:), allocatable            :: weights_freq      !! Grid weights
+     real(kind=dp), dimension(:), allocatable            :: grid_time         !! Minimax grid
+     real(kind=dp), dimension(:), allocatable            :: weights_time      !! Grid weights
      character(len=long_char) :: file_path = __MINIMAX_PATH__ !! Path to minimax grids 
    contains
      procedure :: init => initialise_minimax             !! Initialise scalar attributes
@@ -50,8 +52,10 @@ contains
    this%n_points = n_points
    this%n_states = n_states
    this%n_homo = n_homo
-   allocate(this%grid(this%n_points), source=0.0_dp)
-   allocate(this%weights(this%n_points), source=0.0_dp)
+   allocate(this%grid_freq(this%n_points), source=0.0_dp)
+   allocate(this%grid_time(this%n_points), source=0.0_dp)
+   allocate(this%weights_freq(this%n_points), source=0.0_dp)
+   allocate(this%weights_time(this%n_points), source=0.0_dp)
    allocate(this%eigenvalues(this%n_states, this%n_spin))
 
 end subroutine
@@ -61,8 +65,10 @@ end subroutine
     !> Instance of minimax_type
     class(minimax_type), intent(inout) :: this
     if(allocated(this%eigenvalues)) deallocate(this%eigenvalues)
-    if(allocated(this%grid)) deallocate(this%grid)
-    if(allocated(this%weights)) deallocate(this%weights)
+    if(allocated(this%grid_freq)) deallocate(this%grid_freq)
+    if(allocated(this%grid_time)) deallocate(this%grid_time)
+    if(allocated(this%weights_freq)) deallocate(this%weights_freq)
+    if(allocated(this%weights_time)) deallocate(this%weights_time)
   end subroutine deallocate_minimax
 
   !> Wrapper for calculation of energy range requirement of the minimax grid
@@ -89,6 +95,7 @@ end subroutine
     !> Minimax file name prepended by full path
     character(len=*), optional, intent(in) :: file_name
 
+
     !> Number of grid points, as a string 
     character(len=medium_char) :: str_npoints
     !> Local file name
@@ -96,14 +103,15 @@ end subroutine
 
     ! Default file name
     write(str_npoints, *) this%n_points
-    fname = trim(this%file_path) // '/' // trim(adjustl(str_npoints)) // "_freq_points.dat"
+    fname = trim(this%file_path) // '/' // trim(adjustl(str_npoints)) // "_freq_time_points.dat"
+
     
     if (present(file_name)) then
       fname = trim(adjustl(file_name))
     endif 
 
     call read_freq_grid(this%n_points, trim(fname), this%e_range, &
-                        this%grid, this%weights)
+                        this%grid_freq, this%weights_freq, this%grid_time, this%weights_time)
 
   end subroutine read_frequency_weights
 
@@ -115,8 +123,8 @@ end subroutine
 
     write(*, *) 'Minimax Grid'
     write(*, *) '# Grid point, weight:'
-    do i = 1, size(this%grid)
-      write(*, *) this%grid(i), this%weights(i)
+    do i = 1, size(this%grid_freq)
+      write(*, *) this%grid_freq(i), this%weights_freq(i), this%grid_time(i), this%weights_time(i)
     enddo
 
   end subroutine print_minimax
@@ -132,8 +140,8 @@ end subroutine
     open(newunit=unit, file = trim(file_name))
     write(unit, *) 'Minimax Grid'
     write(unit, *) '# Grid point, weight:'
-    do i = 1, size(this%grid)
-      write(unit, *) this%grid(i), this%weights(i)
+    do i = 1, size(this%grid_freq)
+      write(unit, *) this%grid_freq(i), this%weights_freq(i), this%grid_time(i), this%weights_time(i)
     enddo
     close(unit)
 
