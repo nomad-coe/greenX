@@ -1,6 +1,6 @@
 !> Test Program, demonstrating how to call minimax grid routine
 !> 
-!> Example run command: ./exe -s 32 -e ../../GX-TimeFrequency/src/ref/H2O_eigenvalues.txt -h 5 -output 32_freq_points.dat
+!> Example run command: ./exe -s 32 -e ../../GX-TimeFrequency/src/ref/H2O_eigenvalues.txt -h 5 -output 32_freq_time_points.dat
 !> TODO
 !> * Implement grid scaling
 !> * Write a library module to expose the object: 'use GXTimeFrequency, only: minimax' 
