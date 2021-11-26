@@ -28,7 +28,9 @@ contains
     !> Instance of input
     class(input_type), intent(inout) :: this
 
+    !> Command line input string
     character(len=long_char) :: arg
+    !> Number of command line inputs
     integer(sp) :: narg
     integer :: i
     character(len=10) :: npoints_char, nhomo_char
@@ -39,7 +41,7 @@ contains
     this%have_kpoints = .false.
     this%output = .false.
 
-    narg=iargc()
+    narg = command_argument_count()
 
     if(narg < 1) then
        write(*,'(A98)') "Usage: ./exe -s gridsize -e eigenvalue_file -h nhomo -output output_dir"
@@ -47,24 +49,30 @@ contains
     endif
 
     do i = 1, narg
-       call getarg(i,arg)
-       select case(TRIM(arg))
+       call get_command_argument(i, arg)
+
+       select case(trim(arg))
+
        case("-s")
           this%have_grid_size = .true.
-          call getarg(i+1, npoints_char)
+          call get_command_argument(i+1, npoints_char)
           read(npoints_char, '(I6)') this%npoints
+
        case("-e")
           this%have_eigenvalues = .true.
-          call getarg(i+1,this%eigenvaluefile)
+          call get_command_argument(i+1,this%eigenvaluefile)
+
        case("-h")
           this%have_nhomo = .true.
-          call getarg(i+1, nhomo_char)
+          call get_command_argument(i+1, nhomo_char)
           ! TODO(Alex) Extend to spin polarised (add assignment for nhomo(2))
           read(nhomo_char, '(I6)') this%nhomo(1)
+
        case("-output")
           this%output = .true.
-          call getarg(i+1, this%output_file)
+          call get_command_argument(i+1, this%output_file)
        end select
+
     enddo
 
     if (.not. this%have_grid_size) then
