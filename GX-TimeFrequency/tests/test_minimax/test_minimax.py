@@ -34,8 +34,8 @@ def test_minimax_grids_h20_molecule(paths,  grid_size):
     homo_index = '5'
 
     # Output grid
-    ref_file = test_dir / f'refs/{grid_size}_freq_points.dat'
-    output_file = test_dir / f'output_{grid_size}_freq_points.dat'
+    ref_file = test_dir / f'refs/{grid_size}_freq_time_points.dat'
+    output_file = test_dir / f'output_{grid_size}_freq_time_points.dat'
 
     # Run fortran code
     minimax_args = ['-s', grid_size, '-e', eigenvalue_input, '-h', homo_index, '-output', output_file]
