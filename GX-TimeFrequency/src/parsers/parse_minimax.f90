@@ -39,7 +39,7 @@ contains
 
 
   !> Read minimax frequency grid and weights
-  subroutine read_freq_grid(npoints, file_name, erange, grid, weights)
+  subroutine read_freq_grid(npoints, file_name, erange, grid_freq, weights_freq,grid_time,weights_time)
 
     !> Number of minimax grid points
     integer, intent(in) :: npoints
@@ -48,10 +48,10 @@ contains
     !> Energy range (actually max energy diff / min energy diff)
     real(kind=dp), intent(in) :: erange
     
-    !> Minimax grid
-    real(kind=dp), dimension(:), intent(inout) :: grid
-    !> Minimax weights 
-    real(kind=dp), dimension(:), intent(inout) :: weights
+    !> Minimax grid for frequency and time
+    real(kind=dp), dimension(:), intent(inout) :: grid_freq, grid_time
+    !> Minimax weights for frequency and time
+    real(kind=dp), dimension(:), intent(inout) :: weights_freq, weights_time
 
     character(len=long_char)                       :: line, ch 
     character(len=long_char), dimension(3)         :: tempStr
@@ -85,11 +85,9 @@ contains
           read(tempStr(2),*) lower_range
           read(tempStr(3),*) upper_range
           if(erange > lower_range.and.erange <= upper_range) then
-             do i =  1, 2*npoints
+             do i =  1, npoints
                 if(i <= npoints) then
-                   read(62,*) grid(i)
-                ELSE
-                   read(62,*) weights(i-npoints)
+                   read(62,*) grid_freq(i), weights_freq(i), grid_time(i), weights_time(i)
                 endif
              enddo
           endif
