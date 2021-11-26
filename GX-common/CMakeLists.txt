@@ -6,7 +6,7 @@ add_library(GXCommon "")
 set_target_properties(GXCommon
         PROPERTIES
         VERSION 0.0.1
-        SOVERSION 0.01
+        SOVERSION 0.0.1
         LIBRARY_OUTPUT_NAME GXCommon
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY}
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY}
