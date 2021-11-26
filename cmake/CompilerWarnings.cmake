@@ -4,17 +4,17 @@
       -Wall  # Contains aliasing, apersand, conversion, surprising, binding-type,
              # intrinsics-std, tabs, intrinsic-shadow, line-truncation,
 	     # target-lifetime, integer-division, real-q-constant, unused and undefined-do-loop
-      -Warray-bounds  
+      -Warray-bounds
       -Wcharacter-truncation # Warn when a character assignment will truncate the assigned string.
       -Wfunction-elimination # Warn if any calls to impure functions are eliminated by the optimizations
                              # enabled by the -ffrontend-optimize option
-      #-Wimplicit-interface   # Warn if a procedure is called without an explicit interface.
-      #-Wimplicit-procedure   # Warn if a procedure is called that has neither an explicit interface nor has been declared as EXTERNAL.
+      -Wimplicit-interface   # Warn if a procedure is called without an explicit interface.
+      -Wimplicit-procedure   # Warn if a procedure is called that has neither an explicit interface nor has been declared as EXTERNAL.
       -Wuse-without-only     # Warn if modules are used without only keyword
       -Wunderflow            # Produce a warning when numerical constant expressions are encountered, which yield an UNDERFLOW during compilation.
       -Wrealloc-lhs          # I assume this warns if the shape of the L.H.S. and R.H.S of an allocatable assignment differ.
                              # Fortran 2003: The L.H.S.is assumed to be allocated with the correct shape to hold the right-hand side. If it is not, incorrect behavior will occu. Intel's default is when the L.H.S of an assignment is an allocatable object, it should be reallocated to the shape of the right-hand side of the assignment before the assignment occurs. This is the current Fortran Standard definition. This feature may cause extra overhead at run time.
-      -Wrealloc-lhs-all      # 
+      -Wrealloc-lhs-all      #
       -Wfrontend-loop-interchange # Warn when using -ffrontend-loop-interchange for performing loop interchanges.
       -pedantic)    # Issue warnings for uses of extensions to Fortran i.e. C's #include
                     # This should be used in conjunction with -std=f95 to f2018
