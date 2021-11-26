@@ -8,6 +8,7 @@
 build/
 cmake-build-debug/
 cmake-build-release/
+python/pygreenx.egg-info/
 
 # Binaries
 *.exe

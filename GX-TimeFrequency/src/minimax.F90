@@ -94,9 +94,7 @@ end subroutine
     class(minimax_type), intent(inout) :: this
     !> Minimax file name prepended by full path
     character(len=*), optional, intent(in) :: file_name
-
-
-    !> Number of grid points, as a string 
+    !> Number of grid points, as a string
     character(len=medium_char) :: str_npoints
     !> Local file name
     character(len=long_char) :: fname
@@ -105,7 +103,6 @@ end subroutine
     write(str_npoints, *) this%n_points
     fname = trim(this%file_path) // '/' // trim(adjustl(str_npoints)) // "_freq_time_points.dat"
 
-    
     if (present(file_name)) then
       fname = trim(adjustl(file_name))
     endif 
@@ -121,8 +118,8 @@ end subroutine
     class(minimax_type), intent(inout) :: this
     integer :: i
 
-    write(*, *) 'Minimax Grid'
-    write(*, *) '# Grid point, weight:'
+    write(*, *) 'Minimax Grid for frequency and time'
+    write(*, *) '# Frequency grid point, freq weight, time grid point, time weight:'
     do i = 1, size(this%grid_freq)
       write(*, *) this%grid_freq(i), this%weights_freq(i), this%grid_time(i), this%weights_time(i)
     enddo

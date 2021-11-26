@@ -48,9 +48,9 @@ contains
     !> Energy range (actually max energy diff / min energy diff)
     real(kind=dp), intent(in) :: erange
     
-    !> Minimax grid
+    !> Minimax grid for frequency and time
     real(kind=dp), dimension(:), intent(inout) :: grid_freq, grid_time
-    !> Minimax weights 
+    !> Minimax weights for frequency and time
     real(kind=dp), dimension(:), intent(inout) :: weights_freq, weights_time
 
     character(len=long_char)                       :: line, ch 
