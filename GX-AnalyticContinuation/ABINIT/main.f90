@@ -1,16 +1,18 @@
+! COPYRIGHT
+!  Copyright (C) 2020-2021 Green-X library (MA, MG, XG)
+!  This file is distributed under the terms of the
+!  APACHE2 License.
+
 program  main
 
-    use m_simple_pade
-
+    use pade_approximant
+    use test
     
-    !write(*,*) pade(n,z,f,zz)
+    complex(dpc),parameter :: xx = (1.0,1.0) 
+    complex(dpc), parameter :: w = (2.0,2.0)
 
-    complex(dpc),parameter :: zz = (1.0,1.0) 
-
-
-    write(*,*) 'pade =', test(), 'original_function=', cos(zz) 
-
-
+    write(*,*) 'pade1 =', test1(), 'original_function1=', -1./(xx-w) 
+    write(*,*) 'pade2 =', test2(), 'original_function2=', -1./sqrt(xx-w) 
 end program
 
 
