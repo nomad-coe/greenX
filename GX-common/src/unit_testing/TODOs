@@ -1,0 +1,14 @@
+Unit Testing TODOs
+
+* Add Zofu to CMake
+ - Have it pull and build if not detected
+* Look at how to write explicit interfaces for base class method, when one
+  intends to overload in the child class
+* Have a unit test initialisation module that selects the correct class
+  - currently only one available
+* Set up a unit test to check the wrapper (which will be scrapped as soon
+  as this gets used for an actual test)
+* Add unit test builds for each library to CMake
+  - May need to introduce the driver generator I wrote for Zofu, OR have people
+    manually write them
+* Add unit testing to the CI
