@@ -8,31 +8,28 @@ add_library(GXMiniMax "")
 set_target_properties(GXMiniMax
         PROPERTIES
         VERSION 0.0.1
-        SOVERSION 0.01
-        )
-
-target_include_directories(GXMiniMax PUBLIC src/)
-
-# Set full path to minimax grids using preprocessor 
-set_property(SOURCE src/minimax.F90 APPEND PROPERTY
-    COMPILE_DEFINITIONS "MINIMAX_PATH='${CMAKE_SOURCE_DIR}/GX-TimeFrequency/data/minimax_grids'")
-
-target_sources(GXMiniMax PRIVATE
-        src/eigen_utilities.f90 
-        src/minimax.F90 
-        src/parsers/parse_minimax.f90 
-        src/parsers/parse_utils.f90   
-        src/parsers/read_cmd_line.f90
-        src/kinds.f90
-        )
-
-set_target_properties(GXMiniMax
-        PROPERTIES
-        LIBRARY_OUTPUT_NAME unit_testing
+        SOVERSION 0.0.1
+        LIBRARY_OUTPUT_NAME GXMiniMax
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY}
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY}
         )
 
+target_link_libraries(GXMiniMax GXCommon)
+
+target_include_directories(GXMiniMax PUBLIC src/ )
+
+# Set full path to minimax grids using preprocessor 
+set_property(SOURCE src/minimax/minimax.F90 APPEND PROPERTY
+    COMPILE_DEFINITIONS "MINIMAX_PATH='${CMAKE_SOURCE_DIR}/GX-TimeFrequency/data/minimax_grids'")
+
+target_sources(GXMiniMax PRIVATE
+        src/minimax/minimax.F90
+        src/minimax/parse_minimax.f90
+        src/minimax/read_cmd_line.f90  # TODO The test depends on this, not the lib
+        )
+
+
+# TODO (Alex) This wants to be defined once
 # Set installation location
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     # TODO(Alex) clean this up
@@ -57,7 +54,7 @@ set(REG_TESTS test_minimax)
 foreach(INPUT ${REG_TESTS})
 
     # Fortran test TODO(Alex) Move where this is built
-    add_executable(${INPUT}.x src/${INPUT}.f90)
+    add_executable(${INPUT}.x src/minimax/${INPUT}.f90)
     link_directories(${LIBRARY_OUTPUT_PATH})
     target_link_libraries(${INPUT}.x GXMiniMax)
 
