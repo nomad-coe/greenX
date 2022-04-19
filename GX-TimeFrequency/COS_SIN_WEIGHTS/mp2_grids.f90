@@ -225,6 +225,7 @@ CONTAINS
                                                  
                                                  
              IF (present(ounit)) then
+                write(ounit, FMT="(T3,A,T66,F15.4)") "Range for the minimax approximation:", Range_from_i_exp
                 write(ounit,*)"weights_cos_tf_t_to_w", weights_cos_tf_t_to_w
                 write(ounit,*)"weights_cos_tf_w_to_t", weights_cos_tf_w_to_t
                 write(ounit,*)"weights_sin_tf_t_to_w", weights_sin_tf_t_to_w
