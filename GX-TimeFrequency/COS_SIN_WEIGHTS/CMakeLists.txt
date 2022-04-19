@@ -8,8 +8,7 @@ add_library(minimax_ct_st kinds.f90
             minimax_rpa.f90
             mp2_grids.f90
             minimax_exp_k15.f90
-            minimax_exp_k53.f90
-            test.f90)
+            minimax_exp_k53.f90)
 add_executable(ct_st main.f90)
 find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
