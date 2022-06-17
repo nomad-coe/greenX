@@ -45,7 +45,7 @@ CONTAINS
       REAL(KIND=dp)                                      :: E_ratio
 
 !      CALL timeset(routineN, handle)
-
+      E_ratio = 1.0_dp
       SELECT CASE (k)
       CASE (26)
          CALL get_coeff_26(k, E_range, aw, E_ratio)
@@ -61,7 +61,7 @@ CONTAINS
 !         CPABORT("The grid size you choose is not available.")
       END SELECT
 
-      CALL rescale_grid(aw, E_ratio)
+!      CALL rescale_grid(aw, E_ratio)
 
 !      CALL timestop(handle)
 
@@ -72,17 +72,17 @@ CONTAINS
 !> \param aw ...
 !> \param E_ratio ...
 ! **************************************************************************************************
-   PURE SUBROUTINE rescale_grid(aw, E_ratio)
-      REAL(KIND=dp), DIMENSION(:), INTENT(INOUT)         :: aw
-      REAL(KIND=dp), INTENT(INOUT)                       :: E_ratio
+!   PURE SUBROUTINE rescale_grid(aw, E_ratio)
+!      REAL(KIND=dp), DIMENSION(:), INTENT(INOUT)         :: aw
+!      REAL(KIND=dp), INTENT(INOUT)                       :: E_ratio
 
-      IF (E_ratio > 1.5_dp) THEN
-         E_ratio = E_ratio/1.5_dp
-      ELSE
-         E_ratio = 1.0_dp
-      END IF
-      aw(:) = aw(:)*E_ratio
-   END SUBROUTINE
+!      IF (E_ratio > 1.5_dp) THEN
+!         E_ratio = E_ratio/1.5_dp
+!      ELSE
+!         E_ratio = 1.0_dp
+!      END IF
+!      aw(:) = aw(:)*E_ratio
+!   END SUBROUTINE
 
 ! **************************************************************************************************
 !> \brief ...
@@ -99,7 +99,7 @@ CONTAINS
 
       E_ratio = 1.0_dp
       IF (E_range < 799.0_dp) THEN
-         E_ratio = 799.0_dp/E_range
+!         E_ratio = 799.0_dp/E_range
          aw(:) = (/ &
                  0.00037867004555797054_dp, &
                  0.002019373143542281_dp, &
@@ -1197,7 +1197,7 @@ CONTAINS
 
       E_ratio = 1.0_dp
       IF (E_range < 1545.0_dp) THEN
-         E_ratio = 1545.0_dp/E_range
+!         E_ratio = 1545.0_dp/E_range
          aw(:) = (/ &
                  0.00019912749139307142_dp, &
                  0.0010623606743332262_dp, &
@@ -2898,7 +2898,7 @@ CONTAINS
       E_ratio = 1.0_dp
 
       IF (E_range < 2906.0_dp) THEN
-         E_ratio = 2906.0_dp/E_range
+!         E_ratio = 2906.0_dp/E_range
          aw(:) = (/ &
                  0.00010719782131833758_dp, &
                  0.0005720967766785331_dp, &
@@ -4714,7 +4714,7 @@ CONTAINS
 
       E_ratio = 1.0_dp
       IF (E_range < 4862.0_dp) THEN
-         E_ratio = 4862.0_dp/E_range
+!         E_ratio = 4862.0_dp/E_range
          aw(:) = (/ &
                  6.390102821995496e-05_dp, &
                  0.0003410048490902184_dp, &
@@ -5986,7 +5986,7 @@ CONTAINS
 
       E_ratio = 1.0_dp
       IF (E_range < 9649.0_dp) THEN
-         E_ratio = 9649.0_dp/E_range
+!         E_ratio = 9649.0_dp/E_range
          aw(:) = (/ &
                  3.284029233271286e-05_dp, &
                  0.0001753443602861097_dp, &

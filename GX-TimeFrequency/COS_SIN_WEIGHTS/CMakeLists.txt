@@ -13,3 +13,9 @@ add_executable(ct_st main.f90)
 find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
 target_link_libraries(ct_st minimax_ct_st  ${BLAS_LIBRARIES}  ${LAPACK_LIBRARIES})
+
+
+
+
+
+
