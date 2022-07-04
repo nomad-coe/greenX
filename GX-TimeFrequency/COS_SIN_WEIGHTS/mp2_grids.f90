@@ -95,7 +95,7 @@ CONTAINS
              IF (present(ounit)) then
               ! GET AND PRINT FREQUENCY GRIDS
 
-              IF (num_integ_points .LE. 20) THEN
+              IF (num_integ_points .LE. 14) THEN
                  CALL get_rpa_minimax_coeff(num_integ_points, Range_from_i_exp, x_tw, ierr)
               ELSE
                  CALL get_rpa_minimax_coeff_larger_grid(num_integ_points, Range_from_i_exp, x_tw)
@@ -109,7 +109,7 @@ CONTAINS
 
               ! GET AND PRINT TIME GRIDS
 
-              IF (num_integ_points .LE. 20) THEN
+              IF (num_integ_points .LE. 14) THEN
                  CALL get_exp_minimax_coeff(num_integ_points, Range_from_i_exp, x_tw)
               ELSE
                  CALL get_exp_minimax_coeff_gw(num_integ_points, Range_from_i_exp, x_tw)
@@ -154,7 +154,7 @@ CONTAINS
          
              ierr = 0
          
-             IF (num_integ_points .LE. 20) THEN
+             IF (num_integ_points .LE. 14) THEN
                 CALL get_rpa_minimax_coeff(num_integ_points, E_Range, x_tw, ierr)
              ELSE
                 CALL get_rpa_minimax_coeff_larger_grid(num_integ_points, E_Range, x_tw)
@@ -182,7 +182,7 @@ CONTAINS
          x_tw = 0.0_dp   
 
 
-         IF (num_integ_points .LE. 20) THEN
+         IF (num_integ_points .LE. 14) THEN
             CALL get_exp_minimax_coeff(num_integ_points, E_Range, x_tw)
          ELSE
             CALL get_exp_minimax_coeff_gw(num_integ_points, E_Range, x_tw)

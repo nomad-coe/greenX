@@ -4,7 +4,7 @@
          use kinds,                           ONLY: dp         
 !         use test
 
-      INTEGER, PARAMETER                                 :: num_integ_points = 20
+      INTEGER, PARAMETER                                 :: num_integ_points = 6
       INTEGER                                            :: ct_unit, ct_main_unit
       REAL(KIND=dp), ALLOCATABLE, DIMENSION(:)           :: tau_tj, tau_wj
 !      TYPE(qs_environment_type), OPTIONAL, POINTER       :: qs_env
