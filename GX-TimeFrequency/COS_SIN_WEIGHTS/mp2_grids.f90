@@ -9,10 +9,9 @@ MODULE mp2_grids
 !   USE message_passing,                 ONLY: mp_bcast,&
 !                                              mp_max,&
 !                                              mp_sum
-   USE minimax_exp,                     ONLY: get_exp_minimax_coeff
+!   USE minimax_exp,                     ONLY: get_exp_minimax_coeff
    USE minimax_exp_gw,                  ONLY: get_exp_minimax_coeff_gw
-   USE minimax_rpa,                     ONLY: get_rpa_minimax_coeff,&
-                                              get_rpa_minimax_coeff_larger_grid
+   USE minimax_rpa,                     ONLY: get_rpa_minimax_grids
 !   USE mp2_types,                       ONLY: mp2_type
 !   USE qs_environment_types,            ONLY: get_qs_env,&
 !                                              qs_environment_type
@@ -95,10 +94,10 @@ CONTAINS
              IF (present(ounit)) then
               ! GET AND PRINT FREQUENCY GRIDS
 
-              IF (num_integ_points .LE. 14) THEN
-                 CALL get_rpa_minimax_coeff(num_integ_points, Range_from_i_exp, x_tw, ierr)
+              IF (num_integ_points .LE. 5) THEN
+                 write(*,*)"The grid size you choose is not available."
               ELSE
-                 CALL get_rpa_minimax_coeff_larger_grid(num_integ_points, Range_from_i_exp, x_tw)
+                 CALL get_rpa_minimax_grids(num_integ_points, Range_from_i_exp, x_tw)
               END IF
 
               WRITE (ounit, FMT="(T3,A,T66,F15.4)") "Range for the minimax approximation:", Range_from_i_exp
@@ -109,8 +108,8 @@ CONTAINS
 
               ! GET AND PRINT TIME GRIDS
 
-              IF (num_integ_points .LE. 14) THEN
-                 CALL get_exp_minimax_coeff(num_integ_points, Range_from_i_exp, x_tw)
+              IF (num_integ_points .LE. 5) THEN
+                 write(*,*)"The grid size you choose is not available."
               ELSE
                  CALL get_exp_minimax_coeff_gw(num_integ_points, Range_from_i_exp, x_tw)
               END IF
@@ -154,10 +153,10 @@ CONTAINS
          
              ierr = 0
          
-             IF (num_integ_points .LE. 14) THEN
-                CALL get_rpa_minimax_coeff(num_integ_points, E_Range, x_tw, ierr)
+             IF (num_integ_points .LE. 5) THEN
+                write(*,*)"The grid size you choose is not available."
              ELSE
-                CALL get_rpa_minimax_coeff_larger_grid(num_integ_points, E_Range, x_tw)
+                CALL get_rpa_minimax_grids(num_integ_points, E_Range, x_tw)
              END IF
 
 
@@ -182,8 +181,8 @@ CONTAINS
          x_tw = 0.0_dp   
 
 
-         IF (num_integ_points .LE. 14) THEN
-            CALL get_exp_minimax_coeff(num_integ_points, E_Range, x_tw)
+         IF (num_integ_points .LE. 5) THEN
+            write(*,*)"The grid size you choose is not available."
          ELSE
             CALL get_exp_minimax_coeff_gw(num_integ_points, E_Range, x_tw)
          END IF
