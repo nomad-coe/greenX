@@ -942,7 +942,7 @@ SUBROUTINE gx_minimax_grid(num_integ_points, emin, emax, &
       ierr = 0
       CALL get_rpa_minimax_coeff_larger_grid(num_integ_points, e_range, x_tw)
    END IF
-   GX_ASSERT(ierr == 0, "Error computing RPA iomega grid")
+   GX_CHECK(ierr == 0, "Error computing RPA iomega grid")
 
    !IF (present(ount)) then
    !  WRITE (ount, FMT="(T3,A,T66,F15.4)") "Range for the minimax approximation:", e_range
