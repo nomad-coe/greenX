@@ -4,27 +4,12 @@
 
 MODULE mp2_grids
 
-!   USE cp_para_types,                   ONLY: cp_para_env_type
    USE kinds,                           ONLY: dp
-!   USE kpoint_types,                    ONLY: get_kpoint_info,&
-!                                              kpoint_env_type,&
-!                                              kpoint_type
-!   USE machine,                         ONLY: m_flush
    USE mathconstants,                   ONLY: pi
-!   USE message_passing,                 ONLY: mp_bcast,&
-!                                              mp_max,&
-!                                              mp_sum
-!   USE minimax_exp,                     ONLY: get_exp_minimax_coeff
    USE minimax_exp_gw,                  ONLY: get_exp_minimax_coeff_gw
    USE minimax_rpa,                     ONLY: get_rpa_minimax_grids
-!   USE mp2_types,                       ONLY: mp2_type
-!   USE qs_environment_types,            ONLY: get_qs_env,&
-!                                              qs_environment_type
-!   USE qs_mo_types,                     ONLY: get_mo_set,&
-!                                              mo_set_type
 
    IMPLICIT NONE
-
 
    PRIVATE
 
@@ -57,11 +42,10 @@ CONTAINS
       CHARACTER(LEN=*), PARAMETER                        :: routineN = 'get_minimax_grid'
       INTEGER, PARAMETER                                 :: num_points_per_magnitude = 200
 
-      INTEGER                                            :: handle, ierr, ispin, jquad, nspins, i_exp
+      INTEGER                                            :: ierr, ispin, jquad, i_exp
       REAL(KIND=dp)                                      :: E_Range, Emax, Emin, max_error_min, &
                                                             scaling, Range_from_i_exp
 
-!      REAL(KIND=dp), INTENT(IN), OPTIONAL                :: Range_from_i_exp
       REAL(KIND=dp), ALLOCATABLE, DIMENSION(:)           :: x_tw
 
 
@@ -267,7 +251,7 @@ CONTAINS
 
       CHARACTER(LEN=*), PARAMETER :: routineN = 'get_l_sq_wghts_cos_tf_t_to_w'
 
-      INTEGER                                            :: handle, iii, info, jjj, jquad, lwork, &
+      INTEGER                                            :: iii, info, jjj, jquad, lwork, &
                                                             num_x_nodes
       INTEGER, ALLOCATABLE, DIMENSION(:)                 :: iwork
       REAL(KIND=dp)                                      :: multiplicator, omega
@@ -410,7 +394,7 @@ CONTAINS
 
       CHARACTER(LEN=*), PARAMETER :: routineN = 'get_l_sq_wghts_sin_tf_t_to_w'
 
-      INTEGER                                            :: handle, iii, info, jjj, jquad, lwork, &
+      INTEGER                                            :: iii, info, jjj, jquad, lwork, &
                                                             num_x_nodes
       INTEGER, ALLOCATABLE, DIMENSION(:)                 :: iwork
       REAL(KIND=dp)                                      :: chi2_min_jquad, multiplicator, omega
@@ -554,7 +538,7 @@ CONTAINS
 
       CHARACTER(LEN=*), PARAMETER :: routineN = 'get_l_sq_wghts_cos_tf_w_to_t'
 
-      INTEGER                                            :: handle, iii, info, jjj, jquad, lwork, &
+      INTEGER                                            :: iii, info, jjj, jquad, lwork, &
                                                             num_x_nodes
       INTEGER, ALLOCATABLE, DIMENSION(:)                 :: iwork
       REAL(KIND=dp)                                      :: chi2_min_jquad, multiplicator, omega, &
@@ -852,10 +836,8 @@ CONTAINS
 
       CHARACTER(LEN=*), PARAMETER :: routineN = 'calc_max_error_fit_omega_grid_with_cosine'
 
-      INTEGER                                            :: handle, kkk
+      INTEGER                                            :: kkk
       REAL(KIND=dp)                                      :: func_val, func_val_temp, max_error_tmp
-
-!      CALL timeset(routineN, handle)
 
       max_error_tmp = 0.0_dp
 
@@ -877,8 +859,6 @@ CONTAINS
          max_error = max_error_tmp
 
       END IF
-
-!      CALL timestop(handle)
 
    END SUBROUTINE calc_max_error_fit_omega_grid_with_cosine
 
@@ -922,14 +902,14 @@ SUBROUTINE gx_minimax_grid(num_integ_points, emin, emax, &
 
    E_Range = Emax / Emin
 
-   IF (num_integ_points > 20 .AND. E_Range < 100.0_dp) THEN
+   !IF (num_integ_points > 20 .AND. E_Range < 100.0_dp) THEN
    !   IF (unit_nr > 0) &
    !      CALL cp_warn(__LOCATION__, &
    !                   "You requested a large minimax grid (> 20 points) for a small minimax range R (R < 100). "// &
    !                   "That may lead to numerical "// &
    !                   "instabilities when computing minimax grid weights. You can prevent small ranges by choosing "// &
    !                   "a larger basis set with higher angular momenta or alternatively using all-electron calculations.")
-   END IF
+   !END IF
 
    ! MG: In CP2K, they have
    !IF (num_integ_points .LE. 20) THEN
@@ -945,9 +925,8 @@ SUBROUTINE gx_minimax_grid(num_integ_points, emin, emax, &
    IF (num_integ_points .LE. 5) THEN
      write(*,*)"The grid size you choose is not available."
      stop
-   ELSE
-     CALL get_rpa_minimax_grids(num_integ_points, E_Range, x_tw)
    END IF
+   CALL get_rpa_minimax_grids(num_integ_points, E_Range, x_tw)
 
    !IF (present(ount)) then
    !  WRITE (ount, FMT="(T3,A,T66,F15.4)") "Range for the minimax approximation:", e_range

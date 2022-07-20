@@ -1,7 +1,7 @@
       program  main
 
-         use mp2_grids
-         use kinds,                           ONLY: dp         
+         use kinds,                           ONLY: dp
+         use mp2_grids,      only : get_minimax_grid
 !         use test
 
       INTEGER, PARAMETER                                 :: num_integ_points = 22
@@ -24,10 +24,10 @@
       REAL(KIND=dp)                                      :: e_fermi
 !      REAL (KIND=dp), ALLOCATABLE, DIMENSION(:)          :: Eval
 !      REAL (KIND=dp)                                     :: homo
-      
+
 !      ALLOCATE(Eval(10))
-!      Eval = (/ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 /) 
-      
+!      Eval = (/ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 /)
+
 
 !             ALLOCATE (weights_cos_tf_t_to_w(num_integ_points, num_integ_points))
 !             weights_cos_tf_t_to_w = 0.0_dp
@@ -36,12 +36,12 @@
 !             ALLOCATE (weights_sin_tf_t_to_w(num_integ_points, num_integ_points))
 !             weights_sin_tf_t_to_w = 0.0_dp
 !             ALLOCATE (x_tw(2*num_integ_points))
-!             x_tw = 0.0_dp             
+!             x_tw = 0.0_dp
 
 
     open(newunit=ct_unit,file='CT')
     open(newunit=ct_main_unit,file='CT_main')
-    
+
 !    DO i_exp = 0, 50
 
 !           Range_from_i_exp = 1.58489319246_dp**i_exp
@@ -49,12 +49,12 @@
     call get_minimax_grid(num_integ_points, &
                                tau_tj, tau_wj, a_scaling, e_fermi, tj, wj, weights_cos_tf_t_to_w, &
                                weights_cos_tf_w_to_t, weights_sin_tf_t_to_w, ounit=ct_unit)
-                               
-                               
+
+
 !    write(ct_main_unit,*) weights_cos_tf_w_to_t
-    
-!    DEALLOCATE(tj, wj, tau_tj, tau_wj, weights_cos_tf_t_to_w, weights_cos_tf_w_to_t, weights_sin_tf_t_to_w) 
-    
+
+!    DEALLOCATE(tj, wj, tau_tj, tau_wj, weights_cos_tf_t_to_w, weights_cos_tf_w_to_t, weights_sin_tf_t_to_w)
+
 !    END DO
 
     close(ct_unit)
@@ -63,5 +63,5 @@
       end program
 
 
-    
+
 
