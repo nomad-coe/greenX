@@ -34,16 +34,18 @@ CONTAINS
 !> \param E_range ...
 !> \param aw ...
 ! **************************************************************************************************
-   SUBROUTINE get_exp_minimax_coeff_gw(k, E_range, aw)
+   SUBROUTINE get_exp_minimax_coeff_gw(k, E_range, aw, ierr)
       INTEGER, INTENT(IN)                                :: k
       REAL(KIND=dp), INTENT(IN)                          :: E_range
       REAL(KIND=dp), DIMENSION(2*k), INTENT(OUT)         :: aw
+      integer,intent(out)                                :: ierr
 
       CHARACTER(LEN=*), PARAMETER :: routineN = 'get_exp_minimax_coeff_gw'
-
       REAL(KIND=dp)                                      :: E_ratio
 
+      ierr = 0
       E_ratio = 1.0_dp
+
       SELECT CASE (k)
       CASE (6)
          CALL get_coeff_6(k, E_range, aw, E_ratio)
@@ -75,10 +77,10 @@ CONTAINS
          CALL get_coeff_32(k, E_range, aw, E_ratio)
       CASE (34)
          CALL get_coeff_34(k, E_range, aw, E_ratio)
-!      CASE DEFAULT
-!         CPABORT("The grid size you choose is not available.")
+      CASE DEFAULT
+        ierr = 1
+        !CPABORT("The grid size you choose is not available.")
       END SELECT
-
 
    END SUBROUTINE get_exp_minimax_coeff_gw
 ! **************************************************************************************************
