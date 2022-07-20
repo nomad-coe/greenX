@@ -18,13 +18,20 @@ set_property(SOURCE src/minimax.F90 APPEND PROPERTY
     COMPILE_DEFINITIONS "MINIMAX_PATH='${CMAKE_SOURCE_DIR}/GX-TimeFrequency/data/minimax_grids'")
 
 target_sources(GXMiniMax PRIVATE
+        src/kinds.f90
+        src/constants.f90
         src/eigen_utilities.f90 
         src/minimax.F90 
         src/parsers/parse_minimax.f90 
         src/parsers/parse_utils.f90   
         src/parsers/read_cmd_line.f90
-        src/kinds.f90
+        src/minimax_exp_gw.F90
+        src/minimax_rpa.F90
+        src/mp2_grids.F90
         )
+
+#file(GLOB_RECURSE sources src/*.f90 src/*.F90 src/*.h)
+#set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/GX-TimeFrequency/modules)
 
 set_target_properties(GXMiniMax
         PROPERTIES
