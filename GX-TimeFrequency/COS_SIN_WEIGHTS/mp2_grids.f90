@@ -815,7 +815,7 @@ CONTAINS
       REAL(KIND=dp), INTENT(INOUT)                       :: max_error
       REAL(KIND=dp), INTENT(IN)                          :: tau
       REAL(KIND=dp), ALLOCATABLE, DIMENSION(:), &
-         INTENT(IN)                                      :: omega_tj, omega_wj_work, x_values, &
+      INTENT(IN)                                         :: omega_tj, omega_wj_work, x_values, &
                                                             y_values
       INTEGER, INTENT(IN)                                :: num_integ_points, num_x_nodes
 
@@ -938,6 +938,7 @@ SUBROUTINE gx_minimax_grid(num_integ_points, emin, emax, &
    weights_cos_tf_w_to_t = 0.0_dp
    weights_sin_tf_t_to_w = 0.0_dp
 
+   ! get the weights for the cosine transform W^c(it) -> W^c(iw)
    CALL get_l_sq_wghts_cos_tf_t_to_w(num_integ_points, tau_tj, weights_cos_tf_t_to_w, tj, &
                                      Emin, Emax, max_error_min(1), num_points_per_magnitude, ierr)
 

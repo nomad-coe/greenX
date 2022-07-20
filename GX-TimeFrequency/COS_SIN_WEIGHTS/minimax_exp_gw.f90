@@ -22,9 +22,11 @@ MODULE minimax_exp_gw
 
    PRIVATE
 
-   CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN = 'minimax_exp_gw'
-
    PUBLIC :: get_exp_minimax_coeff_gw
+   integer, parameter, public :: supported_num_points(15) = &
+       [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34]
+
+   CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN = 'minimax_exp_gw'
 
 CONTAINS
 
