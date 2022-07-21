@@ -59,14 +59,14 @@ install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
         DESTINATION include)
 
 # Application tests
-set(REG_TESTS test_minimax)
+set(REG_TESTS test_minimax gx_minimax)
 
 foreach(INPUT ${REG_TESTS})
 
     # Fortran test TODO(Alex) Move where this is built
     add_executable(${INPUT}.x src/${INPUT}.f90)
     link_directories(${LIBRARY_OUTPUT_PATH})
-    target_link_libraries(${INPUT}.x GXMiniMax)
+    target_link_libraries(${INPUT}.x GXMiniMax LAPACK BLAS)
 
     # Python test framework
     add_test(

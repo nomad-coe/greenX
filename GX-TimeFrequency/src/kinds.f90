@@ -12,7 +12,7 @@ module kinds
    !> Long length character
    integer, parameter, public :: long_char = 200
 
-   character(len=1), parameter :: ch10 = char(10)
+   character(len=1), parameter, public :: ch10 = char(10)
 
    public :: register_exc
 

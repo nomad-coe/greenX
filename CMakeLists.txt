@@ -19,9 +19,13 @@ set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/modules)
 # Define GNU standard installation directories
 include(GNUInstallDirs)
 
+find_package(BLAS)
+find_package(LAPACK)
+
 # External libraries
 # Python required for application testing
 find_package(Python3 3.7 COMPONENTS Interpreter Development)
+
 if(Python3_FOUND)
     message("-- Python 3 interpreter version: " ${Python3_VERSION})
 else()
