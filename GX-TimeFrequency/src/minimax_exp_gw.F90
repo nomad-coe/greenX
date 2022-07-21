@@ -15,6 +15,9 @@
 !>      03.2020 created [Jan Wilhelm]
 ! **************************************************************************************************
 MODULE minimax_exp_gw
+
+#include "gx_common.h"
+
    USE kinds,                           ONLY: dp
 
    IMPLICIT NONE

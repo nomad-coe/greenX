@@ -4,6 +4,8 @@
 
 program gx_minimax
 
+#include "gx_common.h"
+
   use iso_fortran_env, only: std_out => output_unit
   use kinds,           only: dp
   use mp2_grids,       only: gx_minimax_grid

@@ -10,11 +10,10 @@
 !>        for correlation methods as well as weights for the inhomogeneous cosine/sine transform.
 ! **************************************************************************************************
 
-!#define _REGISTER_EXC(msg)
-#define _REGISTER_EXC(msg) call register_exc(msg, __FILE__, __LINE__)
-
 
 MODULE mp2_grids
+
+#include "gx_common.h"
 
    use kinds,                           ONLY: dp, register_exc
    use constants,                       ONLY: pi
