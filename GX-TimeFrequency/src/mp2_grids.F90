@@ -35,10 +35,10 @@ CONTAINS
 !> \param[in] num_integ_points: Number of mesh points.
 !> \param[in] emin: Minimum transition energy.
 !> \param[in] emax: Maximum transition energy.
-!> \param[out] tau_tj: tau mesh.
-!> \param[out] tau_wj: weights for tau mesh.
-!> \param[out] tj: imaginary frequency mesh.
-!> \param[out] wj: weights for imaginary frequency mesh.
+!> \param[out] tau_mesh: tau mesh (tau_tj in CP2K)
+!> \param[out] tau_wgs: weights for tau mesh (tau_wj in CP2K)
+!> \param[out] iw_mesh: imaginary frequency mesh (tj in CP2K)
+!> \param[out] iw_wgs: weights for imaginary frequency mesh (wj in CP2K)
 !> \param[out] weights_cos_tf_t_to_w: Weights for tau -> w cosine transform.
 !> \param[out] weights_cos_tf_w_to_t: Weights for w -> tau cosine transform.
 !> \param[out] weights_sin_tf_t_to_w: Weights for tau -> w sine transform.
@@ -47,14 +47,14 @@ CONTAINS
 !> \param[out] ierr: Exit status
 
 subroutine gx_minimax_grid(num_integ_points, emin, emax, &
-                           tau_tj, tau_wj, tj, wj, weights_cos_tf_t_to_w, &
+                           tau_mesh, tau_wgs, iw_mesh, iw_wgs, weights_cos_tf_t_to_w, &
                            weights_cos_tf_w_to_t, weights_sin_tf_t_to_w, &
                            max_errors, cosft_duality_error, ierr)
 
    integer, intent(in)                                :: num_integ_points
    real(dp),intent(in) :: emin, emax
-   real(dp), allocatable, intent(out)                 :: tau_tj(:), tau_wj(:)
-   real(dp), allocatable, intent(out)                 :: tj(:), wj(:)
+   real(dp), allocatable, intent(out)                 :: tau_mesh(:), tau_wgs(:)
+   real(dp), allocatable, intent(out)                 :: iw_mesh(:), iw_wgs(:)
    real(dp), allocatable, intent(out)                 :: weights_cos_tf_t_to_w(:,:), &
                                                          weights_cos_tf_w_to_t(:,:), &
                                                          weights_sin_tf_t_to_w(:,:)
@@ -68,7 +68,7 @@ subroutine gx_minimax_grid(num_integ_points, emin, emax, &
    integer                                            :: jquad, it, iw
    real(dp)                                           :: e_range, scaling
    real(dp),allocatable                               :: x_tw(:)
-   real(dp),allocatable                               :: wt_cos_wgs(:,:), tw_cos_wgs(:,:), mat(:,:)
+   real(dp),allocatable                               :: cosft_wt(:,:), cosft_tw(:,:), mat(:,:)
 
    E_Range = Emax / Emin
    ierr = 0
@@ -78,17 +78,17 @@ subroutine gx_minimax_grid(num_integ_points, emin, emax, &
    CALL get_rpa_minimax_grids(num_integ_points, E_Range, x_tw)
    !if (ierr /= 0) return
 
-   ALLOCATE (tj(num_integ_points))
-   ALLOCATE (wj(num_integ_points))
+   ALLOCATE (iw_mesh(num_integ_points))
+   ALLOCATE (iw_wgs(num_integ_points))
 
    DO jquad = 1, num_integ_points
-      tj(jquad) = x_tw(jquad)
-      wj(jquad) = x_tw(jquad + num_integ_points)
+      iw_mesh(jquad) = x_tw(jquad)
+      iw_wgs(jquad) = x_tw(jquad + num_integ_points)
    END DO
 
    ! scale the minimax parameters
-   tj(:) = tj(:)*Emin
-   wj(:) = wj(:)*Emin
+   iw_mesh(:) = iw_mesh(:) * Emin
+   iw_wgs(:) = iw_wgs(:) *Emin
 
    ! set up the minimax time grid
    CALL get_exp_minimax_coeff_gw(num_integ_points, E_Range, x_tw, ierr)
@@ -97,18 +97,18 @@ subroutine gx_minimax_grid(num_integ_points, emin, emax, &
    ! For RPA we include already a factor of two (see later steps)
    scaling = 2.0_dp
 
-   ALLOCATE (tau_tj(num_integ_points))
-   !ALLOCATE (tau_tj(0:num_integ_points))   CPK original allocation.
-   ALLOCATE (tau_wj(num_integ_points))
+   ALLOCATE (tau_mesh(num_integ_points))
+   !ALLOCATE (tau_mesh(0:num_integ_points))   CPK original allocation.
+   ALLOCATE (tau_wgs(num_integ_points))
 
    DO jquad = 1, num_integ_points
-      tau_tj(jquad) = x_tw(jquad)/scaling
-      tau_wj(jquad) = x_tw(jquad + num_integ_points)/scaling
+      tau_mesh(jquad) = x_tw(jquad)/scaling
+      tau_wgs(jquad) = x_tw(jquad + num_integ_points)/scaling
    END DO
 
    ! scale grid from [1,R] to [Emin,Emax]
-   tau_tj(:) = tau_tj(:)/Emin
-   tau_wj(:) = tau_wj(:)/Emin
+   tau_mesh(:) = tau_mesh(:) / Emin
+   tau_wgs(:) = tau_wgs(:) / Emin
 
    ALLOCATE (weights_cos_tf_t_to_w(num_integ_points, num_integ_points))
    ALLOCATE (weights_cos_tf_w_to_t(num_integ_points, num_integ_points))
@@ -118,43 +118,43 @@ subroutine gx_minimax_grid(num_integ_points, emin, emax, &
    weights_sin_tf_t_to_w = 0.0_dp
 
    ! get the weights for the cosine transform W^c(it) -> W^c(iw)
-   CALL get_l_sq_wghts_cos_tf_t_to_w(num_integ_points, tau_tj, weights_cos_tf_t_to_w, tj, &
+   CALL get_l_sq_wghts_cos_tf_t_to_w(num_integ_points, tau_mesh, weights_cos_tf_t_to_w, iw_mesh, &
                                      Emin, Emax, max_errors(1), num_points_per_magnitude, ierr)
    if (ierr /= 0) return
 
    ! get the weights for the cosine transform W^c(iw) -> W^c(it)
-   CALL get_l_sq_wghts_cos_tf_w_to_t(num_integ_points, tau_tj, weights_cos_tf_w_to_t, tj, &
+   CALL get_l_sq_wghts_cos_tf_w_to_t(num_integ_points, tau_mesh, weights_cos_tf_w_to_t, iw_mesh, &
                                      Emin, Emax, max_errors(2), num_points_per_magnitude, ierr)
    if (ierr /= 0) return
 
    ! get the weights for the sine transform Sigma^sin(it) -> Sigma^sin(iw) (PRB 94, 165109 (2016), Eq. 71)
-   CALL get_l_sq_wghts_sin_tf_t_to_w(num_integ_points, tau_tj, weights_sin_tf_t_to_w, tj, &
+   CALL get_l_sq_wghts_sin_tf_t_to_w(num_integ_points, tau_mesh, weights_sin_tf_t_to_w, iw_mesh, &
                                      Emin, Emax, max_errors(3), num_points_per_magnitude, ierr)
    if (ierr /= 0) return
 
    ! Compute the "real" weights used for the inhomogeneous cosine/ FT and check whether
    ! the two matrices for the forward/backward transform are the inverse of each other.
-   allocate(wt_cos_wgs (num_integ_points,num_integ_points))
-   allocate(tw_cos_wgs (num_integ_points,num_integ_points))
+   allocate(cosft_wt (num_integ_points, num_integ_points))
+   allocate(cosft_tw (num_integ_points, num_integ_points))
    allocate(mat (num_integ_points, num_integ_points))
 
    do it=1,num_integ_points
      do iw=1,num_integ_points
-       wt_cos_wgs(iw, it) = weights_cos_tf_t_to_w(iw, it) * cos(tau_tj(it) * tj(iw))
-       tw_cos_wgs(it, iw) = weights_cos_tf_w_to_t(it, iw) * cos(tau_tj(it) * tj(iw))
+       cosft_wt(iw, it) = weights_cos_tf_t_to_w(iw, it) * cos(tau_mesh(it) * iw_mesh(iw))
+       cosft_tw(it, iw) = weights_cos_tf_w_to_t(it, iw) * cos(tau_mesh(it) * iw_mesh(iw))
+       !sinft_wt(it, iw) = weights_sin_tf_t_to_w(iw, it) * sin(tau_mesh(it) * iw_mesh(iw))
      end do
    end do
 
-   mat = matmul(wt_cos_wgs, tw_cos_wgs)
+   mat = matmul(cosft_wt, cosft_tw)
    do it=1,num_integ_points
      mat(it, it) = mat(it, it) - 1.0_dp
    end do
    cosft_duality_error = maxval(abs(mat))
 
    deallocate(mat)
-   deallocate(wt_cos_wgs)
-   deallocate(tw_cos_wgs)
-
+   deallocate(cosft_wt)
+   deallocate(cosft_tw)
    deallocate(x_tw)
 
 end subroutine gx_minimax_grid
