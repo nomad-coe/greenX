@@ -6,7 +6,7 @@ FFLAGS_NO = -O0 -ffree-line-length-none -g
 PROGRAM = test_minimax.exe
 
 # "make" builds all
-all: $(PROGRAM) realclean
+all: $(PROGRAM) clean
 
 vpath %.f90 src parsers
 
@@ -17,10 +17,10 @@ test_minimax.exe: kinds.o parse_minimax.o parse_utils.o eigen_utilities.o minima
 	$(FC) $(FFLAGS) $(F90FLAGS) -o $@ -c $<
 
 # Utility targets
-.PHONY: realclean distclean
+.PHONY: clean distclean
 
-realclean:
+clean:
 	rm -rf *.o *.mod
 
-distclean: realclean
+distclean: clean
 	rm -f *~ $(PROGRAM) 

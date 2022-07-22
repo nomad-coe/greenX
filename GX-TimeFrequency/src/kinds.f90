@@ -1,7 +1,7 @@
 !> Precision constants
 module kinds
    implicit none
-   private
+   public
 
    !> Single precison
    integer, parameter, public :: sp = selected_real_kind(6, 30)
@@ -12,12 +12,15 @@ module kinds
    !> Long length character
    integer, parameter, public :: long_char = 200
 
+   real(dp), parameter :: one = 1.0_dp
+   real(dp), parameter :: zero = 0.0_dp
+
    character(len=1), parameter, public :: ch10 = char(10)
 
    public :: register_exc
 
 ! Private stuff
-   character(len=4*1024) :: error_message__ = "No Error reported so far"
+   character(len=4*1024), private :: error_message__ = "No Error reported so far"
 
 contains
 
