@@ -1,5 +1,4 @@
 !> Program to print minimax meshes and the associated errors.
-!>
 
 program gx_minimax
 
@@ -14,7 +13,7 @@ program gx_minimax
 
 !Local variables-------------------------------
 !scalars
-integer :: ii, it, iw, ierr, num_integ_points, unt, py_unt, nargs, iostat, ntau = -1
+integer :: ii, it, ierr, num_integ_points, unt, py_unt, nargs, iostat, ntau = -1
 real(dp) :: emin = huge(one), emax = huge(one), eratio, cosft_duality_error
 character(len=1024) :: msg, arg, arg_val, iomsg, command
 character(len=1), parameter :: ch10 = char(10)
