@@ -29,6 +29,7 @@ target_sources(GXMiniMax PRIVATE
         src/minimax_exp_gw.F90
         src/minimax_rpa.F90
         src/mp2_grids.F90
+        src/gx_api.F90
         )
 
 #file(GLOB_RECURSE sources src/*.f90 src/*.F90 src/*.h)

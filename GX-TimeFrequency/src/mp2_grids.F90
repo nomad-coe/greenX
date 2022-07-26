@@ -7,9 +7,12 @@
 
 ! **************************************************************************************************
 !> \brief Routines to calculate frequency and time grids (integration points and weights)
-!>        for correlation methods as well as weights for the inhomogeneous cosine/sine transform.
+!> for correlation methods as well as weights for the inhomogeneous cosine/sine transform.
+!>
+!> NB: When dealing with runtime exceptions, we set ierr to a non-zero value and return immediately
+!  to the caller so we don't need to goto to a cleanup section at the end of the procedure.
+!  Assume -std=f2008: i.e. allocatable arrays are automatically deallocated when going out of scope.
 ! **************************************************************************************************
-
 
 MODULE mp2_grids
 
@@ -69,8 +72,8 @@ subroutine gx_minimax_grid(num_integ_points, emin, emax, &
 
    ALLOCATE(x_tw(2*num_integ_points))
 
-   CALL get_rpa_minimax_grids(num_integ_points, E_Range, x_tw)
-   !if (ierr /= 0) return
+   CALL get_rpa_minimax_grids(num_integ_points, E_Range, x_tw, ierr)
+   if (ierr /= 0) return
 
    ALLOCATE (iw_mesh(num_integ_points))
    ALLOCATE (iw_wgs(num_integ_points))
@@ -761,11 +764,8 @@ end subroutine gx_minimax_grid
              IF (present(ounit)) then
               ! GET AND PRINT FREQUENCY GRIDS
 
-              IF (num_integ_points .LE. 5) THEN
-                 write(*,*)"The grid size you choose is not available."
-              ELSE
-                 CALL get_rpa_minimax_grids(num_integ_points, Range_from_i_exp, x_tw)
-              END IF
+              CALL get_rpa_minimax_grids(num_integ_points, Range_from_i_exp, x_tw, ierr)
+              stop "The grid size you choose is not available."
 
               WRITE (ounit, FMT="(T3,A,T66,F15.4)") "Range for the minimax approximation:", Range_from_i_exp
               WRITE (ounit, FMT="(T3,A)") "minimax frequency omega_i     weight of frequency omega_i"
@@ -818,14 +818,8 @@ end subroutine gx_minimax_grid
              weights_cos_tf_w_to_t = 0.0_dp
              weights_sin_tf_t_to_w = 0.0_dp
 
-             ierr = 0
-             IF (num_integ_points .LE. 5) THEN
-                write(*,*)"The grid size you choose is not available."
-             ELSE
-                CALL get_rpa_minimax_grids(num_integ_points, E_Range, x_tw)
-             END IF
-
-
+             CALL get_rpa_minimax_grids(num_integ_points, E_Range, x_tw, ierr)
+             stop "The grid size you choose is not available."
 
              DO jquad = 1, num_integ_points
                 tj(jquad) = x_tw(jquad)
