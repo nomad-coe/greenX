@@ -128,16 +128,15 @@ subroutine gx_minimax_grid(num_integ_points, emin, emax, &
 
    ! Compute the actual weights used for the inhomogeneous cosine/ FT and check whether
    ! the two matrices for the forward/backward transform are the inverse of each other.
-   allocate(mat (num_integ_points, num_integ_points))
-
    do it=1,num_integ_points
      do iw=1,num_integ_points
        cosft_wt(iw, it) = cosft_wt(iw, it) * cos(tau_mesh(it) * iw_mesh(iw))
        cosft_tw(it, iw) = cosft_tw(it, iw) * cos(tau_mesh(it) * iw_mesh(iw))
-       sinft_wt(it, iw) = sinft_wt(iw, it) * sin(tau_mesh(it) * iw_mesh(iw))
+       sinft_wt(iw, it) = sinft_wt(iw, it) * sin(tau_mesh(it) * iw_mesh(iw))
      end do
    end do
 
+   allocate(mat (num_integ_points, num_integ_points))
    mat = matmul(cosft_wt, cosft_tw)
    do it=1,num_integ_points
      mat(it, it) = mat(it, it) - 1.0_dp
