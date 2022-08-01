@@ -8,32 +8,30 @@ add_library(GXMiniMax "")
 set_target_properties(GXMiniMax
         PROPERTIES
         VERSION 0.0.1
-        SOVERSION 0.01
+        SOVERSION 0.0.1
+        LIBRARY_OUTPUT_NAME GXMiniMax
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY}
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY}
         )
 
-target_include_directories(GXMiniMax PUBLIC src/)
+target_link_libraries(GXMiniMax GXCommon)
+
+target_include_directories(GXMiniMax PUBLIC src/ )
 
 # Set full path to minimax grids using preprocessor 
-set_property(SOURCE src/minimax.F90 APPEND PROPERTY
+set_property(SOURCE src/minimax/minimax.F90 APPEND PROPERTY
     COMPILE_DEFINITIONS "MINIMAX_PATH='${CMAKE_SOURCE_DIR}/GX-TimeFrequency/data/minimax_grids'")
 
 target_sources(GXMiniMax PRIVATE
         src/gx_common.h
-        src/kinds.f90
-        src/constants.f90
-        src/eigen_utilities.f90 
-        src/minimax.F90 
-        src/parsers/parse_minimax.f90 
-        src/parsers/parse_utils.f90   
-        src/parsers/read_cmd_line.f90
         src/minimax_exp_gw.F90
         src/minimax_rpa.F90
         src/mp2_grids.F90
         src/gx_api.F90
+        src/minimax/minimax.F90
+        src/minimax/parse_minimax.f90
+        src/minimax/read_cmd_line.f90  # TODO The test depends on this, not the lib
         )
-
-#file(GLOB_RECURSE sources src/*.f90 src/*.F90 src/*.h)
-#set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/GX-TimeFrequency/modules)
 
 set_target_properties(GXMiniMax
         PROPERTIES
@@ -42,6 +40,7 @@ set_target_properties(GXMiniMax
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY}
         )
 
+# TODO (Alex) This wants to be defined once
 # Set installation location
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     # TODO(Alex) clean this up
@@ -67,6 +66,7 @@ foreach(INPUT ${REG_TESTS})
 
     # Fortran test TODO(Alex) Move where this is built
     add_executable(${INPUT}.x src/${INPUT}.F90)
+    #add_executable(${INPUT}.x src/minimax/${INPUT}.f90)
     link_directories(${LIBRARY_OUTPUT_PATH})
     target_link_libraries(${INPUT}.x PRIVATE GXMiniMax LAPACK::LAPACK)
     #target_link_libraries(${INPUT}.x GXMiniMax PRIVATE ${LAPACK_LIBRARIES})

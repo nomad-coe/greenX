@@ -27,19 +27,26 @@ find_package(LAPACK REQUIRED)
 get_target_property(targetlib LAPACK::LAPACK INTERFACE_LINK_LIBRARIES)
 message(STATUS "LAPACK INTERFACE LINK LIBRARIES FROM TARGET: ${targetlib}")
 
+# CMake module directory
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
+# Defines build type
+include(cmake/StandardProjectSettings.cmake)
+
+# Compiler flags
+include(cmake/CompilerFlags.cmake)
+
+# Compiler warnings
+include(cmake/CompilerWarnings.cmake)
 
 # External libraries
-# Python required for application testing
-find_package(Python3 3.7 COMPONENTS Interpreter Development)
 
-if(Python3_FOUND)
-    message("-- Python 3 interpreter version: " ${Python3_VERSION})
-else()
-    message("-- Python 3 interpreter not found")
-endif()
+# Python required for application testing
+include(cmake/python3.cmake)
 
 # Enable ctest
 enable_testing()
 
 # Our libraries
+add_subdirectory(GX-common)
 add_subdirectory(GX-TimeFrequency)
