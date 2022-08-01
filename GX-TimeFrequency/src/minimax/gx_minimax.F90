@@ -141,7 +141,8 @@ real(dp), allocatable :: cosft_wt(:,:), cosft_tw(:,:), sinft_wt(:,:)
 " max_err_costf_w_to_t max_err_sintf_t_to_w eratio"
    call dumps(msg, [std_out, unt])
    do it=1,ntau
-     write(msg, "(i0, *(es12.5,2x))")it, tau_mesh(it), tau_wgs(it), iw_mesh(it), iw_wgs(it), cosft_duality_error, max_errors, eratio
+     write(msg, "(i0, *(es12.5,2x))")it, tau_mesh(it), tau_wgs(it), iw_mesh(it), iw_wgs(it), &
+                                     cosft_duality_error, max_errors, eratio
      call dumps(msg, [std_out, unt])
    end do
    close(unt)
