@@ -65,8 +65,8 @@ set(REG_TESTS test_minimax gx_minimax)
 foreach(INPUT ${REG_TESTS})
 
     # Fortran test TODO(Alex) Move where this is built
-    add_executable(${INPUT}.x src/${INPUT}.F90)
-    #add_executable(${INPUT}.x src/minimax/${INPUT}.f90)
+    #add_executable(${INPUT}.x src/${INPUT}.F90)
+    add_executable(${INPUT}.x src/minimax/${INPUT}.F90)
     link_directories(${LIBRARY_OUTPUT_PATH})
     target_link_libraries(${INPUT}.x PRIVATE GXMiniMax LAPACK::LAPACK)
     #target_link_libraries(${INPUT}.x GXMiniMax PRIVATE ${LAPACK_LIBRARIES})

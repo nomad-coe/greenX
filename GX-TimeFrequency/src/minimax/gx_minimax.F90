@@ -204,13 +204,14 @@ real(dp), allocatable :: cosft_wt(:,:), cosft_tw(:,:), sinft_wt(:,:)
 contains
 
 subroutine print_help()
-  write(std_out, "(a,/)")"Usage: gx_minimax.x command -emin NUM -emax NUM [-ntau INT] [-plot|-p]"
-  write(std_out, "(a,/)")"Usage: gx_minimax.x command -emin NUM -emax NUM [-ntau INT] [-plot|-p]"
+  write(std_out, "(a)")"Usage: gx_minimax.x command -emin NUM -emax NUM [-ntau INT] [-plot|-p]"
+  write(std_out, "(a,/)")"where allowed commands are: table, print."
   write(std_out, "(a,/)")"The options are as follows:"
   write(std_out, "(a)")  "  -emin   Minimum transition energy."
   write(std_out, "(a)")  "  -emax   Maximum transition energy."
   write(std_out, "(a)")  "  -ntau   Number of mesh-points."
   write(std_out, "(a)")  "  -p      Execute plotting script automatically. "
+  write(std_out, "(a)")
 
   write(std_out, "(a,/)")"To print the mesh with 6 points and erange=emax/emin, use:"
   write(std_out, "(a,/)")"    gx_minimax.x print -ntau 6 -emin 0.4 -emax 100"

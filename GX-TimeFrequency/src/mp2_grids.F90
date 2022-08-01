@@ -137,7 +137,7 @@ subroutine gx_minimax_grid(num_integ_points, emin, emax, &
    end do
 
    allocate(mat (num_integ_points, num_integ_points))
-   mat = matmul(cosft_wt, cosft_tw)
+   mat(:,:) = matmul(cosft_wt, cosft_tw)
    do it=1,num_integ_points
      mat(it, it) = mat(it, it) - 1.0_dp
    end do
