@@ -1,12 +1,12 @@
-# GreenX Top-level CMake 
+# GreenX Top-level CMake
 #
-# CMake Variable Descriptions 
+# CMake Variable Descriptions
 # PROJECT_BINARY_DIR:  Build directory of the most-recent project() command
 # CMAKE_BINARY_DIR: Full path to the top level of the current CMake build tree
 
 cmake_minimum_required(VERSION 3.0.2)
 
-project(greenX 
+project(greenX
     LANGUAGES Fortran
     VERSION 0.0.1
 )
@@ -19,8 +19,14 @@ set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/modules)
 # Define GNU standard installation directories
 include(GNUInstallDirs)
 
-find_package(BLAS)
-find_package(LAPACK)
+#find_package(BLAS REQUIRED)
+#get_target_property(targetlib BLAS::BLAS INTERFACE_LINK_LIBRARIES)
+#message(STATUS "BLAS INTERFACE LINK LIBRARIES FROM TARGET: ${targetlib}")
+
+find_package(LAPACK REQUIRED)
+get_target_property(targetlib LAPACK::LAPACK INTERFACE_LINK_LIBRARIES)
+message(STATUS "LAPACK INTERFACE LINK LIBRARIES FROM TARGET: ${targetlib}")
+
 
 # External libraries
 # Python required for application testing
@@ -35,5 +41,5 @@ endif()
 # Enable ctest
 enable_testing()
 
-# Our libraries 
+# Our libraries
 add_subdirectory(GX-TimeFrequency)

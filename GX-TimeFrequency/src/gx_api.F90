@@ -1,10 +1,21 @@
 module gx_api
+ ! public high-level API
 
  use mp2_grids,   only :  gx_minimax_grid
   ! Compute minimax grid for RPA energy and GW calculation on imaginary time/frequency domain.
+  ! Usage:
+  !
+  !   call gx_minimax_grid(..., ierr)
+  !   if (ierr /= 0) then
+  !     call gx_get_error_message(msg)
+  !     handle error
+  !   end if
 
  use minimax_rpa,    only : omega_npoints_supported
+  ! List wth the number of points supported for the frequency meshes
+
  use minimax_exp_gw, only : tau_npoints_supported
+  ! List wth the number of points supported for the imag-time meshes
 
  implicit none
 
