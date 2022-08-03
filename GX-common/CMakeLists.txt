@@ -18,6 +18,7 @@ target_sources(GXCommon PRIVATE
         src/kinds.f90
         src/constants.f90
         src/unit_conversion.f90
+        src/error_handling.f90
 
         src/eigen_utilities.f90
         src/parse_utils.f90

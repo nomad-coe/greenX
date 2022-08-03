@@ -18,5 +18,9 @@ module constants
 
     !> Pi
     real(kind=dp), parameter, public :: pi = 3.14159265358979323846264338_dp
+    !> Zero
+    real(dp), parameter :: zero = 0.0_dp
+    !> One
+    real(dp), parameter :: one = 1.0_dp
 
 end module constants
