@@ -6,7 +6,7 @@
 !--------------------------------------------------------------------------------------------------!
 
 ! **************************************************************************************************
-!> \brief Routines to calculate the minimax coefficients in order to
+!> \brief Routines to return tabulated the minimax coefficients in order to
 !>        approximate 1/x as a sum over exponential functions
 !>        1/x ~ SUM_{i}^{K} w_i EXP(-a_i * x) for x belonging to [1:Rc].
 !>        This module contains coefficients for minimax approximations with 26, 28, 30, 32, 34 points
@@ -14,22 +14,18 @@
 !> \par History
 !>      03.2020 created [Jan Wilhelm]
 ! **************************************************************************************************
-MODULE minimax_exp_gw
-
+MODULE minimax_gw
 #include "gx_common.h"
-
    USE kinds,                           ONLY: dp
-
    IMPLICIT NONE
-
    PRIVATE
 
    PUBLIC :: get_exp_minimax_coeff_gw
 
+   !> List wth the number of points supported for the imag-time meshes
    integer, parameter, public :: tau_npoints_supported(15) = &
        [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34]
 
-   CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN = 'minimax_exp_gw'
 
 CONTAINS
 
@@ -17014,4 +17010,4 @@ CONTAINS
       END IF
    END SUBROUTINE
 
-END MODULE minimax_exp_gw
+END MODULE minimax_gw

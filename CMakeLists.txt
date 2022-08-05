@@ -3,6 +3,8 @@
 # CMake Variable Descriptions
 # PROJECT_BINARY_DIR:  Build directory of the most-recent project() command
 # CMAKE_BINARY_DIR: Full path to the top level of the current CMake build tree
+#
+# A Buccheri.
 
 cmake_minimum_required(VERSION 3.0.2)
 
@@ -14,18 +16,12 @@ project(greenX
 # Set folder structure for build directory
 set(CMAKE_Fortran_BIN_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_Fortran_LIB_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+# Note, this will put modules of each library in <BUILD_DIR>/modules
+# We should consider if this is the desired behaviour
 set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/modules)
 
 # Define GNU standard installation directories
 include(GNUInstallDirs)
-
-#find_package(BLAS REQUIRED)
-#get_target_property(targetlib BLAS::BLAS INTERFACE_LINK_LIBRARIES)
-#message(STATUS "BLAS INTERFACE LINK LIBRARIES FROM TARGET: ${targetlib}")
-
-find_package(LAPACK REQUIRED)
-get_target_property(targetlib LAPACK::LAPACK INTERFACE_LINK_LIBRARIES)
-message(STATUS "LAPACK INTERFACE LINK LIBRARIES FROM TARGET: ${targetlib}")
 
 # CMake module directory
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -40,6 +36,9 @@ include(cmake/CompilerFlags.cmake)
 include(cmake/CompilerWarnings.cmake)
 
 # External libraries
+# Note, this will not find MKL or openBLAS
+find_package(BLAS REQUIRED)
+find_package(LAPACK REQUIRED)
 
 # Python required for application testing
 include(cmake/python3.cmake)
@@ -47,6 +46,14 @@ include(cmake/python3.cmake)
 # Enable ctest
 enable_testing()
 
-# Our libraries
+# Our library directories
 add_subdirectory(GX-common)
 add_subdirectory(GX-TimeFrequency)
+
+# Set installation location
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(default_install_prefix "${PROJECT_SOURCE_DIR}/install")        
+    set(CMAKE_INSTALL_PREFIX ${default_install_prefix}
+            CACHE STRING "Choose the installation directory. Default location is ${default_install_prefix}"
+            FORCE)
+endif()

@@ -6,14 +6,12 @@ module error_handling
    integer, parameter :: err_len = 1024
    !> Error message
    character(len=err_len), public, protected :: error_message__ = "No Error reported so far"
-   !> TODO Move me
-   character(len=1), parameter, public :: ch10 = char(10)
+
+   public :: register_exc
 
 contains
 
    !> Write an error to file.
-   !>
-   !> Note, this should replaced with somethign machine-readable.
    subroutine register_exc(msg, filename, line_number)
 
       !>  Error message
@@ -25,6 +23,7 @@ contains
 
       integer :: line_num
       character(len=err_len) :: my_filename
+      character(len=1), parameter :: ch10 = char(10)
 
       my_filename = "Unknown File"
       if (present(filename)) then

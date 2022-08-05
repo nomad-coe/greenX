@@ -6,26 +6,26 @@
 !--------------------------------------------------------------------------------------------------!
 
 ! **************************************************************************************************
-!> \brief Routines to calculate the minimax coefficients for approximating 1/x as
+!> \brief Routines to return tabulated minimax coefficients for approximating 1/x as
 !>        1/x ~ 1/pi SUM_{i}^{K} w_i x^2/(x^2+a_i^2)^2  for x belonging to [1:Rc].
+!>
 !> \par History
 !>      06.2014 created [Mauro Del Ben]
 ! **************************************************************************************************
 MODULE minimax_rpa
-
 #include "gx_common.h"
-
-  use kinds,                           ONLY: dp, register_exc
+  use kinds,                           only: dp
+  use error_handling,                  only: register_exc
 
   implicit none
-
   private
 
-  ! List with the number of points supported. Must be kept in synch with get_rpa_minimax_grids.
+  !> List with the number of points supported. Must be kept in synch with get_rpa_minimax_grids.
   integer, parameter, public :: omega_npoints_supported(15) = &
     [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34]
 
   public :: get_rpa_minimax_grids
+
 
 CONTAINS
 ! **************************************************************************************************
@@ -80,13 +80,12 @@ CONTAINS
          CALL get_coeff_34(k, E_range, aw, E_ratio)
       CASE DEFAULT
         ierr = 1
-        _REGISTER_EXC("The grid size you choose is not available.")
+        _REGISTER_EXC("The grid size you chose is not available.")
       END SELECT
-      !write(*,*)k, E_ratio, E_range
-      !CALL rescale_grid(aw, E_ratio)
-      !write(*,*)k, E_ratio, E_range
 
    END SUBROUTINE get_rpa_minimax_grids
+
+
 ! **************************************************************************************************
 !> \brief ...
 !> \param aw ...

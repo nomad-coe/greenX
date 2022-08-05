@@ -15,21 +15,19 @@
 ! **************************************************************************************************
 
 MODULE mp2_grids
-
 #include "gx_common.h"
-
-   use kinds,                           ONLY: dp, register_exc
-   use constants,                       ONLY: pi
-   use minimax_exp_gw,                  ONLY: get_exp_minimax_coeff_gw
-   use minimax_rpa,                     ONLY: get_rpa_minimax_grids
+   use kinds, only: dp
+   use error_handling, only: register_exc
+   use constants, only: pi
+   use minimax_gw, only: get_exp_minimax_coeff_gw
+   use minimax_rpa, only: get_rpa_minimax_grids
 
    IMPLICIT NONE
 
    PRIVATE
 
-   PUBLIC :: gx_minimax_grid   ! Main entry point for client code.
-
-   PUBLIC :: get_minimax_grid  ! FIXME: Temporary API used by Maryam
+   !> Main entry point for client code.
+   PUBLIC :: gx_minimax_grid
 
 CONTAINS
 
@@ -47,108 +45,105 @@ CONTAINS
 !> \param[out] max_errors: Max error for the three kind of transforms (same order as previous args)
 !> \param[out] cosft_duality_error. Max_{ij} |AB - I| where A and B are the cosft_wt and cosft_tw matrices.
 !> \param[out] ierr: Exit status
+   subroutine gx_minimax_grid(num_integ_points, emin, emax, &
+                              tau_mesh, tau_wgs, iw_mesh, iw_wgs, &
+                              cosft_wt, cosft_tw, sinft_wt, &
+                              max_errors, cosft_duality_error, ierr)
 
-subroutine gx_minimax_grid(num_integ_points, emin, emax, &
-                           tau_mesh, tau_wgs, iw_mesh, iw_wgs, &
-                           cosft_wt, cosft_tw, sinft_wt, &
-                           max_errors, cosft_duality_error, ierr)
+      integer, intent(in) :: num_integ_points
+      real(dp), intent(in) :: emin, emax
+      real(dp), allocatable, intent(out) :: tau_mesh(:), tau_wgs(:)
+      real(dp), allocatable, intent(out) :: iw_mesh(:), iw_wgs(:)
+      real(dp), allocatable, intent(out) :: cosft_wt(:, :), cosft_tw(:, :), sinft_wt(:, :)
+      real(dp), intent(out) :: max_errors(3), cosft_duality_error
+      integer, intent(out) :: ierr
 
-   integer, intent(in) :: num_integ_points
-   real(dp),intent(in) :: emin, emax
-   real(dp), allocatable, intent(out) :: tau_mesh(:), tau_wgs(:)
-   real(dp), allocatable, intent(out) :: iw_mesh(:), iw_wgs(:)
-   real(dp), allocatable, intent(out) :: cosft_wt(:,:), cosft_tw(:,:), sinft_wt(:,:)
-   real(dp), intent(out) :: max_errors(3), cosft_duality_error
-   integer, intent(out) :: ierr
+      integer, parameter                                 :: num_points_per_magnitude = 200
+      integer                                            :: jquad, it, iw
+      real(dp)                                           :: e_range, scaling
+      real(dp), allocatable                              :: x_tw(:), mat(:, :)
 
-!Local variables-------------------------------
-   INTEGER, PARAMETER                                 :: num_points_per_magnitude = 200
-   integer                                            :: jquad, it, iw
-   real(dp)                                           :: e_range, scaling
-   real(dp),allocatable                               :: x_tw(:), mat(:,:)
+      E_Range = Emax/Emin
+      ierr = 0
 
-   E_Range = Emax / Emin
-   ierr = 0
+      ALLOCATE (x_tw(2*num_integ_points))
 
-   ALLOCATE(x_tw(2*num_integ_points))
+      CALL get_rpa_minimax_grids(num_integ_points, E_Range, x_tw, ierr)
+      if (ierr /= 0) return
 
-   CALL get_rpa_minimax_grids(num_integ_points, E_Range, x_tw, ierr)
-   if (ierr /= 0) return
+      ALLOCATE (iw_mesh(num_integ_points))
+      ALLOCATE (iw_wgs(num_integ_points))
 
-   ALLOCATE (iw_mesh(num_integ_points))
-   ALLOCATE (iw_wgs(num_integ_points))
+      DO jquad = 1, num_integ_points
+         iw_mesh(jquad) = x_tw(jquad)
+         iw_wgs(jquad) = x_tw(jquad + num_integ_points)
+      END DO
 
-   DO jquad = 1, num_integ_points
-      iw_mesh(jquad) = x_tw(jquad)
-      iw_wgs(jquad) = x_tw(jquad + num_integ_points)
-   END DO
+      ! scale the minimax parameters
+      iw_mesh(:) = iw_mesh(:)*Emin
+      iw_wgs(:) = iw_wgs(:)*Emin
 
-   ! scale the minimax parameters
-   iw_mesh(:) = iw_mesh(:) * Emin
-   iw_wgs(:) = iw_wgs(:) * Emin
+      ! set up the minimax time grid
+      CALL get_exp_minimax_coeff_gw(num_integ_points, E_Range, x_tw, ierr)
+      if (ierr /= 0) return
 
-   ! set up the minimax time grid
-   CALL get_exp_minimax_coeff_gw(num_integ_points, E_Range, x_tw, ierr)
-   if (ierr /= 0) return
+      ! For RPA we include already a factor of two (see later steps)
+      scaling = 2.0_dp
 
-   ! For RPA we include already a factor of two (see later steps)
-   scaling = 2.0_dp
+      ALLOCATE (tau_mesh(num_integ_points))
+      !ALLOCATE (tau_mesh(0:num_integ_points))   CPK original allocation.
+      ALLOCATE (tau_wgs(num_integ_points))
 
-   ALLOCATE (tau_mesh(num_integ_points))
-   !ALLOCATE (tau_mesh(0:num_integ_points))   CPK original allocation.
-   ALLOCATE (tau_wgs(num_integ_points))
+      DO jquad = 1, num_integ_points
+         tau_mesh(jquad) = x_tw(jquad)/scaling
+         tau_wgs(jquad) = x_tw(jquad + num_integ_points)/scaling
+      END DO
 
-   DO jquad = 1, num_integ_points
-      tau_mesh(jquad) = x_tw(jquad)/scaling
-      tau_wgs(jquad) = x_tw(jquad + num_integ_points)/scaling
-   END DO
+      ! scale grid from [1,R] to [Emin,Emax]
+      tau_mesh(:) = tau_mesh(:)/Emin
+      tau_wgs(:) = tau_wgs(:)/Emin
 
-   ! scale grid from [1,R] to [Emin,Emax]
-   tau_mesh(:) = tau_mesh(:) / Emin
-   tau_wgs(:) = tau_wgs(:) / Emin
+      ALLOCATE (cosft_wt(num_integ_points, num_integ_points))
+      ALLOCATE (cosft_tw(num_integ_points, num_integ_points))
+      ALLOCATE (sinft_wt(num_integ_points, num_integ_points))
 
-   ALLOCATE (cosft_wt(num_integ_points, num_integ_points))
-   ALLOCATE (cosft_tw(num_integ_points, num_integ_points))
-   ALLOCATE (sinft_wt(num_integ_points, num_integ_points))
+      ! get the weights for the cosine transform W^c(it) -> W^c(iw)
+      CALL get_l_sq_wghts_cos_tf_t_to_w(num_integ_points, tau_mesh, cosft_wt, iw_mesh, &
+                                        Emin, Emax, max_errors(1), num_points_per_magnitude, ierr)
+      if (ierr /= 0) return
 
-   ! get the weights for the cosine transform W^c(it) -> W^c(iw)
-   CALL get_l_sq_wghts_cos_tf_t_to_w(num_integ_points, tau_mesh, cosft_wt, iw_mesh, &
-                                     Emin, Emax, max_errors(1), num_points_per_magnitude, ierr)
-   if (ierr /= 0) return
+      ! get the weights for the cosine transform W^c(iw) -> W^c(it)
+      CALL get_l_sq_wghts_cos_tf_w_to_t(num_integ_points, tau_mesh, cosft_tw, iw_mesh, &
+                                        Emin, Emax, max_errors(2), num_points_per_magnitude, ierr)
+      if (ierr /= 0) return
 
-   ! get the weights for the cosine transform W^c(iw) -> W^c(it)
-   CALL get_l_sq_wghts_cos_tf_w_to_t(num_integ_points, tau_mesh, cosft_tw, iw_mesh, &
-                                     Emin, Emax, max_errors(2), num_points_per_magnitude, ierr)
-   if (ierr /= 0) return
+      ! get the weights for the sine transform Sigma^sin(it) -> Sigma^sin(iw) (PRB 94, 165109 (2016), Eq. 71)
+      CALL get_l_sq_wghts_sin_tf_t_to_w(num_integ_points, tau_mesh, sinft_wt, iw_mesh, &
+                                        Emin, Emax, max_errors(3), num_points_per_magnitude, ierr)
+      if (ierr /= 0) return
 
-   ! get the weights for the sine transform Sigma^sin(it) -> Sigma^sin(iw) (PRB 94, 165109 (2016), Eq. 71)
-   CALL get_l_sq_wghts_sin_tf_t_to_w(num_integ_points, tau_mesh, sinft_wt, iw_mesh, &
-                                     Emin, Emax, max_errors(3), num_points_per_magnitude, ierr)
-   if (ierr /= 0) return
+      ! Compute the actual weights used for the inhomogeneous cosine/ FT and check whether
+      ! the two matrices for the forward/backward transform are the inverse of each other.
+      do it = 1, num_integ_points
+         do iw = 1, num_integ_points
+            cosft_wt(iw, it) = cosft_wt(iw, it)*cos(tau_mesh(it)*iw_mesh(iw))
+            cosft_tw(it, iw) = cosft_tw(it, iw)*cos(tau_mesh(it)*iw_mesh(iw))
+            sinft_wt(iw, it) = sinft_wt(iw, it)*sin(tau_mesh(it)*iw_mesh(iw))
+         end do
+      end do
 
-   ! Compute the actual weights used for the inhomogeneous cosine/ FT and check whether
-   ! the two matrices for the forward/backward transform are the inverse of each other.
-   do it=1,num_integ_points
-     do iw=1,num_integ_points
-       cosft_wt(iw, it) = cosft_wt(iw, it) * cos(tau_mesh(it) * iw_mesh(iw))
-       cosft_tw(it, iw) = cosft_tw(it, iw) * cos(tau_mesh(it) * iw_mesh(iw))
-       sinft_wt(iw, it) = sinft_wt(iw, it) * sin(tau_mesh(it) * iw_mesh(iw))
-     end do
-   end do
+      allocate (mat(num_integ_points, num_integ_points))
+      mat(:, :) = matmul(cosft_wt, cosft_tw)
+      do it = 1, num_integ_points
+         mat(it, it) = mat(it, it) - 1.0_dp
+      end do
+      cosft_duality_error = maxval(abs(mat))
 
-   allocate(mat (num_integ_points, num_integ_points))
-   mat(:,:) = matmul(cosft_wt, cosft_tw)
-   do it=1,num_integ_points
-     mat(it, it) = mat(it, it) - 1.0_dp
-   end do
-   cosft_duality_error = maxval(abs(mat))
+      deallocate (mat)
+      deallocate (x_tw)
 
-   deallocate(mat)
-   deallocate(x_tw)
+   end subroutine gx_minimax_grid
 
-end subroutine gx_minimax_grid
-
-! **************************************************************************************************
 
    SUBROUTINE get_l_sq_wghts_cos_tf_t_to_w(num_integ_points, tau_tj, weights_cos_tf_t_to_w, omega_tj, &
                                            E_min, E_max, max_error, num_points_per_magnitude, ierr)
@@ -163,7 +158,7 @@ end subroutine gx_minimax_grid
       REAL(KIND=dp), INTENT(IN)                          :: E_min, E_max
       REAL(KIND=dp), INTENT(INOUT)                       :: max_error
       INTEGER, INTENT(IN)                                :: num_points_per_magnitude
-      integer,intent(out) :: ierr
+      integer, intent(out) :: ierr
 
       INTEGER                                            :: iii, jjj, jquad, lwork, &
                                                             num_x_nodes
@@ -238,8 +233,8 @@ end subroutine gx_minimax_grid
                      mat_SinvVSinvT, num_x_nodes, work, lwork, iwork, ierr)
 
          if (ierr /= 0) then
-           _REGISTER_EXC("DGESDD returned ierr != 0")
-           return
+            _REGISTER_EXC("DGESDD returned ierr != 0")
+            return
          end if
 
          ! integration weights = V Sigma U^T y
@@ -270,6 +265,7 @@ end subroutine gx_minimax_grid
 
    END SUBROUTINE get_l_sq_wghts_cos_tf_t_to_w
 
+
    SUBROUTINE get_l_sq_wghts_sin_tf_t_to_w(num_integ_points, tau_tj, weights_sin_tf_t_to_w, omega_tj, &
                                            E_min, E_max, max_error, num_points_per_magnitude, ierr)
 
@@ -283,7 +279,7 @@ end subroutine gx_minimax_grid
       REAL(KIND=dp), INTENT(IN)                          :: E_min, E_max
       REAL(KIND=dp), INTENT(OUT)                         :: max_error
       INTEGER, INTENT(IN)                                :: num_points_per_magnitude
-      integer,intent(out)                                :: ierr
+      integer, intent(out)                                :: ierr
 
       INTEGER                                            :: iii, jjj, jquad, lwork, num_x_nodes
       INTEGER, ALLOCATABLE, DIMENSION(:)                 :: iwork
@@ -292,7 +288,6 @@ end subroutine gx_minimax_grid
                                                             work_array, x_values, y_values
       REAL(KIND=dp), ALLOCATABLE, DIMENSION(:, :)        :: mat_A, mat_SinvVSinvSigma, &
                                                             mat_SinvVSinvT, mat_U
-
 
       ierr = 0
 
@@ -364,8 +359,8 @@ end subroutine gx_minimax_grid
                      mat_SinvVSinvT, num_x_nodes, work, lwork, iwork, ierr)
 
          if (ierr /= 0) then
-           _REGISTER_EXC("DGESDD returned ierr != 0")
-           return
+            _REGISTER_EXC("DGESDD returned ierr != 0")
+            return
          end if
 
          ! integration weights = V Sigma U^T y
@@ -395,7 +390,7 @@ end subroutine gx_minimax_grid
                   work, iwork, mat_SinvVSinvSigma, vec_UTy)
 
    END SUBROUTINE get_l_sq_wghts_sin_tf_t_to_w
-!*********************************************************************************************************
+
 
    SUBROUTINE get_l_sq_wghts_cos_tf_w_to_t(num_integ_points, tau_tj, weights_cos_tf_w_to_t, omega_tj, &
                                            E_min, E_max, max_error, num_points_per_magnitude, ierr)
@@ -410,7 +405,7 @@ end subroutine gx_minimax_grid
       REAL(KIND=dp), INTENT(IN)                          :: E_min, E_max
       REAL(KIND=dp), INTENT(INOUT)                       :: max_error
       INTEGER, INTENT(IN)                                :: num_points_per_magnitude
-      integer,intent(out)                                :: ierr
+      integer, intent(out)                                :: ierr
 
       INTEGER                                            :: iii, jjj, jquad, lwork, &
                                                             num_x_nodes
@@ -493,8 +488,8 @@ end subroutine gx_minimax_grid
                      mat_SinvVSinvT, num_x_nodes, work, lwork, iwork, ierr)
 
          if (ierr /= 0) then
-           _REGISTER_EXC("DGESDD returned ierr != 0")
-           return
+            _REGISTER_EXC("DGESDD returned ierr != 0")
+            return
          end if
 
          ! integration weights = V Sigma U^T y
@@ -526,7 +521,6 @@ end subroutine gx_minimax_grid
    END SUBROUTINE get_l_sq_wghts_cos_tf_w_to_t
 
 
-! **************************************************************************************************
    PURE SUBROUTINE calc_max_error_fit_tau_grid_with_cosine(max_error, omega, tau_tj, tau_wj_work, x_values, &
                                                            y_values, num_integ_points, num_x_nodes)
 
@@ -561,7 +555,7 @@ end subroutine gx_minimax_grid
 
    END SUBROUTINE calc_max_error_fit_tau_grid_with_cosine
 
-! **************************************************************************************************
+
    PURE SUBROUTINE eval_fit_func_tau_grid_cosine(func_val, x_value, num_integ_points, tau_tj, tau_wj_work, omega)
 
       REAL(KIND=dp), INTENT(OUT)                         :: func_val
@@ -583,6 +577,7 @@ end subroutine gx_minimax_grid
       END DO
 
    END SUBROUTINE eval_fit_func_tau_grid_cosine
+
 
 ! **************************************************************************************************
 !> \brief Evaluate fit function when calculating tau grid for sine transform
@@ -615,7 +610,6 @@ end subroutine gx_minimax_grid
 
    END SUBROUTINE eval_fit_func_tau_grid_sine
 
-! **************************************************************************************************
 
    PURE SUBROUTINE calc_max_error_fit_tau_grid_with_sine(max_error, omega, tau_tj, tau_wj_work, x_values, &
                                                          y_values, num_integ_points, num_x_nodes)
@@ -651,9 +645,7 @@ end subroutine gx_minimax_grid
 
    END SUBROUTINE calc_max_error_fit_tau_grid_with_sine
 
-! **************************************************************************************************
 
-! **************************************************************************************************
    PURE SUBROUTINE eval_fit_func_omega_grid_cosine(func_val, x_value, num_integ_points, omega_tj, omega_wj_work, tau)
       REAL(KIND=dp), INTENT(OUT)                         :: func_val
       REAL(KIND=dp), INTENT(IN)                          :: x_value
@@ -677,16 +669,14 @@ end subroutine gx_minimax_grid
 
    END SUBROUTINE eval_fit_func_omega_grid_cosine
 
-
-
    SUBROUTINE calc_max_error_fit_omega_grid_with_cosine(max_error, tau, omega_tj, omega_wj_work, x_values, &
                                                         y_values, num_integ_points, num_x_nodes)
 
       REAL(KIND=dp), INTENT(INOUT)                       :: max_error
       REAL(KIND=dp), INTENT(IN)                          :: tau
       REAL(KIND=dp), ALLOCATABLE, DIMENSION(:), &
-      INTENT(IN)                                         :: omega_tj, omega_wj_work, x_values, &
-                                                            y_values
+         INTENT(IN)                                         :: omega_tj, omega_wj_work, x_values, &
+                                                               y_values
       INTEGER, INTENT(IN)                                :: num_integ_points, num_x_nodes
 
       INTEGER                                            :: kkk
@@ -714,183 +704,5 @@ end subroutine gx_minimax_grid
       END IF
 
    END SUBROUTINE calc_max_error_fit_omega_grid_with_cosine
-
-   SUBROUTINE get_minimax_grid(num_integ_points, &
-                               tau_tj, tau_wj, a_scaling, e_fermi, tj, wj, weights_cos_tf_t_to_w, &
-                               weights_cos_tf_w_to_t, weights_sin_tf_t_to_w,ounit)
-
-      INTEGER, PARAMETER                                 :: unit_nr = 1
-      INTEGER, INTENT(IN), OPTIONAL                      :: ounit
-      INTEGER, INTENT(IN)                                :: num_integ_points
-      REAL(KIND=dp), ALLOCATABLE, DIMENSION(:), &
-         INTENT(OUT)                                     :: tau_tj, tau_wj
-      REAL(KIND=dp), INTENT(IN), OPTIONAL                :: a_scaling
-      REAL(KIND=dp), INTENT(OUT), OPTIONAL               :: e_fermi
-      REAL(KIND=dp), ALLOCATABLE, DIMENSION(:), &
-         INTENT(INOUT), OPTIONAL                         :: tj, wj
-      REAL(KIND=dp), ALLOCATABLE, DIMENSION(:, :), &
-         INTENT(OUT), OPTIONAL                           :: weights_cos_tf_t_to_w, &
-                                                            weights_cos_tf_w_to_t, &
-                                                            weights_sin_tf_t_to_w
-
-      INTEGER, PARAMETER                                 :: num_points_per_magnitude = 200
-
-      INTEGER                                            :: ierr, jquad, i_exp
-      REAL(KIND=dp)                                      :: E_Range, Emax, Emin, max_error_min, &
-                                                            scaling, Range_from_i_exp
-
-      REAL(KIND=dp), ALLOCATABLE, DIMENSION(:)           :: x_tw
-
-
-
-        ierr = 0
-        ALLOCATE (tj(num_integ_points))
-        ALLOCATE (wj(num_integ_points))
-        ALLOCATE (tau_tj(0:num_integ_points))
-        ALLOCATE (tau_wj(num_integ_points))
-        ALLOCATE (weights_cos_tf_t_to_w(num_integ_points, num_integ_points))
-        ALLOCATE (weights_cos_tf_w_to_t(num_integ_points, num_integ_points))
-        ALLOCATE (weights_sin_tf_t_to_w(num_integ_points, num_integ_points))
-        ALLOCATE (x_tw(2*num_integ_points))
-        x_tw = 0.0_dp
-         ! @Maryam: Start of print statements that have been added
-
-         DO i_exp = 0, 50
-
-           Range_from_i_exp = 1.58489319246_dp**i_exp
-
-           !IF (unit_nr > 0) THEN
-             IF (present(ounit)) then
-              ! GET AND PRINT FREQUENCY GRIDS
-
-              CALL get_rpa_minimax_grids(num_integ_points, Range_from_i_exp, x_tw, ierr)
-              stop "The grid size you choose is not available."
-
-              WRITE (ounit, FMT="(T3,A,T66,F15.4)") "Range for the minimax approximation:", Range_from_i_exp
-              WRITE (ounit, FMT="(T3,A)") "minimax frequency omega_i     weight of frequency omega_i"
-              DO jquad = 1, num_integ_points
-                 WRITE (ounit, FMT="(T15,F20.10,F20.10)") x_tw(jquad), x_tw(jquad + num_integ_points)
-              END DO
-
-              ! GET AND PRINT TIME GRIDS
-
-              IF (num_integ_points .LE. 5) THEN
-                 write(*,*)"The grid size you choose is not available."
-              ELSE
-                 CALL get_exp_minimax_coeff_gw(num_integ_points, Range_from_i_exp, x_tw, ierr)
-              END IF
-
-              WRITE (ounit, FMT="(T3,A)") "minimax time tau_j     weight of time tau_j"
-              DO jquad = 1, num_integ_points
-                 WRITE (ounit, FMT="(T15,F20.10,F20.10)") x_tw(jquad), x_tw(jquad + num_integ_points)
-              END DO
-
-              WRITE (ounit, FMT="(T3,A)") " "
-
-
-           END IF
-
-         END DO
-
-         ! @Maryam: End of print statements that have been added
-
-         DEALLOCATE (x_tw)
-
-       DO i_exp = 0, 50
-
-          Range_from_i_exp = 1.58489319246_dp**i_exp
-
-          Emin = 1.0_dp
-          Emax = Range_from_i_exp
-          E_Range = Emax/Emin
-
-
-
-!         IF (.NOT. do_ri_sos_laplace_mp2) THEN
-             ALLOCATE (x_tw(2*num_integ_points))
-             x_tw = 0.0_dp
-             tj = 0.0_dp
-             wj = 0.0_dp
-             tau_tj = 0.0_dp
-             tau_wj = 0.0_dp
-             weights_cos_tf_t_to_w = 0.0_dp
-             weights_cos_tf_w_to_t = 0.0_dp
-             weights_sin_tf_t_to_w = 0.0_dp
-
-             CALL get_rpa_minimax_grids(num_integ_points, E_Range, x_tw, ierr)
-             stop "The grid size you choose is not available."
-
-             DO jquad = 1, num_integ_points
-                tj(jquad) = x_tw(jquad)
-                wj(jquad) = x_tw(jquad + num_integ_points)
-             END DO
-
-             DEALLOCATE (x_tw)
-
-
-
-             ! scale the minimax parameters
-             tj(:) = tj(:)*Emin
-             wj(:) = wj(:)*Emin
-
-
-      ! set up the minimax time grid
- !     IF (do_im_time .OR. do_ri_sos_laplace_mp2) THEN
-         ALLOCATE (x_tw(2*num_integ_points))
-         x_tw = 0.0_dp
-
-
-         IF (num_integ_points .LE. 5) THEN
-            write(*,*)"The grid size you choose is not available."
-         ELSE
-            CALL get_exp_minimax_coeff_gw(num_integ_points, E_Range, x_tw, ierr)
-         END IF
-
-         ! For RPA we include already a factor of two (see later steps)
-         scaling = 2.0_dp
-!         IF (do_ri_sos_laplace_mp2) scaling = 1.0_dp
-
-
-
-         DO jquad = 1, num_integ_points
-            tau_tj(jquad) = x_tw(jquad)/scaling
-            tau_wj(jquad) = x_tw(jquad + num_integ_points)/scaling
-         END DO
-
-         DEALLOCATE (x_tw)
-
-         ! scale grid from [1,R] to [Emin,Emax]
-         !tau_tj(:) = tau_tj(:)/Emin*Emin
-         !tau_wj(:) = tau_wj(:)/Emin*Emin
-
-         CALL get_l_sq_wghts_cos_tf_t_to_w(num_integ_points, tau_tj, weights_cos_tf_t_to_w, tj, &
-                                           Emin, Emax, max_error_min, num_points_per_magnitude, ierr)
-
-         CALL get_l_sq_wghts_cos_tf_w_to_t(num_integ_points, tau_tj, weights_cos_tf_w_to_t, tj, &
-                                           Emin, Emax, max_error_min, num_points_per_magnitude, ierr)
-
-             !write(1,*) "I am writing tj", tj, "***************************"
-
-
-         CALL get_l_sq_wghts_sin_tf_t_to_w(num_integ_points, tau_tj, weights_sin_tf_t_to_w, tj, &
-                                           Emin, Emax, max_error_min, num_points_per_magnitude, ierr)
-
-             IF (present(ounit)) then
-                write(ounit, FMT="(T3,A,T66,F15.4)") "Range for the minimax approximation:", Range_from_i_exp
-                write(ounit,*)Range_from_i_exp, "weights_cos_tf_t_to_w", weights_cos_tf_t_to_w
-                write(ounit,*)Range_from_i_exp, "weights_cos_tf_w_to_t", weights_cos_tf_w_to_t
-                write(ounit,*)Range_from_i_exp, "weights_sin_tf_t_to_w", weights_sin_tf_t_to_w
-             ENDIF
-                 !IF (unit_nr > 0) THEN
-                     !WRITE (UNIT=unit_nr, FMT="(T3,A,T66,ES15.2)") &
-                    ! "MINIMAX_INFO| Maximum deviation of the imag. time fit:", max_error_min
-                 !END IF
-
-             END DO
-
-         !DEALLOCATE(tj, wj, tau_tj, tau_wj, weights_cos_tf_t_to_w, weights_cos_tf_w_to_t, weights_sin_tf_t_to_w)
-
-
-   END SUBROUTINE get_minimax_grid
 
 END MODULE mp2_grids
