@@ -78,6 +78,8 @@ ctest
 from file.The obvious approach is to move to a unit test framework 
   In principle, one should not need to use pytest for this project. 
 
+* Make sure shared libraries can also be built
+
 * In time-frequency CMake, turn the application test into a function, so
   it's compact and reusable.
 * Note GX lib entry point

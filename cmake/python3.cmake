@@ -46,7 +46,7 @@ function(find_pythonhome)
                 OUTPUT_STRIP_TRAILING_WHITESPACE
         )
         if(_PYTHONHOME_FAILED)
-            message(FATAL_ERROR "Couldnt determine PYTHONHOME. Error:" ${_PYTHONHOME_FAILED})
+            message(FATAL_ERROR "Could not determine PYTHONHOME. Error:" ${_PYTHONHOME_FAILED})
         endif()
     endif()
     message("    Found PYTHONHOME: " ${_PYTHONHOME})

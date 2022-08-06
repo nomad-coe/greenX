@@ -26,7 +26,7 @@ __pycache__/
 # Backups
 *~
 
-# MacOSX stuff
+# MacOSX
 .DS_Store
 
 # Temporary files or directories

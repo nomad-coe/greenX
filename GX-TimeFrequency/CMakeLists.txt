@@ -1,5 +1,4 @@
 # CMakeLists for TimeFrequency Library (MiniMax)
-# TODO(Alex)This file should have the option to build/install the minimax library
 
 # GreenXMiniMax Library
 add_library(LibGXMiniMax "")
@@ -14,8 +13,8 @@ set_target_properties(LibGXMiniMax
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY}
         )
 
-# Include src as a directory visible to CMake
-target_include_directories(LibGXMiniMax PUBLIC src/ api/)
+# Add include directories to the LibGXMiniMax
+# target_include_directories(LibGXMiniMax PUBLIC src/ api/)
 
 # Define source that comprise LibGXMiniMax
 target_sources(LibGXMiniMax PRIVATE
