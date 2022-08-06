@@ -28,7 +28,7 @@ from pathlib import Path
 from pygreenx.run import BinaryRunner, BuildType
 from pygreenx.utilities import find_test_binary
 
-binary_name = "test_minimax.exe"
+binary_name = "test_gx_minimax_grid.exe"
 
 
 def mock_file(tmp_path, inputs_str):

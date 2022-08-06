@@ -45,35 +45,31 @@ install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
         DESTINATION include)
 
         
-# -----------------------------------------------
-# Application Tests
-# Note, for the addition of mutliple tests, these
-# commands can be abstracted into a function.
-# -----------------------------------------------
+# Application Test
 target_include_directories(LibGXMiniMax PUBLIC test/)
 
-add_executable(test_minimax)
+add_executable(test_gx_minimax_grid)
 
 # Set binary name
-set_target_properties(test_minimax
+set_target_properties(test_gx_minimax_grid
         PROPERTIES
-        RUNTIME_OUTPUT_NAME test_minimax.exe)
+        RUNTIME_OUTPUT_NAME test_gx_minimax_grid.exe)
 
 # Define source that comprise the binary
-target_sources(test_minimax
+target_sources(test_gx_minimax_grid
         PRIVATE
         test/test_gx_minimax_grid.f90
         )
 
 # Libraries that the binary links to
-target_link_libraries(test_minimax
+target_link_libraries(test_gx_minimax_grid
         PUBLIC
         LibGXMiniMax
         )
 
 # Build location of the binary
 # TODO(Alex) Consider move this to test/, to sit with the python drivers
-set_target_properties(test_minimax
+set_target_properties(test_gx_minimax_grid
         PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_Fortran_BIN_DIRECTORY})
 
@@ -94,7 +90,19 @@ add_custom_command(
 
 # Add test to ctest
 add_test(
-        NAME test_minimax
+        NAME test_gx_minimax_grid
         COMMAND pytest -s
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/time-frequency
 )
+
+# To make the addition of further tests more compact, one can use this function call
+# For example, for the test above:
+#
+#```
+#   include(../cmake/testFunctions.cmake)
+#   set(TEST_NAME "test_gx_minimax_grid")
+#   set(TEST_TARGET_DIR "time-frequency")
+#   set(LIBS_FOR_TESTING)
+#   list(APPEND LIBS_FOR_TESTING LibGXMiniMax)
+#   add_app_test(TEST_NAME TEST_TARGET_DIR LIBS_FOR_TESTING)
+#```
