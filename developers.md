@@ -1,5 +1,7 @@
 # For Developers
 
+Documentation and points of discussion for GreenX developers.
+
 ## Portability
 
 * The minimax library has been tested on:
@@ -20,8 +22,10 @@ The test framework is currently set up such that one:
     
 This has some requirements, and some technical open questions associated with it.
 Two better approaches would be to:  
+
 a). Replace a fortran unit testing framework. In most cases, this is more appropriate.
      This would remove the need for all I/O and path-setting.
+     
 b). Call the respective fortran library directly from python, removing the need
     for the .f90 driver, and removing all the complications associated with
     consistent binary/file paths.
@@ -41,7 +45,8 @@ b). Call the respective fortran library directly from python, removing the need
   test binary is not robust w.r.t change in directory nesting. As directory nesting 
   is changed, one is forced to modify `root = Path(__file__).parent.parent` to 
   `root = Path(__file__).parent.parent.parent`, etc.
-*`find_test_binary` recursively searches for the binary, per test!
+  
+* `find_test_binary` recursively searches for the binary, per test!
    This will get inefficient very quickly, and should be viewed as a *place holder*.
    - A prior implementation passed the full binary path to pytest, however
    one must configure `conftest.py` such that it does not interfere with pytest's
@@ -56,6 +61,11 @@ b). Call the respective fortran library directly from python, removing the need
     test drivers, in the build folder. Perhaps relative paths can be used, 
     removing the need to define `root` and `find_test_binary`. 
 
-* One shuold test the library by directly calling from python, however Alex 
+#### Choice of Test Framework
+
+* One should test the library by directly calling from python, however Alex 
   (thinks) memory allocation in the library prevents this.
   - Refactor the library, such that the caller handles the memory. 
+
+* Using a fortran test framework OR calling the library from python removes
+  all of the issues with the test set-up.
