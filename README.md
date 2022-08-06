@@ -13,16 +13,25 @@ systems:
 
 **Building with CMake**   
 
-To build all libraries, set up a build directory:
+To build all libraries, set up a build directory, change to it and run cmake 
+configuration:
 
 ```bash
 mkdir build 
+cd build
+cmake ../
 ```
 
-Change to the directory and run cmake configuration:
+To explicitly specify the compiler, run CMake configure with:
 
 ```bash
-cmake ../
+FC=ifort cmake ../
+```
+Shared libraries are built by default. To build static versions, one can 
+configure with:
+
+```bash
+cmake ../ -DBUILD_SHARED_LIBS=OFF
 ```
 
 If all requirements are found, build and install the project:
@@ -32,7 +41,7 @@ make -j
 make install 
  ```
 
-**Running the Tests** 
+## Running the Tests
 
 GreenX uses pytest as its regression testing framework, in conjunction with 
 some custom python modules. First, one must ensure that the python utilities

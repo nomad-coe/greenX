@@ -1,5 +1,13 @@
 # For Developers
 
+## Portability
+
+* The minimax library has been tested on:
+  - macOS Catalina, with GCC9 and openBLAS
+  - Ubuntu-20.04, with GCC9 and blas/lapack
+  
+* There has been no testing with Intel or MKL. This should be done.
+
 ## Testing 
 
 The test framework is currently set up such that one:
