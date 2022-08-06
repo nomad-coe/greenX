@@ -45,11 +45,24 @@ install(TARGETS LibGXMiniMax
 install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
         DESTINATION include)
 
+        
 # -----------------------------------------------
 # Application Tests
 # Note, for the addition of mutliple tests, these
 # commands can be abstracted into a function.
 # -----------------------------------------------
+message('Linking with test binary')
+
+message('BLAS_FOUND: ${BLAS_FOUND}')
+message('BLAS_LINKER_FLAGS: ${BLAS_LINKER_FLAGS}')
+message('BLAS_LIBRARIES: ${BLAS_LIBRARIES}')
+message('BLAS95_FOUND: ${BLAS95_FOUND}')
+
+message('LAPACK_FOUND: ${LAPACK_FOUND}')
+message('LAPACK_LINKER_FLAGS: ${LAPACK_LINKER_FLAGS}')
+message('LAPACK_LIBRARIES: ${LAPACK_LIBRARIES}')
+
+
 target_include_directories(LibGXMiniMax PUBLIC test/)
 
 add_executable(test_minimax)
