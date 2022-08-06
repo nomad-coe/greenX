@@ -28,7 +28,7 @@ target_sources(LibGXMiniMax PRIVATE
         )
 
 # Link external libraries and lower-level GX lib dependency
-target_link_libraries(LibGXMiniMax GXCommon LAPACK BLAS)
+target_link_libraries(LibGXMiniMax GXCommon LAPACK_LIBRARIES BLAS_LIBRARIES)
 
 # -----------------------------------------------
 # Library Installation
@@ -67,10 +67,10 @@ target_sources(test_minimax
 
 # Libraries that the binary links to
 target_link_libraries(test_minimax
-        PRIVATE
+        PUBLIC
         LibGXMiniMax
-        LAPACK
-        BLAS
+        LAPACK_LIBRARIES
+        BLAS_LIBRARIES
         )
 
 # Build location of the binary
