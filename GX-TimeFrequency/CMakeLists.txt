@@ -69,6 +69,8 @@ target_sources(test_minimax
 target_link_libraries(test_minimax
         PRIVATE
         LibGXMiniMax
+        LAPACK
+        BLAS
         )
 
 # Build location of the binary
