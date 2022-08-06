@@ -38,7 +38,16 @@ include(cmake/CompilerWarnings.cmake)
 # External libraries
 # Note, this will not find MKL or openBLAS
 find_package(BLAS REQUIRED)
+
+message('BLAS_FOUND: ${BLAS_FOUND}')
+message('BLAS_LINKER_FLAGS: ${BLAS_LINKER_FLAGS}')
+message('BLAS_LIBRARIES: ${BLAS_LIBRARIES}')
+message('BLAS95_FOUND: ${BLAS95_FOUND}')
+
 find_package(LAPACK REQUIRED)
+message('LAPACK_FOUND: ${LAPACK_FOUND}')
+message('LAPACK_LINKER_FLAGS: ${LAPACK_LINKER_FLAGS}')
+message('LAPACK_LIBRARIES: ${LAPACK_LIBRARIES}')
 
 # Python required for application testing
 include(cmake/python3.cmake)
