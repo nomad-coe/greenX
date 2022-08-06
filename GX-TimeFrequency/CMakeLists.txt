@@ -28,7 +28,7 @@ target_sources(LibGXMiniMax PRIVATE
         )
 
 # Link external libraries and lower-level GX lib dependency
-target_link_libraries(LibGXMiniMax GXCommon LAPACK_LIBRARIES BLAS_LIBRARIES)
+target_link_libraries(LibGXMiniMax GXCommon ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 
 # -----------------------------------------------
 # Library Installation
@@ -51,18 +51,6 @@ install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 # Note, for the addition of mutliple tests, these
 # commands can be abstracted into a function.
 # -----------------------------------------------
-message('Linking with test binary')
-
-message('BLAS_FOUND: ${BLAS_FOUND}')
-message('BLAS_LINKER_FLAGS: ${BLAS_LINKER_FLAGS}')
-message('BLAS_LIBRARIES: ${BLAS_LIBRARIES}')
-message('BLAS95_FOUND: ${BLAS95_FOUND}')
-
-message('LAPACK_FOUND: ${LAPACK_FOUND}')
-message('LAPACK_LINKER_FLAGS: ${LAPACK_LINKER_FLAGS}')
-message('LAPACK_LIBRARIES: ${LAPACK_LIBRARIES}')
-
-
 target_include_directories(LibGXMiniMax PUBLIC test/)
 
 add_executable(test_minimax)
@@ -82,8 +70,6 @@ target_sources(test_minimax
 target_link_libraries(test_minimax
         PUBLIC
         LibGXMiniMax
-        LAPACK_LIBRARIES
-        BLAS_LIBRARIES
         )
 
 # Build location of the binary
