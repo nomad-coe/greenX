@@ -56,6 +56,7 @@ include(cmake/python3.cmake)
 enable_testing()
 
 # Our library directories
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 add_subdirectory(GX-common)
 add_subdirectory(GX-TimeFrequency)
 
