@@ -60,8 +60,11 @@ def test_gx_minimax_grid():
     runner = BinaryRunner(binary, BuildType.serial,
                           args=['table', '-emin', f'{emin}', '-emax', f'{emax}'])
     results = runner.run()
-    # assert results.success, f"Execution of {binary} failed"
-    #
-    # # Compare parsed results to reference values
-    # tabulated_errors = parse_std_out(results)
-    # assert np.allclose(tabulated_errors, ref_errors)
+    assert results.success, f"Execution of {binary} failed"
+
+    # Compare parsed results to reference values
+    tabulated_errors = parse_std_out(results)
+    print('error diff')
+    print(tabulated_errors - ref_errors)
+
+    assert np.allclose(tabulated_errors, ref_errors)
