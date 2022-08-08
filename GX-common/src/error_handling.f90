@@ -6,8 +6,10 @@ module error_handling
    integer, parameter :: err_len = 1024
    !> Error message
    character(len=err_len), public, protected :: error_message__ = "No Error reported so far"
+   !> Fixed-length character
+   character(len=1), parameter :: ch10 = char(10)
 
-   public :: register_exc
+   public :: register_exc, ch10
 
 contains
 
@@ -23,7 +25,6 @@ contains
 
       integer :: line_num
       character(len=err_len) :: my_filename
-      character(len=1), parameter :: ch10 = char(10)
 
       my_filename = "Unknown File"
       if (present(filename)) then
