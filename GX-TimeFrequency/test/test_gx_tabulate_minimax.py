@@ -66,4 +66,5 @@ def test_gx_minimax_grid():
     # NOTE, some of the reference numbers are exceedingly small ~ machine precision
     # As such, I've set the tolerance to a reasonable 1.e-7
     tabulated_errors = parse_std_out(results)
+    print(tabulated_errors - ref_errors)
     assert np.allclose(tabulated_errors, ref_errors, atol=1.e-7)
