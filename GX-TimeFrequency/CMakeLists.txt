@@ -14,7 +14,7 @@ set_target_properties(LibGXMiniMax
         )
 
 # Add include directories to the LibGXMiniMax
-# target_include_directories(LibGXMiniMax PUBLIC src/ api/)
+target_include_directories(LibGXMiniMax PUBLIC src/ api/ utilities/)
 
 # Define source that comprise LibGXMiniMax
 target_sources(LibGXMiniMax PRIVATE
@@ -29,25 +29,51 @@ target_sources(LibGXMiniMax PRIVATE
 # Link external libraries and lower-level GX lib dependency
 target_link_libraries(LibGXMiniMax GXCommon ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 
+
+# -----------------------------------------------
+# Build utility program for grid tabulation
+# -----------------------------------------------
+add_executable(GXTabulateGrids)
+
+set_target_properties(GXTabulateGrids
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_Fortran_BIN_DIRECTORY}
+        RUNTIME_OUTPUT_NAME gx_tabulate_grids.exe)
+
+target_sources(GXTabulateGrids
+        PRIVATE
+        utilities/gx_tabulate_minimax.F90
+        src/gx_common.h
+        )
+
+target_link_libraries(GXTabulateGrids
+        PRIVATE
+        GXCommon
+        LibGXMiniMax
+        )
+
 # -----------------------------------------------
 # Library Installation
 # -----------------------------------------------
-
 # Install library
-# Destination relative to ${CMAKE_INSTALL_PREFIX}
+# Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in top-level CMake
 install(TARGETS LibGXMiniMax
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib)
 
 # Install modules
-# Destination relative to ${CMAKE_INSTALL_PREFIX}
+# Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in top-level CMake
 install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
         DESTINATION include)
+
+# Install `Build utility` program
+install(TARGETS GXTabulateGrids
+        DESTINATION bin)
 
 # -----------------------------------------------
 # Application Testing
 # -----------------------------------------------
-# Include cmake custom functin
+# Include cmake custom function
 include(../cmake/testFunctions.cmake)
 # Set name of test sub-directory in the build directory
 set(TEST_TARGET_DIR "time-frequency")
@@ -102,6 +128,7 @@ add_test(
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
 )
 
+# TODO For developers.
 # To make the addition of further tests more compact, one can use this function call
 # For example, for the test above:
 #

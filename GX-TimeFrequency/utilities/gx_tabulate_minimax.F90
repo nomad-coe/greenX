@@ -1,5 +1,5 @@
 !> Program to print minimax meshes and the associated errors.
-!> Use: gx_minimax.x -help to list available options.
+!> Use: gx_tabulate_grids.exe -help to list available options.
 program gx_tabulate_minimax
 #include "gx_common.h"
 

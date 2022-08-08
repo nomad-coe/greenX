@@ -18,5 +18,9 @@ module constants
 
     !> Pi
     real(kind=dp), parameter, public :: pi = 3.14159265358979323846264338_dp
-    
+    !> Fixed-length character
+    character(len=1), parameter, public :: ch10 = char(10)
+    !> Arbitrary error length
+    integer, parameter, public :: err_len = 1024
+
 end module constants

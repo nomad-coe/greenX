@@ -1,15 +1,12 @@
 module error_handling
+   use constants, only: ch10, err_len
    implicit none
    private
 
-   !> Arbitrary error length
-   integer, parameter :: err_len = 1024
    !> Error message
    character(len=err_len), public, protected :: error_message__ = "No Error reported so far"
-   !> Fixed-length character
-   character(len=1), parameter :: ch10 = char(10)
 
-   public :: register_exc, ch10
+   public :: register_exc
 
 contains
 
