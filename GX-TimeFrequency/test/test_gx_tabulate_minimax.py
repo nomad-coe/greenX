@@ -39,7 +39,7 @@ def test_gx_minimax_grid():
     # NOTE, some of the reference numbers are exceedingly small ~ machine precision
     # and others are very large, which clearly need to be tested with relative tolerance.
     # One could also split up into columns, and test different columns separately.
-    ref_errors_small_tau = np.array([[ 6,  0,  2.51200821E-04,  1.88667240E-03,  6.86380679E-03,  5.56242714E-02,  2.50000000E+02],
+    ref_errors_small_grid = np.array([[ 6,  0,  2.51200821E-04,  1.88667240E-03,  6.86380679E-03,  5.56242714E-02,  2.50000000E+02],
                                      [ 8,  0,  9.26518238E-04,  7.02310800E-04,  8.97132915E-04,  1.49383520E-02,  2.50000000E+02],
                                      [10,  0,  2.93904398E-02,  4.15097815E-04,  9.85375147E-04,  3.87442807E-03,  2.50000000E+02],
                                      [12,  0,  1.22980779E-03,  5.40966369E-05,  3.23113268E-05,  9.86318209E-04,  2.50000000E+02],
@@ -49,7 +49,7 @@ def test_gx_minimax_grid():
                                      [20,  0,  2.62469243E-03,  2.86296047E-07,  3.67016067E-08,  4.88850816E-06,  2.50000000E+02],
                                      [22,  0,  9.17541725E-02,  1.56304524E-07,  1.11589701E-07,  1.21503959E-06,  2.50000000E+02]])
 
-    ref_errors_big_tau = np.array([[24,  0,  5.95421450E+01,  9.11762981E-08,  9.65139449E-09,  1.43312081E-06,  2.50000000E+02],
+    ref_errors_big_grid = np.array([[24,  0,  5.95421450E+01,  9.11762981E-08,  9.65139449E-09,  1.43312081E-06,  2.50000000E+02],
                                    [26,  0,  9.37145464E+02,  3.33178951E-08,  3.39771986E-09,  5.16593492E-07,  2.50000000E+02],
                                    [28,  0,  7.58978121E+06,  2.91854558E-08,  4.27640628E-09,  4.63466294E-07,  2.50000000E+02],
                                    [30,  0,  2.88001056E+08,  3.72208007E-08,  2.57757957E-09,  7.25625128E-07,  2.50000000E+02],
@@ -70,14 +70,14 @@ def test_gx_minimax_grid():
 
     # Compare parsed results to reference values
     tabulated_errors = parse_std_out(results)
-    print(tabulated_errors[0:9, :] - ref_errors_small_tau)
-    print(tabulated_errors[9:, :] - ref_errors_big_tau)
+    print(tabulated_errors[0:9, :] - ref_errors_small_grid)
+    print(tabulated_errors[9:, :] - ref_errors_big_grid)
 
-    assert np.allclose(tabulated_errors[0:9, :], ref_errors_small_tau, atol=1.e-7), \
+    assert np.allclose(tabulated_errors[0:9, :], ref_errors_small_grid, atol=1.e-7), \
         'Difference in results with small tau values'
 
     # TODO Investigate if these larger grids are stable
     # Alex gets different numbers for grid 28 tau between his Mac with openblas,
     # and the Ubuntu CI with blas/lapack
-    # assert np.allclose(tabulated_errors[9:, :], ref_errors_big_tau, atol=0.01), \
+    # assert np.allclose(tabulated_errors[9:, :], ref_errors_big_grid, atol=0.01), \
     #     'Difference in results with large tau values'
