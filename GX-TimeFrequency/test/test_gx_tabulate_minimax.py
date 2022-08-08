@@ -8,7 +8,7 @@ from pygreenx.utilities import find_test_binary
 binary_name = "gx_tabulate_grids.exe"
 
 
-def parse_std_out(results: ProcessResults) -> np.ndarray:
+def parse_std_out(results: ProcessResults):
     """ Parse std.out of gx_tabulate_grids.exe
 
     Note, if the output format changes in ANY way, this breaks.
@@ -28,6 +28,8 @@ def parse_std_out(results: ProcessResults) -> np.ndarray:
     tabulated_errors = np.empty(shape=(n_grids, n_columns))
     for i, line in enumerate(output_list[:]):
         tabulated_errors[i, :] = np.asarray([float(x) for x in line.split()])
+
+    return tabulated_errors
 
 
 def test_gx_minimax_grid():
