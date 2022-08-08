@@ -27,6 +27,7 @@ def parse_std_out(results: ProcessResults):
 
     tabulated_errors = np.empty(shape=(n_grids, n_columns))
     for i, line in enumerate(output_list[:]):
+        print(line)
         tabulated_errors[i, :] = np.asarray([float(x) for x in line.split()])
 
     return tabulated_errors
@@ -67,4 +68,7 @@ def test_gx_minimax_grid():
     # As such, I've set the tolerance to a reasonable 1.e-7
     tabulated_errors = parse_std_out(results)
     print(tabulated_errors - ref_errors)
+
+
+
     assert np.allclose(tabulated_errors, ref_errors, atol=1.e-7)
