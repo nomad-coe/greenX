@@ -115,6 +115,7 @@ add_custom_command(
                 ${CMAKE_CURRENT_SOURCE_DIR}/test/test_gx_minimax_grid.py
                 # Location to copy the test to
                 ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/test_gx_minimax_grid.py)
+
 # Note.
 # The command below would build the test in <BUILD_DIR>/<LIB_NAME>/test:
 #                #  Location to copy the test to
@@ -127,6 +128,20 @@ add_test(
         COMMAND pytest -s
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
 )
+
+# Add a second test, using the `tabulate utility` binary
+add_custom_command(
+        TARGET LibGXMiniMax POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/test_gx_tabulate_minimax.py
+        ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/test_gx_tabulate_minimax.py)
+
+add_test(
+        NAME test_gx_tabulate_minimax
+        COMMAND pytest -s
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
+)
+
 
 # TODO For developers.
 # To make the addition of further tests more compact, one can use this function call

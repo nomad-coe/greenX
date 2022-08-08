@@ -216,9 +216,9 @@ contains
         write(std_out, "(a)")
 
         write(std_out, "(a,/)")"To print the mesh with 6 points and erange=emax/emin, use:"
-        write(std_out, "(a,/)")"    gx_minimax.x print -ntau 6 -emin 0.4 -emax 100"
+        write(std_out, "(a,/)")"    gx_tabulate_grids.exe print -ntau 6 -emin 0.4 -emax 100"
         write(std_out, "(a,/)")"To print all the meshes with erange=emax/emin, use:"
-        write(std_out, "(a,/)")"    gx_minimax.x table -emin 0.4 -emax 100"
+        write(std_out, "(a,/)")"    gx_tabulate_grids.exe table -emin 0.4 -emax 100"
     end subroutine print_help
 
     subroutine dumps(string, units)
