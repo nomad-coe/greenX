@@ -28,6 +28,8 @@ MODULE mp2_grids
 
    !> Main entry point for client code.
    PUBLIC :: gx_minimax_grid
+   !> TODO(Maryam) Temporary API - to delete
+   PUBLIC :: get_minimax_grid
 
 CONTAINS
 
@@ -704,5 +706,181 @@ CONTAINS
       END IF
 
    END SUBROUTINE calc_max_error_fit_omega_grid_with_cosine
+
+   !> TODO(Maryam) Remove temporary routine
+   SUBROUTINE get_minimax_grid(num_integ_points, &
+           tau_tj, tau_wj, a_scaling, e_fermi, tj, wj, weights_cos_tf_t_to_w, &
+           weights_cos_tf_w_to_t, weights_sin_tf_t_to_w,ounit)
+
+      INTEGER, PARAMETER                                 :: unit_nr = 1
+      INTEGER, INTENT(IN), OPTIONAL                      :: ounit
+      INTEGER, INTENT(IN)                                :: num_integ_points
+      REAL(KIND=dp), ALLOCATABLE, DIMENSION(:), &
+              INTENT(OUT)                                     :: tau_tj, tau_wj
+      REAL(KIND=dp), INTENT(IN), OPTIONAL                :: a_scaling
+      REAL(KIND=dp), INTENT(OUT), OPTIONAL               :: e_fermi
+      REAL(KIND=dp), ALLOCATABLE, DIMENSION(:), &
+              INTENT(INOUT), OPTIONAL                         :: tj, wj
+      REAL(KIND=dp), ALLOCATABLE, DIMENSION(:, :), &
+              INTENT(OUT), OPTIONAL                           :: weights_cos_tf_t_to_w, &
+              weights_cos_tf_w_to_t, &
+              weights_sin_tf_t_to_w
+
+      INTEGER, PARAMETER                                 :: num_points_per_magnitude = 200
+
+      INTEGER                                            :: ierr, jquad, i_exp
+      REAL(KIND=dp)                                      :: E_Range, Emax, Emin, max_error_min, &
+              scaling, Range_from_i_exp
+
+      REAL(KIND=dp), ALLOCATABLE, DIMENSION(:)           :: x_tw
+
+      ierr = 0
+      ALLOCATE (tj(num_integ_points))
+      ALLOCATE (wj(num_integ_points))
+      ALLOCATE (tau_tj(0:num_integ_points))
+      ALLOCATE (tau_wj(num_integ_points))
+      ALLOCATE (weights_cos_tf_t_to_w(num_integ_points, num_integ_points))
+      ALLOCATE (weights_cos_tf_w_to_t(num_integ_points, num_integ_points))
+      ALLOCATE (weights_sin_tf_t_to_w(num_integ_points, num_integ_points))
+      ALLOCATE (x_tw(2*num_integ_points))
+      x_tw = 0.0_dp
+      ! @Maryam: Start of print statements that have been added
+
+      DO i_exp = 0, 50
+
+         Range_from_i_exp = 1.58489319246_dp**i_exp
+
+         !IF (unit_nr > 0) THEN
+         IF (present(ounit)) then
+            ! GET AND PRINT FREQUENCY GRIDS
+
+            CALL get_rpa_minimax_grids(num_integ_points, Range_from_i_exp, x_tw, ierr)
+            stop "The grid size you choose is not available."
+
+            WRITE (ounit, FMT="(T3,A,T66,F15.4)") "Range for the minimax approximation:", Range_from_i_exp
+            WRITE (ounit, FMT="(T3,A)") "minimax frequency omega_i     weight of frequency omega_i"
+            DO jquad = 1, num_integ_points
+               WRITE (ounit, FMT="(T15,F20.10,F20.10)") x_tw(jquad), x_tw(jquad + num_integ_points)
+            END DO
+
+            ! GET AND PRINT TIME GRIDS
+
+            IF (num_integ_points .LE. 5) THEN
+               write(*,*)"The grid size you choose is not available."
+            ELSE
+               CALL get_exp_minimax_coeff_gw(num_integ_points, Range_from_i_exp, x_tw, ierr)
+            END IF
+
+            WRITE (ounit, FMT="(T3,A)") "minimax time tau_j     weight of time tau_j"
+            DO jquad = 1, num_integ_points
+               WRITE (ounit, FMT="(T15,F20.10,F20.10)") x_tw(jquad), x_tw(jquad + num_integ_points)
+            END DO
+
+            WRITE (ounit, FMT="(T3,A)") " "
+
+
+         END IF
+
+      END DO
+
+      ! @Maryam: End of print statements that have been added
+
+      DEALLOCATE (x_tw)
+
+      DO i_exp = 0, 50
+
+         Range_from_i_exp = 1.58489319246_dp**i_exp
+
+         Emin = 1.0_dp
+         Emax = Range_from_i_exp
+         E_Range = Emax/Emin
+
+
+
+         !         IF (.NOT. do_ri_sos_laplace_mp2) THEN
+         ALLOCATE (x_tw(2*num_integ_points))
+         x_tw = 0.0_dp
+         tj = 0.0_dp
+         wj = 0.0_dp
+         tau_tj = 0.0_dp
+         tau_wj = 0.0_dp
+         weights_cos_tf_t_to_w = 0.0_dp
+         weights_cos_tf_w_to_t = 0.0_dp
+         weights_sin_tf_t_to_w = 0.0_dp
+
+         CALL get_rpa_minimax_grids(num_integ_points, E_Range, x_tw, ierr)
+         stop "The grid size you choose is not available."
+
+         DO jquad = 1, num_integ_points
+            tj(jquad) = x_tw(jquad)
+            wj(jquad) = x_tw(jquad + num_integ_points)
+         END DO
+
+         DEALLOCATE (x_tw)
+
+
+
+         ! scale the minimax parameters
+         tj(:) = tj(:)*Emin
+         wj(:) = wj(:)*Emin
+
+
+         ! set up the minimax time grid
+         !     IF (do_im_time .OR. do_ri_sos_laplace_mp2) THEN
+         ALLOCATE (x_tw(2*num_integ_points))
+         x_tw = 0.0_dp
+
+
+         IF (num_integ_points .LE. 5) THEN
+            write(*,*)"The grid size you choose is not available."
+         ELSE
+            CALL get_exp_minimax_coeff_gw(num_integ_points, E_Range, x_tw, ierr)
+         END IF
+
+         ! For RPA we include already a factor of two (see later steps)
+         scaling = 2.0_dp
+         !         IF (do_ri_sos_laplace_mp2) scaling = 1.0_dp
+
+
+
+         DO jquad = 1, num_integ_points
+            tau_tj(jquad) = x_tw(jquad)/scaling
+            tau_wj(jquad) = x_tw(jquad + num_integ_points)/scaling
+         END DO
+
+         DEALLOCATE (x_tw)
+
+         ! scale grid from [1,R] to [Emin,Emax]
+         !tau_tj(:) = tau_tj(:)/Emin*Emin
+         !tau_wj(:) = tau_wj(:)/Emin*Emin
+
+         CALL get_l_sq_wghts_cos_tf_t_to_w(num_integ_points, tau_tj, weights_cos_tf_t_to_w, tj, &
+                 Emin, Emax, max_error_min, num_points_per_magnitude, ierr)
+
+         CALL get_l_sq_wghts_cos_tf_w_to_t(num_integ_points, tau_tj, weights_cos_tf_w_to_t, tj, &
+                 Emin, Emax, max_error_min, num_points_per_magnitude, ierr)
+
+         !write(1,*) "I am writing tj", tj, "***************************"
+
+
+         CALL get_l_sq_wghts_sin_tf_t_to_w(num_integ_points, tau_tj, weights_sin_tf_t_to_w, tj, &
+                 Emin, Emax, max_error_min, num_points_per_magnitude, ierr)
+
+         IF (present(ounit)) then
+            write(ounit, FMT="(T3,A,T66,F15.4)") "Range for the minimax approximation:", Range_from_i_exp
+            write(ounit,*)Range_from_i_exp, "weights_cos_tf_t_to_w", weights_cos_tf_t_to_w
+            write(ounit,*)Range_from_i_exp, "weights_cos_tf_w_to_t", weights_cos_tf_w_to_t
+            write(ounit,*)Range_from_i_exp, "weights_sin_tf_t_to_w", weights_sin_tf_t_to_w
+         ENDIF
+         !IF (unit_nr > 0) THEN
+         !WRITE (UNIT=unit_nr, FMT="(T3,A,T66,ES15.2)") &
+         ! "MINIMAX_INFO| Maximum deviation of the imag. time fit:", max_error_min
+         !END IF
+
+      END DO
+
+      !DEALLOCATE(tj, wj, tau_tj, tau_wj, weights_cos_tf_t_to_w, weights_cos_tf_w_to_t, weights_sin_tf_t_to_w)
+
+   END SUBROUTINE get_minimax_grid
 
 END MODULE mp2_grids
