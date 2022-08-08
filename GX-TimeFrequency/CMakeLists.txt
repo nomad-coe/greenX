@@ -125,7 +125,7 @@ add_custom_command(
 # Add test to ctest
 add_test(
         NAME test_gx_minimax_grid
-        COMMAND pytest -s
+        COMMAND pytest -s test_gx_minimax_grid.py
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
 )
 
@@ -138,7 +138,7 @@ add_custom_command(
 
 add_test(
         NAME test_gx_tabulate_minimax
-        COMMAND pytest -s
+        COMMAND pytest -s test_gx_tabulate_minimax.py
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
 )
 
