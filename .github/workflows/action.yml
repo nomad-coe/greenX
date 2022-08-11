@@ -40,6 +40,8 @@ jobs:
           cd build
           cmake ../
           make -j$(nproc) VERBOSE=1
+          env:
+            GX_BUILD_DIR: ${GX_BUILD_DIR}
 
       - name: Run Tests
         run: |
