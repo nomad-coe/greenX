@@ -5,60 +5,14 @@ Indeed, MUCH of the complication regarding running tests comes from this.
 
 Issues and solutions:
 ---------------------
-Problem
-* python needs to know where the test binary is located.
-Solution
-* The robust but less-than-ideal approach solution is to have python recursively
-  search through the directories for it.
-  This work very well if one defines the tests to be run from a given build
-  directory.
-
-Problem
 * Where should the python test write the input data for the fortran binary?
-Solution
-* This is solved using tmp_path, which gives an absolute path.
-
-
-* Path for passing to the fortran binary     () This is solved using tmp_path, which gives an absolute path
-* where to read the result from              () This is solved using tmp_path, which gives an absolute path
+  - This is solved using tmp_path, which gives an absolute path.
 """
 import numpy as np
 from pathlib import Path
 import pytest
 
 from pygreenx.run import BinaryRunner, BuildType
-
-
-def mock_file(tmp_path, inputs_str):
-    """ Write an inputs string to file.
-    :param tmp_path:
-    :param inputs_str:
-    :return:
-    """
-    # Write test inputs to file
-    file: Path = tmp_path / "inputs.dat"
-    file.write_text(inputs_str)
-    assert file.exists(), f"{file.name} does not exist"
-    return file
-
-
-def set_input(tmp_path, n_mesh_points, e_trans_min, e_trans_max):
-    """ Set inputs in a string.
-
-    :param tmp_path:
-    :param n_mesh_points:
-    :param e_trans_min:
-    :param e_trans_max:
-    :return:
-    """
-    inputs_template = """
-{}
-n_mesh_points     {}
-e_transition_min  {}
-e_transition_max  {}
-"""
-    inputs_str = inputs_template.format(tmp_path, n_mesh_points, e_trans_min, e_trans_max)
-    return inputs_str
 
 
 @pytest.fixture()
@@ -71,20 +25,36 @@ def fortran_binary(get_binary, greenx_build_root):
     return _binary
 
 
-def test_my_fixture(tmp_path, fortran_binary):
+def mock_file(tmp_path, inputs_str):
+    """ Write an inputs string to file.
+    :param tmp_path:
+    :param inputs_str:
+    :return: Path object
     """
-    TODO(Maryam) Issue 24. Extend the test inputs, and include fringe cases.
+    file: Path = tmp_path / "inputs.dat"
+    file.write_text(inputs_str)
+    assert file.exists(), f"{file.name} does not exist"
+    return file
 
-    The input parameters (e_trans_min, e_trans_max) could be swept across a range
-    of values using pytest parameterize. One would need to tabulate references
-    for all input choices.
-    """
-    # Test inputs
-    n_mesh_points = 10
-    e_trans_min, e_trans_max = 2., 30.
+
+class ETrans:
+    def __init__(self, min, max):
+        self.min = min
+        self.max = max
+
+
+# Note. This could be a fixture
+def get_grids_and_weights(tmp_path, fortran_binary, n_mesh_points, e_trans: ETrans):
 
     # Fortran input file
-    inputs_str = set_input(tmp_path, n_mesh_points, e_trans_min, e_trans_max)
+    inputs_template = """
+{}
+n_mesh_points     {}
+e_transition_min  {}
+e_transition_max  {}
+"""
+
+    inputs_str = inputs_template.format(tmp_path, n_mesh_points, e_trans.min, e_trans.max)
     file = mock_file(tmp_path, inputs_str)
 
     # Run test
@@ -96,8 +66,21 @@ def test_my_fixture(tmp_path, fortran_binary):
     tau_file = tmp_path / "tau.dat"
     freq_file = tmp_path / "freq.dat"
 
-    tau_grid_weights = np.genfromtxt(tau_file)
-    freq_grid_weights = np.genfromtxt(freq_file)
+    return np.genfromtxt(tau_file), np.genfromtxt(freq_file)
+
+
+def test_get_grids_and_weights(tmp_path, fortran_binary):
+    """
+    TODO(Maryam) Issue 24. Extend the test inputs, and include fringe cases.
+    """
+    # Test inputs
+    n_mesh_points = 10
+    e_trans = ETrans(2., 30.)
+
+    tau_grid_weights, freq_grid_weights = get_grids_and_weights(tmp_path,
+                                                                fortran_binary,
+                                                                n_mesh_points,
+                                                                e_trans)
 
     ref_tau_grid_weights = np.array([[0.005918, 0.01525399],
                                      [0.03177845, 0.03688566],
