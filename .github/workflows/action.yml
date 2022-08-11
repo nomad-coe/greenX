@@ -40,14 +40,15 @@ jobs:
           cd build
           cmake ../
           make -j$(nproc) VERBOSE=1
-          echo "GITHUB WORKSPACE" ${GITHUB_WORKSPACE}
-          echo "GX_BUILD_DIR" ${GX_BUILD_DIR}
+          echo "GITHUB WORKSPACE" ${{ GITHUB_WORKSPACE }}
+          echo "GX_BUILD_DIR" ${{ GX_BUILD_DIR }}
         env:
             GX_BUILD_DIR: ${GX_BUILD_DIR}
 
       - name: Run Tests
         run: |
-          echo "GX_BUILD_DIR" ${GX_BUILD_DIR}
+          echo "GX_BUILD_DIR" ${{ GX_BUILD_DIR }}
+          export GX_BUILD_DIR="/home/runner/work/greenX/greenX/build"
           cd python && pip install -e . && cd ../
           cd build
           ctest -j1 --output-on-failure
