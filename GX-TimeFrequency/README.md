@@ -91,9 +91,11 @@ def fortran_binary(get_binary, greenx_build_root):
 where the binary `name` should be consistent with whatever the developer has
 called the binary in the CMakeLists.txt
 
-Additionally, one should ensure that both python and fortran read/write to `tmp_path`.
-The `tmp_path` fixture will provide a temporary directory unique to the (py)test 
-invocation, created in the base temporary directory.
+One notes that the working directory for all tests is `tmp_path`, which is 
+switched to using a fixture defined in `GX-TimeFrequency/test/conftest.py`, 
+for the duration of the test execution. The `tmp_path` fixture will provide a 
+temporary directory unique to the (py)test invocation, created in the base 
+temporary directory.
 
 A new test can be added to this `CMakeLists.txt` in the following way:
 

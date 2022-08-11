@@ -11,6 +11,7 @@ Issues and solutions:
 import numpy as np
 from pathlib import Path
 import pytest
+import os
 
 from pygreenx.run import BinaryRunner, BuildType
 
@@ -25,13 +26,13 @@ def fortran_binary(get_binary, greenx_build_root):
     return _binary
 
 
-def mock_file(tmp_path, inputs_str):
+def mock_file(path, inputs_str):
     """ Write an inputs string to file.
-    :param tmp_path:
+    :param path:
     :param inputs_str:
     :return: Path object
     """
-    file: Path = tmp_path / "inputs.dat"
+    file: Path = Path(path) / Path("inputs.dat")
     file.write_text(inputs_str)
     assert file.exists(), f"{file.name} does not exist"
     return file
@@ -44,7 +45,7 @@ class ETrans:
 
 
 # Note. This could be a fixture
-def get_grids_and_weights(tmp_path, fortran_binary, n_mesh_points, e_trans: ETrans):
+def get_grids_and_weights(fortran_binary, n_mesh_points, e_trans: ETrans):
 
     # Fortran input file
     inputs_template = """
@@ -54,8 +55,10 @@ e_transition_min  {}
 e_transition_max  {}
 """
 
-    inputs_str = inputs_template.format(tmp_path, n_mesh_points, e_trans.min, e_trans.max)
-    file = mock_file(tmp_path, inputs_str)
+    working_dir = os.getcwd()
+
+    inputs_str = inputs_template.format(working_dir, n_mesh_points, e_trans.min, e_trans.max)
+    file = mock_file(working_dir, inputs_str)
 
     # Run test
     runner = BinaryRunner(fortran_binary, BuildType.serial, args=[file.as_posix()])
@@ -63,13 +66,14 @@ e_transition_max  {}
     assert results.success, f"Execution of {fortran_binary} failed"
 
     # Parse results
-    tau_file = tmp_path / "tau.dat"
-    freq_file = tmp_path / "freq.dat"
+    tau_file = "tau.dat"
+    freq_file = "freq.dat"
 
     return np.genfromtxt(tau_file), np.genfromtxt(freq_file)
 
 
-def test_get_grids_and_weights(tmp_path, fortran_binary):
+# @pytest.mark.usefixtures("testdir")
+def test_get_grids_and_weights(fortran_binary):
     """
     TODO(Maryam) Issue 24. Extend the test inputs, and include fringe cases.
     """
@@ -77,8 +81,7 @@ def test_get_grids_and_weights(tmp_path, fortran_binary):
     n_mesh_points = 10
     e_trans = ETrans(2., 30.)
 
-    tau_grid_weights, freq_grid_weights = get_grids_and_weights(tmp_path,
-                                                                fortran_binary,
+    tau_grid_weights, freq_grid_weights = get_grids_and_weights(fortran_binary,
                                                                 n_mesh_points,
                                                                 e_trans)
 

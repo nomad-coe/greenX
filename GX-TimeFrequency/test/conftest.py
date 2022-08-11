@@ -99,3 +99,17 @@ def get_binary(all_binaries):
         return path / name
     return wrapper
 
+
+@pytest.fixture(autouse=True)
+def testdir(tmp_path: Path):
+    """ Test directory fixture.
+
+    Provide a fixture to switch to tmp_path as a working test directory.
+
+    :param tmp_path: Temporary directory unique to the test invocation
+    """
+    oldpath = os.getcwd()
+    os.chdir(tmp_path.as_posix())
+    yield
+    os.chdir(oldpath)
+    print(f'Testdir: {tmp_path.as_posix()}')
