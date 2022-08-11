@@ -40,11 +40,13 @@ jobs:
           cd build
           cmake ../
           make -j$(nproc) VERBOSE=1
-          echo "GX_BUILD_DIR=$(echo GX_BUILD_DIR)" >> $GITHUB_ENV
+          echo "BUILD_VERSION=GX_BUILD_DIR" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Run Tests
         run: |
-          echo "GX_BUILD_DIR"
+          env:
           cd python && pip install -e . && cd ../
           cd build
           ctest -j1 --output-on-failure
+        env:
+          GX_BUILD_DIR: "/home/runner/work/greenX/greenX/build"
