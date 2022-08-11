@@ -71,6 +71,8 @@ program test_gx_minimax_grid
 
     ! TODO Add max_errors and cosft_duality_error as outputs
 
+    ! Note, arrays are allocated in the library, and so must be explicitly
+    ! deallocated by the caller
     deallocate(tau_mesh, tau_weights, freq_mesh, freq_weights, &
                cos_tau_to_freq_weights, cos_freq_to_tau_weights, sinft_tau_to_freq_weights)
 

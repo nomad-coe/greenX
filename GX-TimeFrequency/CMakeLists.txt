@@ -71,14 +71,26 @@ install(TARGETS GXTabulateGrids
         DESTINATION bin)
 
 # -----------------------------------------------
-# Application Testing
+# Application Testing Set-Up
 # -----------------------------------------------
 # Include cmake custom function
 include(../cmake/testFunctions.cmake)
+
 # Set name of test sub-directory in the build directory
 set(TEST_TARGET_DIR "time-frequency")
+
 target_include_directories(LibGXMiniMax PUBLIC test/)
 
+# Set pytest conftest for Time-Frequency library tests
+add_custom_command(
+        TARGET LibGXMiniMax POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/conftest.py
+        ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/conftest.py)
+
+# -----------------------------------------------
+# Application Tests
+# -----------------------------------------------
 
 # Add a test target
 add_executable(test_gx_minimax_grid)

@@ -27,8 +27,6 @@ from pathlib import Path
 import pytest
 
 from pygreenx.run import BinaryRunner, BuildType
-from pygreenx.utilities import find_test_binary
-
 
 
 def mock_file(tmp_path, inputs_str):
@@ -64,20 +62,16 @@ e_transition_max  {}
 
 
 @pytest.fixture()
-def binary():
-    """
-    root MUST be defined per test script.
-    Note that it's not robust to changes in the nesting of directories.
-    For example, if I change <BUILD_DIR>/test to <BUILD_DIR>/test/time-frequency
-    this command requires updating (and vice versa)
-    :return:
-    """
-    binary_name = "test_gx_minimax_grid.exe"
-    root = Path(__file__).parent.parent.parent
-    return find_test_binary(root, binary_name)
+@pytest.mark.usefixtures("get_binary", "greenx_build_root")
+def fortran_binary(get_binary, greenx_build_root):
+    name = 'test_gx_minimax_grid.exe'
+    _binary = get_binary(name)
+    assert _binary is not None, f'{name} cannot be found in {greenx_build_root}'
+    print(f'Binary source: {_binary}')
+    return _binary
 
 
-def test_gx_minimax_grid(tmp_path, binary):
+def test_my_fixture(tmp_path, fortran_binary):
     """
     TODO(Maryam) Issue 24. Extend the test inputs, and include fringe cases.
 
@@ -94,9 +88,9 @@ def test_gx_minimax_grid(tmp_path, binary):
     file = mock_file(tmp_path, inputs_str)
 
     # Run test
-    runner = BinaryRunner(binary, BuildType.serial, args=[file.as_posix()])
+    runner = BinaryRunner(fortran_binary, BuildType.serial, args=[file.as_posix()])
     results = runner.run()
-    assert results.success, f"Execution of {binary} failed"
+    assert results.success, f"Execution of {fortran_binary} failed"
 
     # Parse results
     tau_file = tmp_path / "tau.dat"
