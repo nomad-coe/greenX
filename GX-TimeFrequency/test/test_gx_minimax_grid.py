@@ -64,6 +64,13 @@ e_transition_max  {}
 
 
 def test_gx_minimax_grid(tmp_path):
+    """
+    TODO(Maryam) Issue 24. Extend the test inputs, and include fringe cases.
+
+    The input parameters (e_trans_min, e_trans_max) could be swept across a range
+    of values using pytest parameterize. One would need to tabulate references
+    for all input choices.
+    """
     # Test inputs
     n_mesh_points = 10
     e_trans_min, e_trans_max = 2., 30.

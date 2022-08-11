@@ -34,12 +34,23 @@ def parse_std_out(results: ProcessResults):
     return tabulated_errors
 
 
-def test_gx_minimax_grid():
+def test_tabulate_gx_minimax_grid():
+    """
+    Reference Data Column Labels:
+    0.Num_points, 1.ierr, 2.cosft_duality_error, 3.max_err_costf_t_to_w,
+    4.max_err_costf_w_to_t, 5.max_err_sintf_t_to_w, 6.eratio
 
-    # NOTE, some of the reference numbers are exceedingly small ~ machine precision
-    # and others are very large, which clearly need to be tested with relative tolerance.
-    # One could also split up into columns, and test different columns separately.
-    ref_errors_small_grid = np.array([[ 6,  0,  2.51200821E-04,  1.88667240E-03,  6.86380679E-03,  5.56242714E-02,  2.50000000E+02],
+    Some of the reference numbers are exceedingly small ~ machine precision:
+    Specifically, max_err_costf_t_to_w and max_err_costf_w_to_t.
+    Where as the cosft_duality_error can get very large as a function of
+    minimax grid points.
+
+    which clearly need to be tested with relative tolerance.
+    One could also split up into columns, and test different columns separately.
+
+    """
+
+    ref_errors_small_grid = np.array([[6,  0,  2.51200821E-04,  1.88667240E-03,  6.86380679E-03,  5.56242714E-02,  2.50000000E+02],
                                      [ 8,  0,  9.26518238E-04,  7.02310800E-04,  8.97132915E-04,  1.49383520E-02,  2.50000000E+02],
                                      [10,  0,  2.93904398E-02,  4.15097815E-04,  9.85375147E-04,  3.87442807E-03,  2.50000000E+02],
                                      [12,  0,  1.22980779E-03,  5.40966369E-05,  3.23113268E-05,  9.86318209E-04,  2.50000000E+02],
