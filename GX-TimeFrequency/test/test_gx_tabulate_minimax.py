@@ -44,8 +44,8 @@ def binary():
     """
     binary_name = "gx_tabulate_grids.exe"
     root = Path(__file__).parent.parent.parent
-    _binary = find_test_binary(root, binary_name)
-    assert os.path.isfile(binary), f'Binary {binary_name} cannot be found'
+    _binary: Path = find_test_binary(root, binary_name)
+    assert _binary.exists(), f'Binary {binary_name} cannot be found'
     return _binary
 
 
