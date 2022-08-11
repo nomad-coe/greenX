@@ -75,17 +75,21 @@ write the result to file. `test_name.py` should provide the input parameters
 `test_name.f90`, parse the result and make the assertions. This implies the
 reference results should also be stored in `test_name.py`.
 
-`test_name.py` *must* define the binary name, by convention `test_name.exe`
-and define the root path in which to look for the binary. This can be achieved
-with:
+`test_name.py` *must* include the fixture:
 
 ```python
-root = Path(__file__).parent.parent.parent
+@pytest.fixture()
+@pytest.mark.usefixtures("get_binary", "greenx_build_root")
+def fortran_binary(get_binary, greenx_build_root):
+    name = 'gx_tabulate_grids.exe'
+    _binary = get_binary(name)
+    assert _binary is not None, f'{name} cannot be found in {greenx_build_root}'
+    print(f'Binary source: {_binary}')
+    return _binary
 ```
-  
-where the level of nesting depends upon how one defines the `test/` directory
-structure in the `<BUILD>` folder. See `developers.md` for a discussion of how
-one can (and should) make this more robust. 
+
+where the binary `name` should be consistent with whatever the developer has
+called the binary in the CMakeLists.txt
 
 Additionally, one should ensure that both python and fortran read/write to `tmp_path`.
 The `tmp_path` fixture will provide a temporary directory unique to the (py)test 
@@ -104,3 +108,11 @@ add_app_test(TEST_NAME TEST_TARGET_DIR LIBS_FOR_TESTING)
 Calling `add_app_test` should ensure that the directory level structure in
 the build folder is consistent with example python driver. For multiple tests, 
 one can place the call to `add_app_test` in a loop, and supply different test names.
+
+All the tests can be run by switching to the `build/` directory and typing `ctest`,
+however they can also be run in the `test/` directory of the source by typing
+`pytest -s` as long as the 'ENV VAR' to the build directory has been defined:
+
+```bash
+export GX_BUILD_DIR=<path/2/build/>
+```

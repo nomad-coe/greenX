@@ -39,28 +39,6 @@ b). Call the respective fortran library directly from python, removing the need
     prefix, the binary name can automatically be retrieved by python
     `os.path.basename(__file__).py`
 
-#### Location of a Test Binary
-
-* The build directory root defined by python, from which to start searching for the 
-  test binary is not robust w.r.t change in directory nesting. As directory nesting 
-  is changed, one is forced to modify `root = Path(__file__).parent.parent` to 
-  `root = Path(__file__).parent.parent.parent`, etc.
-  
-* `find_test_binary` recursively searches for the binary, per test!
-   This will get inefficient very quickly, and should be viewed as a *place holder*.
-   - A prior implementation passed the full binary path to pytest, however
-   one must configure `conftest.py` such that it does not interfere with pytest's
-   existing command-line arguments. This is more robust than the current 
-   implementation. 
-      
-* Alex *assumes* relative paths will be a function of the directory in which pytest
-  is invoked. If one wants to to retain the flexbility of executing pytest in 
-  `<BUILD_DIR>`, `<BUILD_DIR>/test` or lower, relative binary paths are not a
-  good option. 
-  - One should investigate placing test binaries next to the python
-    test drivers, in the build folder. Perhaps relative paths can be used, 
-    removing the need to define `root` and `find_test_binary`. 
-
 #### Choice of Test Framework
 
 * One should test the library by directly calling from python, however Alex 
