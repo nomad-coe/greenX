@@ -1,8 +1,7 @@
-import os
-from glob import glob
+from pathlib import Path
 
 
-def find_test_binary(root, binary_name: str) -> str:
+def find_test_binary(root, binary_name: str) -> Path:
     """ Recursively search the project for a `binary_name`.
 
     Reference:
@@ -17,7 +16,7 @@ def find_test_binary(root, binary_name: str) -> str:
     :param binary_name: Binary name.
     :return: binary name prepended by its full path.
     """
-    found = [y for x in os.walk(root) for y in glob(os.path.join(x[0], binary_name))]
+    found = [path for path in Path(root).rglob(binary_name) if path.is_file()]
     assert len(found) == 1, f"No binary, or multiple binaries were found with the same name: {found}" \
                             f"Began searching from root = {root}"
     return found[0]
