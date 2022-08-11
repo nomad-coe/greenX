@@ -6,7 +6,6 @@ import pytest
 from pygreenx.run import BinaryRunner, BuildType, ProcessResults
 from pygreenx.utilities import find_test_binary
 
-binary_name = "gx_tabulate_grids.exe"
 
 
 def parse_std_out(results: ProcessResults):
@@ -34,7 +33,23 @@ def parse_std_out(results: ProcessResults):
     return tabulated_errors
 
 
-def test_tabulate_gx_minimax_grid():
+@pytest.fixture()
+def binary():
+    """
+    root MUST be defined per test script.
+    Note that it's not robust to changes in the nesting of directories.
+    For example, if I change <BUILD_DIR>/test to <BUILD_DIR>/test/time-frequency
+    this command requires updating (and vice versa)
+    :return:
+    """
+    binary_name = "gx_tabulate_grids.exe"
+    root = Path(__file__).parent.parent.parent
+    _binary = find_test_binary(root, binary_name)
+    assert os.path.isfile(binary), f'Binary {binary_name} cannot be found'
+    return _binary
+
+
+def test_tabulate_gx_minimax_grid(binary):
     """
     Reference Data Column Labels:
     0.Num_points, 1.ierr, 2.cosft_duality_error, 3.max_err_costf_t_to_w,
@@ -66,11 +81,6 @@ def test_tabulate_gx_minimax_grid():
                                    [30,  0,  2.88001056E+08,  3.72208007E-08,  2.57757957E-09,  7.25625128E-07,  2.50000000E+02],
                                    [32,  0,  1.50874511E+08,  2.89721647E-08,  2.68576848E-09,  3.26754726E-07,  2.50000000E+02],
                                    [34,  0,  1.03478980E+08,  3.74825302E-08,  2.22192890E-09,  2.66427793E-07,  2.50000000E+02]])
-
-    # Find binary
-    root = Path(__file__).parent.parent.parent
-    binary = find_test_binary(root, binary_name)
-    assert os.path.isfile(binary), f'Binary {binary_name} cannot be found'
 
     # Run binary with specified emin and emax
     emin, emax = 0.4, 100.0

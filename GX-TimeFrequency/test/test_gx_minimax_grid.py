@@ -24,11 +24,11 @@ Solution
 """
 import numpy as np
 from pathlib import Path
+import pytest
 
 from pygreenx.run import BinaryRunner, BuildType
 from pygreenx.utilities import find_test_binary
 
-binary_name = "test_gx_minimax_grid.exe"
 
 
 def mock_file(tmp_path, inputs_str):
@@ -63,7 +63,21 @@ e_transition_max  {}
     return inputs_str
 
 
-def test_gx_minimax_grid(tmp_path):
+@pytest.fixture()
+def binary():
+    """
+    root MUST be defined per test script.
+    Note that it's not robust to changes in the nesting of directories.
+    For example, if I change <BUILD_DIR>/test to <BUILD_DIR>/test/time-frequency
+    this command requires updating (and vice versa)
+    :return:
+    """
+    binary_name = "test_gx_minimax_grid.exe"
+    root = Path(__file__).parent.parent.parent
+    return find_test_binary(root, binary_name)
+
+
+def test_gx_minimax_grid(tmp_path, binary):
     """
     TODO(Maryam) Issue 24. Extend the test inputs, and include fringe cases.
 
@@ -80,12 +94,6 @@ def test_gx_minimax_grid(tmp_path):
     file = mock_file(tmp_path, inputs_str)
 
     # Run test
-    # root MUST be defined in the test script
-    # However, not robust to changes in the nesting of directories.
-    # For example, if I change <BUILD_DIR>/test to <BUILD_DIR>/test/time-frequency
-    # this command requires updating (and vice versa)
-    root = Path(__file__).parent.parent.parent
-    binary = find_test_binary(root, binary_name)
     runner = BinaryRunner(binary, BuildType.serial, args=[file.as_posix()])
     results = runner.run()
     assert results.success, f"Execution of {binary} failed"
