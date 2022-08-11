@@ -1,11 +1,24 @@
 import numpy as np
-from pathlib import Path
-import os
 import pytest
+import enum
 
 from pygreenx.run import BinaryRunner, BuildType, ProcessResults
-from pygreenx.utilities import find_test_binary
 
+
+@pytest.fixture()
+@pytest.mark.usefixtures("get_binary", "greenx_build_root")
+def fortran_binary(get_binary, greenx_build_root):
+    name = 'gx_tabulate_grids.exe'
+    _binary = get_binary(name)
+    assert _binary is not None, f'{name} cannot be found in {greenx_build_root}'
+    print(f'Binary source: {_binary}')
+    return _binary
+
+
+class ETrans:
+    def __init__(self, min, max):
+        self.min = min
+        self.max = max
 
 
 def parse_std_out(results: ProcessResults):
@@ -33,37 +46,29 @@ def parse_std_out(results: ProcessResults):
     return tabulated_errors
 
 
-@pytest.fixture()
-def binary():
+def get_tabulated_errors(fortran_binary, e_trans: ETrans):
+    runner = BinaryRunner(fortran_binary, BuildType.serial,
+                          args=['table', '-emin', f'{e_trans.min}', '-emax', f'{e_trans.max}'])
+    results = runner.run()
+    assert results.success, f"Execution of {fortran_binary} failed"
+    return parse_std_out(results)
+
+
+class Column(enum.Enum):
+    """Reference Data Column Labels.
     """
-    root MUST be defined per test script.
-    Note that it's not robust to changes in the nesting of directories.
-    For example, if I change <BUILD_DIR>/test to <BUILD_DIR>/test/time-frequency
-    this command requires updating (and vice versa)
-    :return:
-    """
-    binary_name = "gx_tabulate_grids.exe"
-    root = Path(__file__).parent.parent.parent
-    _binary: Path = find_test_binary(root, binary_name)
-    assert _binary.exists(), f'Binary {binary_name} cannot be found'
-    return _binary
+    NumPoints = 0
+    IErr = 1
+    CosFTDualityError = 2
+    MaxErrCosFTTimeToFreq = 3
+    MaxErrCosFTFreqToTime = 4
+    MaxErrSinFTimeToFreq = 5
+    ERatio = 6
 
 
-def test_tabulate_gx_minimax_grid(binary):
-    """
-    Reference Data Column Labels:
-    0.Num_points, 1.ierr, 2.cosft_duality_error, 3.max_err_costf_t_to_w,
-    4.max_err_costf_w_to_t, 5.max_err_sintf_t_to_w, 6.eratio
+def test_tabulate_gx_minimax_grid(fortran_binary):
 
-    Some of the reference numbers are exceedingly small ~ machine precision:
-    Specifically, max_err_costf_t_to_w and max_err_costf_w_to_t.
-    Where as the cosft_duality_error can get very large as a function of
-    minimax grid points.
-
-    which clearly need to be tested with relative tolerance.
-    One could also split up into columns, and test different columns separately.
-
-    """
+    e_trans = ETrans(0.4, 100.0)
 
     ref_errors_small_grid = np.array([[6,  0,  2.51200821E-04,  1.88667240E-03,  6.86380679E-03,  5.56242714E-02,  2.50000000E+02],
                                      [ 8,  0,  9.26518238E-04,  7.02310800E-04,  8.97132915E-04,  1.49383520E-02,  2.50000000E+02],
@@ -82,23 +87,33 @@ def test_tabulate_gx_minimax_grid(binary):
                                    [32,  0,  1.50874511E+08,  2.89721647E-08,  2.68576848E-09,  3.26754726E-07,  2.50000000E+02],
                                    [34,  0,  1.03478980E+08,  3.74825302E-08,  2.22192890E-09,  2.66427793E-07,  2.50000000E+02]])
 
-    # Run binary with specified emin and emax
-    emin, emax = 0.4, 100.0
-    runner = BinaryRunner(binary, BuildType.serial,
-                          args=['table', '-emin', f'{emin}', '-emax', f'{emax}'])
-    results = runner.run()
-    assert results.success, f"Execution of {binary} failed"
+    tabulated_errors = get_tabulated_errors(fortran_binary, e_trans)
+    tabulated_errors_small_grids = tabulated_errors[0:9, :]
+    tabulated_errors_large_grids = tabulated_errors[9:, :]
 
-    # Compare parsed results to reference values
-    tabulated_errors = parse_std_out(results)
-    print(tabulated_errors[0:9, :] - ref_errors_small_grid)
-    print(tabulated_errors[9:, :] - ref_errors_big_grid)
+    # Grids for which values do not get large or very small
+    assert np.allclose(tabulated_errors_small_grids[:, Column.CosFTDualityError.value],
+                              ref_errors_small_grid[:, Column.CosFTDualityError.value])
 
-    assert np.allclose(tabulated_errors[0:9, :], ref_errors_small_grid, atol=1.e-7), \
-        'Difference in results with small tau values'
+    assert np.allclose(tabulated_errors_small_grids[:, Column.MaxErrCosFTTimeToFreq.value],
+                              ref_errors_small_grid[:, Column.MaxErrCosFTTimeToFreq.value])
 
-    # TODO Investigate if these larger grids are stable
-    # Alex gets different numbers for grid 28 tau between his Mac with openblas,
-    # and the Ubuntu CI with blas/lapack
-    # assert np.allclose(tabulated_errors[9:, :], ref_errors_big_grid, atol=0.01), \
-    #     'Difference in results with large tau values'
+    assert np.allclose(tabulated_errors_small_grids[:, Column.MaxErrCosFTFreqToTime.value],
+                              ref_errors_small_grid[:, Column.MaxErrCosFTFreqToTime.value])
+
+    assert np.allclose(tabulated_errors_small_grids[:, Column.MaxErrSinFTimeToFreq.value],
+                              ref_errors_small_grid[:, Column.MaxErrSinFTimeToFreq.value])
+
+    # Grids for which values do get large or very small
+    assert np.allclose(tabulated_errors_large_grids[:, Column.MaxErrCosFTTimeToFreq.value],
+                                ref_errors_big_grid[:, Column.MaxErrCosFTTimeToFreq.value])
+
+    assert np.allclose(tabulated_errors_large_grids[:, Column.MaxErrCosFTFreqToTime.value],
+                                ref_errors_big_grid[:, Column.MaxErrCosFTFreqToTime.value])
+
+    assert np.allclose(tabulated_errors_large_grids[:, Column.MaxErrSinFTimeToFreq.value],
+                                ref_errors_big_grid[:, Column.MaxErrSinFTimeToFreq.value])
+
+    # Alex gets a massive difference (~ 10%) grid 28 CosFTDualityError between
+    # his Mac with openblas, and the Ubuntu CI with blas/lapack
+    # Not sure if this is quantity is worth testing
