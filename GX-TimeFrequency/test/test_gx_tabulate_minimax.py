@@ -115,7 +115,7 @@ def test_tabulate_gx_minimax_grid(fortran_binary):
 
     assert np.allclose(tabulated_errors_large_grids[:, Column.MaxErrSinFTimeToFreq.value],
                                 ref_errors_big_grid[:, Column.MaxErrSinFTimeToFreq.value],
-                       atol=1.e-7)
+                       atol=1.e-6)
 
     # Alex gets a massive difference (~ 10%) grid 28 CosFTDualityError between
     # his Mac with openblas, and the Ubuntu CI with blas/lapack
