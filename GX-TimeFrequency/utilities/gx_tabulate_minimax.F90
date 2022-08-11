@@ -11,7 +11,7 @@ program gx_tabulate_minimax
     implicit none
 
     !Local variables-------------------------------
-    real(dp), parameter :: zero = 1._dp
+    real(dp), parameter :: zero = 0._dp
     real(dp), parameter :: one = 1._dp
     !scalars
     integer :: ii, it, iw, ierr, num_integ_points, unt, py_unt, nargs, iostat, ntau = -1

@@ -72,7 +72,7 @@ Write a `test_name.py` and `test_name.f90` in `test/`.
 `test_name.f90` should accept some input parameter/s, make a library call and
 write the result to file. `test_name.py` should provide the input parameters
 (the simplest way is to write to file), execute the binary built from 
-`test_name.f90`, parse the result and make the assertions. This imples the
+`test_name.f90`, parse the result and make the assertions. This implies the
 reference results should also be stored in `test_name.py`.
 
 `test_name.py` *must* define the binary name, by convention `test_name.exe`
