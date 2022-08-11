@@ -9,20 +9,29 @@ independently of one another. To build the whole suite of Green X libraries from
 you need to have a Fortran compiler supporting Fortran 2008, and one of the supported build 
 systems:
 
-* cmake version 3.0.2 or newer, with a build-system backend, i.e. make
+* cmake version 3.15.0 or newer, with a build-system backend, i.e. `make`.
 
 **Building with CMake**   
 
-To build all libraries, set up a build directory:
+To build all libraries, set up a build directory, change to it and run cmake 
+configuration:
 
 ```bash
 mkdir build 
+cd build
+cmake ../
 ```
 
-Change to the directory and run cmake configuration:
+To explicitly specify the compiler, run CMake configure with:
 
 ```bash
-cmake ../
+FC=ifort cmake ../
+```
+Shared libraries are built by default. To build static versions, one can 
+configure with:
+
+```bash
+cmake ../ -DBUILD_SHARED_LIBS=OFF
 ```
 
 If all requirements are found, build and install the project:
@@ -32,7 +41,7 @@ make -j
 make install 
  ```
 
-**Running the Tests** 
+## Running the Tests
 
 GreenX uses pytest as its regression testing framework, in conjunction with 
 some custom python modules. First, one must ensure that the python utilities
@@ -59,6 +68,3 @@ The test suite can now be run with CMake's ctest command:
 cd build
 ctest
  ```
-
-## Usage
-TODO Document 
