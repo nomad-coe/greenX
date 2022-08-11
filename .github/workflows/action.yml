@@ -43,7 +43,6 @@ jobs:
 
       - name: Run Tests
         run: |
-          env:
           cd python && pip install -e . && cd ../
           cd build
           ctest -j1 --output-on-failure
