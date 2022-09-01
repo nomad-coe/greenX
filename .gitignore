@@ -25,3 +25,14 @@ __pycache__/
 
 # Backups
 *~
+
+# MacOSX
+.DS_Store
+
+# Temporary files or directories
+tags
+
+# vim files
+*.swp
+*.swo
+*.swn

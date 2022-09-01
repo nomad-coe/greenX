@@ -1,71 +1,167 @@
-# CMakeLists for TimeFrequency Libraries 
-# TODO(Alex) Have this as a separate CMake 
-# This file should just have the option to build/install specific libs 
+# CMakeLists for TimeFrequency Library (MiniMax)
 
-# Minimax Grids Library
-add_library(GXMiniMax "")
+# GreenXMiniMax Library
+add_library(LibGXMiniMax "")
 
-set_target_properties(GXMiniMax
+# Set properties of the library
+set_target_properties(LibGXMiniMax
         PROPERTIES
         VERSION 0.0.1
         SOVERSION 0.0.1
-        LIBRARY_OUTPUT_NAME GXMiniMax
+        LIBRARY_OUTPUT_NAME gx_minimax
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY}
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY}
         )
 
-target_link_libraries(GXMiniMax GXCommon)
+# Add include directories to the LibGXMiniMax
+target_include_directories(LibGXMiniMax PUBLIC src/ api/ utilities/)
 
-target_include_directories(GXMiniMax PUBLIC src/ )
-
-# Set full path to minimax grids using preprocessor 
-set_property(SOURCE src/minimax/minimax.F90 APPEND PROPERTY
-    COMPILE_DEFINITIONS "MINIMAX_PATH='${CMAKE_SOURCE_DIR}/GX-TimeFrequency/data/minimax_grids'")
-
-target_sources(GXMiniMax PRIVATE
-        src/minimax/minimax.F90
-        src/minimax/parse_minimax.f90
-        src/minimax/read_cmd_line.f90  # TODO The test depends on this, not the lib
+# Define source that comprise LibGXMiniMax
+target_sources(LibGXMiniMax PRIVATE
+        src/gx_common.h
+        src/minimax_gw.F90
+        src/minimax_rpa.F90
+        src/mp2_grids.F90
+        api/api_utilities.f90
+        api/gx_minimax.f90
         )
 
+# Link external libraries and lower-level GX lib dependency
+target_link_libraries(LibGXMiniMax GXCommon ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 
-# TODO (Alex) This wants to be defined once
-# Set installation location
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    # TODO(Alex) clean this up
-    set(default_install_prefix "${PROJECT_SOURCE_DIR}/install")        
-    set(CMAKE_INSTALL_PREFIX ${default_install_prefix}
-            CACHE STRING "Choose the installation directory. Default location is ${default_install_prefix}"
-            FORCE)
-endif()
 
-# Destination relative to ${CMAKE_INSTALL_PREFIX}
-install(TARGETS GXMiniMax
+# -----------------------------------------------
+# Build utility program for grid tabulation
+# -----------------------------------------------
+add_executable(GXTabulateGrids)
+
+set_target_properties(GXTabulateGrids
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_Fortran_BIN_DIRECTORY}
+        RUNTIME_OUTPUT_NAME gx_tabulate_grids.exe)
+
+target_sources(GXTabulateGrids
+        PRIVATE
+        utilities/gx_tabulate_minimax.F90
+        src/gx_common.h
+        )
+
+target_link_libraries(GXTabulateGrids
+        PRIVATE
+        GXCommon
+        LibGXMiniMax
+        )
+
+# -----------------------------------------------
+# Library Installation
+# -----------------------------------------------
+# Install library
+# Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in top-level CMake
+install(TARGETS LibGXMiniMax
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib)
 
-# Destination relative to ${CMAKE_INSTALL_PREFIX}
+# Install modules
+# Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in top-level CMake
 install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
         DESTINATION include)
 
-# Application tests
-set(REG_TESTS test_minimax)
+# Install `Build utility` program
+install(TARGETS GXTabulateGrids
+        DESTINATION bin)
 
-foreach(INPUT ${REG_TESTS})
+# -----------------------------------------------
+# Application Testing Set-Up
+# -----------------------------------------------
+# Include cmake custom function
+include(../cmake/testFunctions.cmake)
 
-    # Fortran test TODO(Alex) Move where this is built
-    add_executable(${INPUT}.x src/minimax/${INPUT}.f90)
-    link_directories(${LIBRARY_OUTPUT_PATH})
-    target_link_libraries(${INPUT}.x GXMiniMax)
+# Set name of test sub-directory in the build directory
+set(TEST_TARGET_DIR "time-frequency")
 
-    # Python test framework
-    add_test(
-            NAME REG_TEST_${INPUT}
-            COMMAND pytest -s GX-TimeFrequency/tests/test_minimax/${INPUT}.py --root ${CMAKE_SOURCE_DIR} --binary ${CMAKE_BINARY_DIR}/GX-TimeFrequency/${INPUT}.x
-            # Run in GreenX's root
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    )
+target_include_directories(LibGXMiniMax PUBLIC test/)
 
-    # Can also set useful test properties
-endforeach()
+# Set pytest conftest for Time-Frequency library tests
+add_custom_command(
+        TARGET LibGXMiniMax POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/conftest.py
+        ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/conftest.py)
 
+# -----------------------------------------------
+# Application Tests
+# -----------------------------------------------
+
+# Add a test target
+add_executable(test_gx_minimax_grid)
+
+# Set binary name
+set_target_properties(test_gx_minimax_grid
+        PROPERTIES
+        RUNTIME_OUTPUT_NAME test_gx_minimax_grid.exe)
+
+# Define source that comprise the binary
+target_sources(test_gx_minimax_grid
+        PRIVATE
+        test/test_gx_minimax_grid.f90
+        )
+
+# Libraries that the binary links to
+target_link_libraries(test_gx_minimax_grid
+        PUBLIC
+        LibGXMiniMax
+        )
+
+# Build location of the binary
+# TODO(Alex) Consider move this to test/, to sit with the python drivers
+set_target_properties(test_gx_minimax_grid
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_Fortran_BIN_DIRECTORY})
+
+# Copy .py test to the `build/test` directory, such that one can run pytest there
+# where CMAKE_CURRENT_SOURCE_DIR => CMakeLists.txt on this level
+add_custom_command(
+        TARGET LibGXMiniMax POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                # Test source relative to the time-frequency (this) folder
+                ${CMAKE_CURRENT_SOURCE_DIR}/test/test_gx_minimax_grid.py
+                # Location to copy the test to
+                ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/test_gx_minimax_grid.py)
+
+# Note.
+# The command below would build the test in <BUILD_DIR>/<LIB_NAME>/test:
+#                #  Location to copy the test to
+#                ${CMAKE_CURRENT_BINARY_DIR}/test/test_gx_minimax_grid.py)
+# whereas I am currently opting to put tests in <BUILD_DIR>/tests/<LIB_NAME>
+
+# Add test to ctest
+add_test(
+        NAME test_gx_minimax_grid
+        COMMAND pytest -s test_gx_minimax_grid.py
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
+)
+
+# Add a second test, using the `tabulate utility` binary
+add_custom_command(
+        TARGET LibGXMiniMax POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/test_gx_tabulate_minimax.py
+        ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/test_gx_tabulate_minimax.py)
+
+add_test(
+        NAME test_gx_tabulate_minimax
+        COMMAND pytest -s test_gx_tabulate_minimax.py
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
+)
+
+
+# TODO For developers.
+# To make the addition of further tests more compact, one can use this function call
+# For example, for the test above:
+#
+#```
+#   set(LIBS_FOR_TESTING)
+#   list(APPEND LIBS_FOR_TESTING LibGXMiniMax)
+#   set(TEST_NAME "test_gx_minimax_grid")
+#   add_app_test(TEST_NAME TEST_TARGET_DIR LIBS_FOR_TESTING)
+#```
