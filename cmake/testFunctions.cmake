@@ -51,7 +51,7 @@ function(add_app_test)
     # Copy .py test to the `<build>/test/${WORKING_TEST_DIR}` directory, such that one can
     #  `<build>/test/${WORKING_TEST_DIR} && pytest -s`
     # or
-    #  `<build>/test && pytest -s`, or
+    #  `<build>/test && pytest -s`
     add_custom_command(
             TARGET LibGXMiniMax POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
@@ -64,7 +64,7 @@ function(add_app_test)
     # Add test to ctest
     add_test(
             NAME ${TEST_NAME}
-            COMMAND pytest -s
+            COMMAND pytest -s test/${TEST_TARGET_DIR}/${TEST_NAME}.py --build-dir ${CMAKE_BINARY_DIR}
             WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
     )
 
