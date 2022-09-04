@@ -30,44 +30,51 @@ def pytest_addoption(parser):
                      )
 
 
+class Build:
+    def __init__(self, dir, error):
+        self.dir = dir
+        self.error = error
+
+
 @pytest.fixture(scope="session")
-def greenx_build_root(request) -> str:
+def greenx_build_root(request) -> Path:
     """ Get GreenX build directory.
 
-    :return: Environment variable string
-    """
-    # First, try from command line arg.
-    build_dir = request.config.getoption('build_dir')
-    if build_dir:
-        if not Path(build_dir).is_dir():
-            raise NotADirectoryError(f'{build_dir} is not a directory')
-        return build_dir
+    Try command line arg. If it's not passed, fall back to
+    the ENV VAR `GX_BUILD_DIR`. None corresponds to "no path given".
 
-    #  If this is not passed, look for an environment variable
-    if build_dir is None:
-        return os.getenv('GX_BUILD_DIR')
+    :return: Build path.
+    """
+    build_dirs = [request.config.getoption('build_dir'), os.getenv('GX_BUILD_DIR')]
+
+    for build_dir in build_dirs:
+        if build_dir:
+            if not Path(build_dir).is_dir():
+                raise NotADirectoryError(f'{build_dir} is not a directory')
+            return Path(build_dir)
+
+    raise NotADirectoryError("GX build directory cannot be found. "
+                             "Try `export GX_BUILD_DIR=<PATH/2/BUILD>`"
+                             "or pass as a command line arg to pytest.")
 
 
 @pytest.fixture(scope="session")
-def all_binaries(greenx_build_root, valid_binary_extensions=None) -> dict:
+def all_binaries(greenx_build_root: Path, valid_binary_extensions=None) -> dict:
     """ List all binaries recursively found in a directory.
 
     Given some top-level directory, recursively find all binaries present,
     where binary is defined according to valid_binary_extensions.
 
     :param greenx_build_root: Build directory for GreenX
-    :param valid_binary_extensions:
+    :param valid_binary_extensions: Valid fortran binary extensions
     :return: result with {key:value} = {file_name: Path/to/file}
     """
-    assert greenx_build_root is not None, 'GX build directory cannot be found. ' \
-                                          'Try `export GX_BUILD_DIR=<PATH/2/BUILD>`'
-
     if valid_binary_extensions is None:
         valid_binary_extensions = ['exe', 'x']
 
     binaries = []
     for ext in valid_binary_extensions:
-        matches = Path(greenx_build_root).rglob('*' + ext)
+        matches = greenx_build_root.rglob('*' + ext)
         binaries += [path for path in matches if path.is_file()]
 
     # Pack for convenient look-up
