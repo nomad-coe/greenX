@@ -5,14 +5,8 @@ from typing import Union
 
 
 def pytest_addoption(parser):
+    """ Custom command-line options parsed added to pytest.
     """
-    Custom command-line options parsed added to pytest.
-    Function used by pytest.
-
-    These are ONLY used in the test runner to determine the full path to
-    the fortran executable and the run settings.
-    """
-
     parser.addoption('--root',
                      type=str,
                      dest='root',
@@ -20,57 +14,67 @@ def pytest_addoption(parser):
                      help='Full path for GreenX root'
                      )
 
+    parser.addoption('--build-dir',
+                     type=str,
+                     dest='build_dir',
+                     default=None,
+                     required=False,
+                     help='Full path to build directory'
+                     )
+
     parser.addoption('--binary',
                      type=str,
                      dest='binary',
                      required=False,
-                     help='Name of the executable with full path prepending'
+                     help='Name of the executable with full path prepended'
                      )
 
 
-# Define metafunc entries from command-line arguments.
-# metafunc can be passed to pytest fixtures.
-def pytest_generate_tests(metafunc):
-    """ Add parameter or parameters to metafunc.
-
-    :param metafunc
-    """
-    for option in ['root', 'binary']:
-        if option in metafunc.fixturenames:
-            metafunc.parametrize(option, metafunc.config.getoption(option))
+class Build:
+    def __init__(self, dir, error):
+        self.dir = dir
+        self.error = error
 
 
 @pytest.fixture(scope="session")
-def greenx_build_root() -> str:
-    """ Get GreenX build directory from an environment variable
-    set by CMake, during the build process.
+def greenx_build_root(request) -> Path:
+    """ Get GreenX build directory.
 
-    :return: Environment variable string
+    Try command line arg. If it's not passed, fall back to
+    the ENV VAR `GX_BUILD_DIR`. None corresponds to "no path given".
+
+    :return: Build path.
     """
-    ENV_VAR = 'GX_BUILD_DIR'
-    return os.getenv(ENV_VAR)
+    build_dirs = [request.config.getoption('build_dir'), os.getenv('GX_BUILD_DIR')]
+
+    for build_dir in build_dirs:
+        if build_dir:
+            if not Path(build_dir).is_dir():
+                raise NotADirectoryError(f'{build_dir} is not a directory')
+            return Path(build_dir)
+
+    raise NotADirectoryError("GX build directory cannot be found. "
+                             "Try `export GX_BUILD_DIR=<PATH/2/BUILD>`"
+                             "or pass as a command line arg to pytest.")
 
 
 @pytest.fixture(scope="session")
-def all_binaries(greenx_build_root, valid_binary_extensions=None) -> dict:
+def all_binaries(greenx_build_root: Path, valid_binary_extensions=None) -> dict:
     """ List all binaries recursively found in a directory.
 
     Given some top-level directory, recursively find all binaries present,
     where binary is defined according to valid_binary_extensions.
 
     :param greenx_build_root: Build directory for GreenX
-    :param valid_binary_extensions:
+    :param valid_binary_extensions: Valid fortran binary extensions
     :return: result with {key:value} = {file_name: Path/to/file}
     """
-    assert greenx_build_root is not None, 'GX build directory cannot be found. ' \
-                                          'Try `export GX_BUILD_DIR=<PATH/2/BUILD>`'
-
     if valid_binary_extensions is None:
         valid_binary_extensions = ['exe', 'x']
 
     binaries = []
     for ext in valid_binary_extensions:
-        matches = Path(greenx_build_root).rglob('*' + ext)
+        matches = greenx_build_root.rglob('*' + ext)
         binaries += [path for path in matches if path.is_file()]
 
     # Pack for convenient look-up
@@ -100,6 +104,23 @@ def get_binary(all_binaries):
     return wrapper
 
 
+@pytest.fixture()
+def get_binary_from_build(get_binary, greenx_build_root):
+    """ Get a binary prepended by absolute path, from the GX build directory.
+
+    :param get_binary: pytest fixture to retrieve absolute binary path.
+    :param greenx_build_root: GX root directory.
+    :return:
+    """
+    def wrapper(name: str):
+        _binary = get_binary(name)
+        assert _binary is not None, f'{name} cannot be found in path {greenx_build_root}'
+        print(f'Binary source: {_binary}')
+        return _binary
+    return wrapper
+
+
+# Run automatically
 @pytest.fixture(autouse=True)
 def testdir(tmp_path: Path):
     """ Test directory fixture.

@@ -33,7 +33,6 @@ __pycache__/
 
 # Temporary files or directories
 tags
-_*.py
 _*.csv
 
 # vim files
