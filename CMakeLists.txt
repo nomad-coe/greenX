@@ -47,9 +47,6 @@ find_python_module(pytest)
 # Enable ctest
 enable_testing()
 
-# Set ENV VAR required by pytest
-set(ENV{GX_BUILD_DIR} "${CMAKE_BINARY_DIR}")
-
 # Our library directories
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 add_subdirectory(GX-common)

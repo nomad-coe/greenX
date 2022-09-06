@@ -15,10 +15,12 @@ python/pygreenx.egg-info/
 
 # Libs
 *.a
+*.dylib
 
 # IDE files
 .idea/
 .vscode/
+.devcontainer/
 
 # Python
 __pycache__/
@@ -31,6 +33,7 @@ __pycache__/
 
 # Temporary files or directories
 tags
+_*.csv
 
 # vim files
 *.swp
