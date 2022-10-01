@@ -16,7 +16,7 @@ set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${STD_FFLAGS}")
 set(GCC_DEBUG 
      -g               # Generate symbols
      -fbacktrace      # symbolic stack traceback
-     -ffpe-trap=invalid,zero,overflow,underflow   # control over floating-point exception 
+     -ffpe-trap=invalid,zero,overflow   # control over floating-point exception 
      -finit-real=nan  #  All real scalars are initialised to NaN
      -fcheck=all      # Enable all run-time test of -fcheck: array-temps, bits, bounds, do, mem, pointer, recursion
     )
