@@ -31,8 +31,8 @@ jobs:
       - name: Install python dependencies
         run: pip3 install numpy pytest
 
-      - name: Install blas and lapack
-        run: sudo apt-get install libblas-dev liblapack-dev
+      - name: Install blas, lapack and other dependencies
+        run: sudo apt-get install libblas-dev liblapack-dev doxygen
 
       - name: Build
         run: |
