@@ -49,8 +49,19 @@ enable_testing()
 
 # Our library directories
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+add_subdirectory(GX-AnalyticContinuation)
 add_subdirectory(GX-common)
 add_subdirectory(GX-TimeFrequency)
+
+# Documentation
+option(ENABLE_DOCS "Enable documentation" ON)
+if (${ENABLE_DOCS})
+    find_program(DOXYGEN doxygen REQUIRED)
+    message("-- Doxygen documentation support enabled.")
+    set(doxy_output "documentation")
+    file(MAKE_DIRECTORY ${doxy_output})
+    add_custom_target(docs COMMAND ${DOXYGEN} ${PROJECT_SOURCE_DIR}/Doxyfile)
+endif ()
 
 # Set installation location
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)

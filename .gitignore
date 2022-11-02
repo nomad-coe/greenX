@@ -39,3 +39,6 @@ _*.csv
 *.swp
 *.swo
 *.swn
+
+# Documentation
+documentation/

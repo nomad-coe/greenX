@@ -68,3 +68,24 @@ The test suite can now be run with CMake's ctest command:
 cd build
 ctest
  ```
+
+## Building Documentation
+
+GreenX is documented using Doxygen, and documentation support is enabled by
+default. To disable CMake looking for Doxygen, configure with:
+
+```bash
+cmake ../ -DENABLE_DOCS=OFF
+```
+
+To build the document, type in the build directory:
+
+```bash
+make docs
+```
+
+Documentation is built in `documentation` and can be viewed by opening
+`html/index.html` in a browser.
+
+When adding new files with documentation, please ensure the directory is listed 
+in the `INPUT` tag of Doxyfile.
