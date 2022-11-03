@@ -1,36 +1,35 @@
 !  Copyright (C) 2020-2022 Green-X library
 !  This file is distributed under the terms of the APACHE2 License.
 
-! TODO(Alex) Move this documentation to below
-!   The Pade approximants are a particular type of rational fraction
-!   approximation to the value of a function. The idea is to match the Taylor
-!   series expansion as far as possible.
-!   Here, we Implemented the Pad\'e approximant using Thiele's reciprocal-difference method.
-!   This routine takes a function $(f_n=f(x_n))$, considering complex $x_n$ which is
-!   evaluated at an initial set of arguments, $(x_n)$
-!   approximates the function with the help of Pad\'e approximants, and evaluates (extrapolates/rotates)
-!   this approximation at a given set of arguments $(x)$. The $N$-point Pad\'e approximant
-!   then reads
-!   $$ P_N(x)=
-!   \cfrac{a_1}
-!   {1+\cfrac{a_2(x-x_1)}{\cdots+\cfrac{a_n(x-x_{N-1})}{1+(x-x_N)g_{N+1}(x)}}}
-!   $$
-!   \cfrac{a_1}
-!   {1+\cfrac{a_2(x-x_1)}{\cdots+\cfrac{a_n(x-x_{N-1})}{1+(x-x_N)g_{N+1}(x)}}}
-!   $$
-!   where
-!   $$  P_N(x)=
-!   \lim_{n \to \infty}\cfrac{A_n(x)}{B_n(x)},
-!   $$
-!   $$  g_n(x)=\frac{g_{n-1}(x_{n-1})-g_{n-1}(x)}
-!                   {(x-x_{n-1})g_{n-1}(x)}, \; n \ge 2
-!   $$
-!   and
-!   $$  a_n=g_n(x_n),\; g_1(x_n)=f_n,\; n=1,\ldots,N.
-!   $$
-!
-!   Expressions are taken from G. A. J. Baker, Essentials of Padé Approximants (Academic,New York, 1975).
-!   See also PHYSICAL REVIEW B 94, 165109 (2016).
+!>   The Pade approximants are a particular type of rational fraction
+!>   approximation to the value of a function. The idea is to match the Taylor
+!>   series expansion as far as possible.
+!>   Here, we Implemented the Pad\'e approximant using Thiele's reciprocal-difference method.
+!>   This routine takes a function $(f_n=f(x_n))$, considering complex $x_n$ which is
+!>   evaluated at an initial set of arguments, $(x_n)$
+!>   approximates the function with the help of Pad\'e approximants, and evaluates (extrapolates/rotates)
+!>   this approximation at a given set of arguments $(x)$. The $N$-point Pad\'e approximant
+!>   then reads
+!>   $$ P_N(x)=
+!>     \cfrac{a_1}
+!>     {1+\cfrac{a_2(x-x_1)}{\cdots+\cfrac{a_n(x-x_{N-1})}{1+(x-x_N)g_{N+1}(x)}}}
+!>   $$
+!>     \cfrac{a_1}
+!>     {1+\cfrac{a_2(x-x_1)}{\cdots+\cfrac{a_n(x-x_{N-1})}{1+(x-x_N)g_{N+1}(x)}}}
+!>   $$
+!>   where
+!>   $$  P_N(x)=
+!>          \lim_{n \to \infty}\cfrac{A_n(x)}{B_n(x)},
+!>   $$
+!>   $$  g_n(x)=\frac{g_{n-1}(x_{n-1})-g_{n-1}(x)}
+!>                   {(x-x_{n-1})g_{n-1}(x)}, \; n \ge 2
+!>   $$
+!>   and
+!>   $$  a_n=g_n(x_n),\; g_1(x_n)=f_n,\; n=1,\ldots,N.
+!>   $$
+!>
+!>   Expressions are taken from G. A. J. Baker, Essentials of Padé Approximants (Academic,New York, 1975).
+!>   See also PHYSICAL REVIEW B 94, 165109 (2016).
 module pade_approximant
    use kinds, only: dp
    implicit none
@@ -45,13 +44,12 @@ module pade_approximant
 
 contains
 
-   ! TODO(Alex) Replace this with description from above
    !> @brief Calculate the pade approximant in $xx$ point of the function $f_n(x)$
    !> calculated at the $n$ points $x$
    !>
    !> @param[in]  n  Number of points
-   !> @param[in]  x  ADD ME
-   !> @param[in]  f  ADD ME
+   !> @param[in]  x  Variable evaluated at discrete points {n}
+   !> @param[in]  f  Function to approximate
    !> @param[in]  xx  Pade will be computed for this value
    !> @return     pade   Pade approximant
    complex(dp) function pade(n, x, f, xx)
@@ -72,8 +70,8 @@ contains
       bcoef(0:1) = c_one
 
       do i = 1, n - 1
-         acoef(i + 1) = acoef(i) + (xx - x(i))*a(i + 1)*acoef(i - 1)
-         bcoef(i + 1) = bcoef(i) + (xx - x(i))*a(i + 1)*bcoef(i - 1)
+         acoef(i + 1) = acoef(i) + (xx - x(i)) * a(i + 1) * acoef(i - 1)
+         bcoef(i + 1) = bcoef(i) + (xx - x(i)) * a(i + 1) * bcoef(i - 1)
       end do
 
       pade = acoef(n)/bcoef(n)
@@ -84,9 +82,9 @@ contains
    !> function f calculated at the n points x.
    !>
    !> @param[in]  n  Number of points
-   !> @param[in]  x   ADD ME
-   !> @param[in]  f   ADD ME
-   !> @param[in]  xx  ADD ME
+   !> @param[in]  x  Variable evaluated at discrete points {n}
+   !> @param[in]  f  Function to approximate
+   !> @param[in]  xx  Pade will be computed for this value
    !> @return     pade   Derivative of the pade approximant
    complex(dp) function pade_derivative(n, x, f, xx)
       integer, intent(in) :: n
@@ -120,8 +118,8 @@ contains
 
    !> @brief Calculate the derivative of the the coefficients of pade approximant
    !>
-   !> @param[in]  x   ADD ME
-   !> @param[in]  f   ADD ME
+   !> @param[in]  x  Variable evaluated at discrete points {n}
+   !> @param[in]  f  Function to approximate
    !> @return     a   Derivative of the pade approximant coefficients
    subroutine pade_coefficient_derivative(x, f, a)
       complex(dp), intent(in) :: x(:), f(:)

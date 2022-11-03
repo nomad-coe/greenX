@@ -37,4 +37,42 @@ install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 # -----------------------------------------------
 # Unit Testing Set-up
 # -----------------------------------------------
+# Set name of test sub-directory in the build directory
+set(TEST_TARGET_DIR "analytic-continuation")
 
+# Create a directory in the build folder to place generated test drivers
+set(UNIT_TEST_DIR ${PROJECT_BINARY_DIR}/unit_tests/${TEST_TARGET_DIR})
+file(MAKE_DIRECTORY ${UNIT_TEST_DIR})
+message("-- AC unit tests written to: ${UNIT_TEST_DIR}")
+
+# TODO(Alex)
+# Everything from here can be placed into a function
+
+# Generate test program from module
+add_custom_command(
+        OUTPUT ${UNIT_TEST_DIR}/test_pade_approximant_driver.f90
+        COMMAND ${ZOFU_DRIVER} "/Users/alexanderbuccheri/Codes/greenX/GX-AnalyticContinuation/src/test_pade_approximant.f90" "${UNIT_TEST_DIR}/test_pade_approximant_driver.f90"
+        COMMENT "Generating ${UNIT_TEST_DIR}/test_pade_approximant_driver.f90"
+    )
+
+# Create the test driver executable
+add_executable(test_pade_approximant)
+
+# Set directory in which unit tests are built in
+set_target_properties(test_pade_approximant
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${UNIT_TEST_DIR}"
+        INCLUDE_DIRECTORIES "${ZOFU_PATH}/include"
+        )
+
+target_sources(test_pade_approximant PRIVATE
+        /Users/alexanderbuccheri/Codes/greenX/GX-AnalyticContinuation/src/test_pade_approximant.f90
+        ${UNIT_TEST_DIR}/test_pade_approximant_driver.f90)
+
+# Ensure our library gets compiled if one attempts to build the unit test executable
+add_dependencies(test_pade_approximant LibGXAC)
+
+target_link_libraries(test_pade_approximant ${LibZofu} LibGXAC)
+
+add_test(NAME UNITTEST_pade_approximant
+        COMMAND ${UNIT_TEST_DIR}/test_pade_approximant)

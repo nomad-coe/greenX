@@ -47,6 +47,15 @@ find_python_module(pytest)
 # Enable ctest
 enable_testing()
 
+# Optional unit testing lib
+option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" OFF)
+if (${ENABLE_UNITTESTS})
+    # Functions for generating unit test executables
+#    include(cmake/unit_test_functions.cmake)
+    # Calling find_package is equivalent to: include(cmake/FindZofu.cmake)
+    find_package(zofu REQUIRED)
+endif()
+
 # Our library directories
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 add_subdirectory(GX-AnalyticContinuation)
