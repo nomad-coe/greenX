@@ -31,12 +31,13 @@
 # First approach. Pass path to Zofu install location to CMake
 set(ZOFU_PATH "" CACHE STRING "Location of Zofu unit-testing library")
 find_library(LibZofu NAME "libzofu" "zofu" HINTS "${ZOFU_PATH}/lib")
-# Default include directory name
-#include_directories(${ZOFU_PATH}/finclude)
+
 # More sensible include name, suggested in the docs and used when caling ExternalProject_Add
-include_directories(${ZOFU_PATH}/include)
+# include_directories(${ZOFU_PATH}/finclude)
+set(ZOFU_INCLUDE_PATH ${ZOFU_PATH}/include)
+include_directories(${ZOFU_INCLUDE_PATH})
+
 # Program that generates a unit test driver given a test module.
-# Unfortunately this does not take multiple modules as arguments
 set(ZOFU_DRIVER ${ZOFU_PATH}/bin/zofu-driver)
 
 # If the library is not found (either not installed, or the path is wrong)
@@ -66,12 +67,12 @@ if (NOT LibZofu)
     add_library(LibZofu STATIC IMPORTED)
     set_target_properties(LibZofu PROPERTIES IMPORTED_LOCATION ${ZOFU_PATH}/lib/libzofu.a)
     # All targets get this added to their include path
-    include_directories(${ZOFU_PATH}/include)
+    include_directories(${ZOFU_INCLUDE_PATH})
 endif ()
 
 if (LibZofu)
     message("-- Found LibZofu ${LibZofu}")
-    message("-- LibZofu's module path: ${ZOFU_PATH}/include")
+    message("-- LibZofu's module path: ${ZOFU_INCLUDE_PATH}")
 
 else()
     message("-- LibZofu not found")
