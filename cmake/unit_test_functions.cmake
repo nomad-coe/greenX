@@ -2,12 +2,21 @@
 # LibZofu and ZOFU_INCLUDE_PATH are implicitly available as globals.
 #
 # Conventions
+# --------------
+# The test module should be named ${TEST_NAME}.f90
+# The test binary will have the name ${TEST_NAME}
+# A unit test with be created with the CMake variable name UNITTEST_${TEST_NAME}
+# ${TARGET_TEST_DIR} should be somewhere senible in the build directory, for
+# example build/unit_tests/library_name
+# The test driver - the auto-generated program that calls the module ${TEST_NAME}.f90 -
+# is placed in the same location as the test binary: ${TARGET_TEST_DIR}
 #
 # Arguments
+# --------------
 # TARGET_TEST_DIR: Build folder subdirectory in which to save the driver.f90
-# and corresponding unit test binary.
+#   and corresponding unit test binary.
 # TEST_NAME: Name of the test module (excluding the .f90 extension)
-# This will also be used to name the unit test
+#   This will also be used to name the unit test
 # REQUIRED_LIBS: List of libaries (excluding Zofu) that the unit tests depend on.
 
 function(create_unit_test_executable)
@@ -16,6 +25,8 @@ function(create_unit_test_executable)
     set(multiValueArgs REQUIRED_LIBS)               # Multi-value options: Multiple arguments or list/s
 
     # Parse function arguments and prepend prefix
+    # This should be present in all functions, with the same signature.
+    # The prefix gives variables a local scope.
     cmake_parse_arguments(FUNC                      # Prefix for all function arguments within function body
             "${options}"                            # Assign the binary options for the function
             "${oneValueArgs}"                       # Assign the single-value options for the function
@@ -25,7 +36,7 @@ function(create_unit_test_executable)
     # Generate test program .f90 from module
     add_custom_command(
             OUTPUT "${FUNC_TARGET_TEST_DIR}/${FUNC_TEST_NAME}_driver.f90"
-            # ./zofu-driver path/to/module.f90 target/location/program.f90
+            # For example, ./zofu-driver path/to/module.f90 target/location/module_driver.f90
             COMMAND ${ZOFU_DRIVER} "${CMAKE_CURRENT_SOURCE_DIR}/src/${FUNC_TEST_NAME}.f90" "${FUNC_TARGET_TEST_DIR}/${FUNC_TEST_NAME}_driver.f90"
             COMMENT "Generating ${FUNC_TARGET_TEST_DIR}/${FUNC_TEST_NAME}_driver.f90"
     )
