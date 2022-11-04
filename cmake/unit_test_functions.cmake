@@ -22,7 +22,7 @@
 # Notes
 # ------------
 # One must link to LibZofu rather than ${LibZofu} when externalProject_add used.
-# Hence externalProject_add is commented-out in FindZofu.cmake.
+# Hence externalProject_add is commented-out in Findzofu.cmake.
 # One should probably look into the nuance of linking to LIB vs ${LIB}
 # https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#importing-libraries
 
