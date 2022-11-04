@@ -38,7 +38,7 @@ jobs:
         run: |
           mkdir -p external && cd external
           git clone https://github.com/acroucher/zofu.git
-          mkdir build && cd build
+          mkdir zofu/build && cd zofu/build
           cmake \
              -DCMAKE_BUILD_TYPE=release \
              -DCMAKE_INSTALL_PREFIX=/home/runner/work/greenX/greenX/external/zofu/install \
