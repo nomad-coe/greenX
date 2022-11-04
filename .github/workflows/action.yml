@@ -58,7 +58,7 @@ jobs:
         run: |
           cd python && pip install -e . && cd ../
           cd build
-          ctest -j1 --output-on-failure
+          ctest -j1 --output-on-failure -V
         # The build system exports GX_BUILD_DIR, but I do not know how to
         # propagate env vars between steps in Github Actions
         env:
