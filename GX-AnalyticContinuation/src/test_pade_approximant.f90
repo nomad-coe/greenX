@@ -1,5 +1,5 @@
 module test_pade_approximant
-    !External libs
+    ! External libs
     use zofu, only: unit_test_type
     ! Our libs/modules
     use kinds, only: dp
@@ -11,6 +11,7 @@ module test_pade_approximant
     private
     public :: test_pade
 
+    ! Helper function
     interface is_close
         module procedure is_close_complex_dp
     end interface
@@ -19,7 +20,7 @@ contains
 
     ! Unfortunately Zofu asserts require real or double precision declarations
     ! (etc), which are not equivalent to real(dp), complex(dp)...
-    ! so one needs a helper function such that a logical is evaluated.
+    ! so one needs a helper function such that a logical can be evaluated.
     ! Sensible thing would be to fork the framework and modify, or open a PR.
     logical function is_close_complex_dp(a, b, tol)
         complex(dp), intent(in) :: a
