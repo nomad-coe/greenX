@@ -37,44 +37,16 @@ install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 # -----------------------------------------------
 # Unit Testing Set-up
 # -----------------------------------------------
-# Set name of test sub-directory in the build directory
-set(TEST_TARGET_DIR "analytic-continuation")
 
-# Create a directory in the build folder to place generated test drivers
-set(UNIT_TEST_DIR ${PROJECT_BINARY_DIR}/unit_tests/${TEST_TARGET_DIR})
+# Create a directory in the build folder to place generated test drivers and binaries
+set(UNIT_TEST_DIR "${PROJECT_BINARY_DIR}/unit_tests/analytic-continuation")
 file(MAKE_DIRECTORY ${UNIT_TEST_DIR})
 message("-- Analytic continuation unit tests written to: ${UNIT_TEST_DIR}")
 
-# TODO(Alex)
-# Everything from here can be placed into a function
+# Libraries on which the unit tests depend
+set(LIBS_FOR_UNIT_TESTS LibGXAC)
 
-# Generate test program from module
-add_custom_command(
-        OUTPUT ${UNIT_TEST_DIR}/test_pade_approximant_driver.f90
-        COMMAND ${ZOFU_DRIVER} "${CMAKE_CURRENT_SOURCE_DIR}/src/test_pade_approximant.f90" "${UNIT_TEST_DIR}/test_pade_approximant_driver.f90"
-        COMMENT "Generating ${UNIT_TEST_DIR}/test_pade_approximant_driver.f90"
-    )
-
-# Create the test driver executable
-add_executable(test_pade_approximant)
-
-# Set directory in which unit tests are built in
-set_target_properties(test_pade_approximant
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${UNIT_TEST_DIR}"
-        INCLUDE_DIRECTORIES "${ZOFU_INCLUDE_PATH}"
-        )
-
-target_sources(test_pade_approximant PRIVATE
-        # Module
-        src/test_pade_approximant.f90
-        # Trivial, aut-generated program to execute module
-        ${UNIT_TEST_DIR}/test_pade_approximant_driver.f90)
-
-# Ensure our library gets compiled if one attempts to build the unit test executable
-add_dependencies(test_pade_approximant LibGXAC)
-
-target_link_libraries(test_pade_approximant ${LibZofu} LibGXAC)
-
-add_test(NAME UNITTEST_pade_approximant
-        COMMAND ${UNIT_TEST_DIR}/test_pade_approximant)
+# For unit tests for many modules, but this in a loop
+create_unit_test_executable(TARGET_TEST_DIR ${UNIT_TEST_DIR}
+                            TEST_NAME "test_pade_approximant"
+                            REQUIRED_LIBS ${LIBS_FOR_UNIT_TESTS})

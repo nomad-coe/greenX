@@ -50,8 +50,8 @@ enable_testing()
 # Optional unit testing lib
 option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" OFF)
 if (${ENABLE_UNITTESTS})
-    # Functions for generating unit test executables
-#    include(cmake/unit_test_functions.cmake)
+    # Function for generating unit test executables (assumes Zofu)
+    include(cmake/unit_test_functions.cmake)
     # Calling find_package is equivalent to: include(cmake/FindZofu.cmake)
     find_package(zofu REQUIRED)
 endif()
