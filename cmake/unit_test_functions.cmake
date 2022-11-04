@@ -18,6 +18,13 @@
 # TEST_NAME: Name of the test module (excluding the .f90 extension)
 #   This will also be used to name the unit test
 # REQUIRED_LIBS: List of libaries (excluding Zofu) that the unit tests depend on.
+#
+# Notes
+# ------------
+# One must link to LibZofu rather than ${LibZofu} when externalProject_add used.
+# Hence externalProject_add is commented-out in FindZofu.cmake.
+# One should probably look into the nuance of linking to LIB vs ${LIB}
+# https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#importing-libraries
 
 function(create_unit_test_executable)
     # Function arguments:
