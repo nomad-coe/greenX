@@ -56,7 +56,7 @@ contains
             f(i) = -1._dp / (x(i) - x0)
         end do
 
-        ref = cmplx(0.5, 0.5, dp)
+        ref = cmplx(0.5, -0.5, dp)
         f_approx = pade(n, x, f, xx)
 
         call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test pade ~ -1 / (x - x0)')
