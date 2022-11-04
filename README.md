@@ -68,3 +68,99 @@ The test suite can now be run with CMake's ctest command:
 cd build
 ctest
  ```
+
+## Building Documentation
+
+GreenX is documented using Doxygen, and documentation support is enabled by
+default. To disable CMake looking for Doxygen, configure with:
+
+```bash
+cmake ../ -DENABLE_DOCS=OFF
+```
+
+To build the document, type in the build directory:
+
+```bash
+make docs
+```
+
+Documentation is built in `documentation` and can be viewed by opening
+`html/index.html` in a browser.
+
+When adding new files with documentation, please ensure the directory is listed 
+in the `INPUT` tag of Doxyfile.
+
+
+## Unit Testing
+
+### Installing the Unit-Testing Framework
+
+Unit tests require the unit-testing framework [Zofu](https://github.com/acroucher/zofu).
+To build Zofu, from GreenX's root (noting that one must define `$GX_ROOT`):
+
+```bash
+mkdir external && cd external
+git clone https://github.com/acroucher/zofu.git
+mkdir build && cd build
+cmake \
+   -DCMAKE_BUILD_TYPE=release \
+   -DCMAKE_INSTALL_PREFIX=${GX_ROOT}/external/zofu/install \
+   -DZOFU_FORTRAN_MODULE_INSTALL_DIR:PATH=include \
+   ..
+make -j 4
+make install
+```
+
+### Running Unit Tests
+
+GreenX can be built with unit-testing enabled using:
+
+```bash
+cmake -DENABLE_UNITTESTS=ON -DZOFU_PATH=${GX_ROOT}/external/zofu/install ../
+```
+
+Unit tests are run with the application tests, using ctest. Simply type `ctest`
+in the build directory.
+
+### Adding Unit Tests
+
+For an example of writing a unit test, see `GX-AnalyticContinuation/src/test_pade_approximant.f90`.
+A unit test is a module and follows the naming convention `test_MODULENAME.f90`.
+The unit test itself is a module containing subroutines which set up some data,
+call the routine under test, and make some assertions on the resulting data.
+Zofu provides the object with which to make the assertions and carry the result.
+One should write a separate test module for each fortran module they wish to test.
+
+Unit tests are added to the build system straightforwardly:
+
+1. Create a directory in the build folder that will contain the test binary.
+A good convention is `unit_tests/sublibrary_name`:
+
+```cmake
+set(UNIT_TEST_DIR "${PROJECT_BINARY_DIR}/unit_tests/analytic-continuation")
+file(MAKE_DIRECTORY ${UNIT_TEST_DIR})
+message("-- Analytic continuation unit tests written to: ${UNIT_TEST_DIR}")
+```
+
+Noting one is free to choose any name for `UNIT_TEST_DIR`.
+
+2. Create a list of libraries which your  unit tests depend upon. Typically
+the library associated with that subfolder, for which the module is a part of.
+
+```cmake
+# Libraries on which the unit tests depend
+set(LIBS_FOR_UNIT_TESTS LibGXAC)
+```
+
+Noting one is free to choose any name for `LIBS_FOR_UNIT_TESTS`.
+
+3. Call the function `create_unit_test_executable` to define the unit test:
+
+```cmake
+create_unit_test_executable(TARGET_TEST_DIR ${UNIT_TEST_DIR}
+                            TEST_NAME "test_pade_approximant"
+                            REQUIRED_LIBS ${LIBS_FOR_UNIT_TESTS})
+```
+
+For multiple tests, one could call `create_unit_test_executable` in a loop over 
+a list of modules.

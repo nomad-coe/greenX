@@ -31,14 +31,27 @@ jobs:
       - name: Install python dependencies
         run: pip3 install numpy pytest
 
-      - name: Install blas and lapack
-        run: sudo apt-get install libblas-dev liblapack-dev
+      - name: Install blas, lapack and other dependencies
+        run: sudo apt-get install libblas-dev liblapack-dev doxygen
+
+      - name: Install Zofu Test Framework
+        run: |
+          mkdir -p external && cd external
+          git clone https://github.com/acroucher/zofu.git
+          mkdir zofu/build && cd zofu/build
+          cmake \
+             -DCMAKE_BUILD_TYPE=release \
+             -DCMAKE_INSTALL_PREFIX=/home/runner/work/greenX/greenX/external/zofu/install \
+             -DZOFU_FORTRAN_MODULE_INSTALL_DIR:PATH=include \
+             ..
+          make -j 4
+          make install
 
       - name: Build
         run: |
           mkdir -p build
           cd build
-          cmake ../
+          cmake -DENABLE_UNITTESTS=ON -DZOFU_PATH=/home/runner/work/greenX/greenX/external/zofu/install ../
           make -j$(nproc) VERBOSE=1
 
       - name: Run Tests
