@@ -21,7 +21,7 @@ target_sources(LibGXMiniMax PRIVATE
         src/gx_common.h
         src/minimax_gw.F90
         src/minimax_rpa.F90
-        src/mp2_grids.F90
+        src/minimax_grids.F90
         api/api_utilities.f90
         api/gx_minimax.f90
         )

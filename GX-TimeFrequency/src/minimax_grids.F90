@@ -1,10 +1,6 @@
-!--------------------------------------------------------------------------------------------------!
-!   CP2K: A general program to perform molecular dynamics simulations                              !
-!   Copyright 2000-2022 CP2K developers group <https://cp2k.org>                                   !
-!                                                                                                  !
-!   SPDX-License-Identifier: GPL-2.0-or-later                                                      !
-!--------------------------------------------------------------------------------------------------!
-
+!  Copyright (C) 2020-2022 Green-X library
+!  This file is distributed under the terms of the APACHE2 License.
+!
 ! **************************************************************************************************
 !> \brief Routines to calculate frequency and time grids (integration points and weights)
 !> for correlation methods as well as weights for the inhomogeneous cosine/sine transform.
@@ -14,7 +10,7 @@
 !  Assume -std=f2008: i.e. allocatable arrays are automatically deallocated when going out of scope.
 ! **************************************************************************************************
 
-module mp2_grids
+module minimax_grids
 #include "gx_common.h"
    use kinds, only: dp
    use error_handling, only: register_exc
@@ -38,9 +34,9 @@ contains
 !> \param[in] emin: Minimum transition energy. Arbitrary units as we only need emax/emin
 !> \param[in] emax: Maximum transition energy.
 !> \param[out] tau_mesh: tau mesh (tau_tj in CP2K)
-!> \param[out] tau_wgs: weights for tau mesh (tau_wj in CP2K)
-!> \param[out] iw_mesh: imaginary frequency mesh (tj in CP2K)
-!> \param[out] iw_wgs: weights for imaginary frequency mesh (wj in CP2K)
+!> \param[out] tau_weights: weights for tau mesh (tau_wj in CP2K)
+!> \param[out] omega_mesh: imaginary frequency mesh (tj in CP2K)
+!> \param[out] omega_weights: weights for imaginary frequency mesh (wj in CP2K)
 !> \param[out] cosft_wt: weights for tau -> w cosine transform. cos(w*t) factor is included.
 !> \param[out] cosft_tw: weights for w -> tau cosine transform. cos(w*t) factor is included.
 !> \param[out] sinft_wt: weights for tau -> w sine transform. sin(w*t) factor is included.
@@ -48,14 +44,14 @@ contains
 !> \param[out] cosft_duality_error. Max_{ij} |AB - I| where A and B are the cosft_wt and cosft_tw matrices.
 !> \param[out] ierr: Exit status
    subroutine gx_minimax_grid(num_integ_points, emin, emax, &
-                              tau_mesh, tau_wgs, iw_mesh, iw_wgs, &
+                              tau_mesh, tau_weights, omega_mesh, omega_weights, &
                               cosft_wt, cosft_tw, sinft_wt, &
                               max_errors, cosft_duality_error, ierr)
 
       integer, intent(in) :: num_integ_points
       real(dp), intent(in) :: emin, emax
-      real(dp), allocatable, intent(out) :: tau_mesh(:), tau_wgs(:)
-      real(dp), allocatable, intent(out) :: iw_mesh(:), iw_wgs(:)
+      real(dp), allocatable, intent(out) :: tau_mesh(:), tau_weights(:)
+      real(dp), allocatable, intent(out) :: omega_mesh(:), omega_weights(:)
       real(dp), allocatable, intent(out) :: cosft_wt(:, :), cosft_tw(:, :), sinft_wt(:, :)
       real(dp), intent(out) :: max_errors(3), cosft_duality_error
       integer, intent(out) :: ierr
@@ -64,7 +60,7 @@ contains
       integer, parameter                                 :: cos_t_to_cos_w = 1
       integer, parameter                                 :: cos_w_to_cos_t = 2
       integer, parameter                                 :: sin_t_to_sin_w = 3
-      integer                                            :: jquad, it, iw
+      integer                                            :: i_point, j_point
       real(dp)                                           :: e_range, scaling
       real(dp), allocatable                              :: x_tw(:), mat(:, :)
 
@@ -76,17 +72,17 @@ contains
       call get_rpa_minimax_grids(num_integ_points, E_Range, x_tw, ierr)
       if (ierr /= 0) return
 
-      allocate (iw_mesh(num_integ_points))
-      allocate (iw_wgs(num_integ_points))
+      allocate (omega_mesh(num_integ_points))
+      allocate (omega_weights(num_integ_points))
 
-      do jquad = 1, num_integ_points
-         iw_mesh(jquad) = x_tw(jquad)
-         iw_wgs(jquad) = x_tw(jquad + num_integ_points)
+      do i_point = 1, num_integ_points
+         omega_mesh(i_point) = x_tw(i_point)
+         omega_weights(i_point) = x_tw(i_point + num_integ_points)
       end do
 
       ! scale the minimax parameters
-      iw_mesh(:) = iw_mesh(:)*Emin
-      iw_wgs(:) = iw_wgs(:)*Emin
+      omega_mesh(:) = omega_mesh(:)*Emin
+      omega_weights(:) = omega_weights(:)*Emin
 
       ! set up the minimax time grid
       call get_exp_minimax_coeff_gw(num_integ_points, E_Range, x_tw, ierr)
@@ -96,51 +92,50 @@ contains
       scaling = 2.0d0
 
       allocate (tau_mesh(num_integ_points))
-      !ALLOCATE (tau_mesh(0:num_integ_points))   CPK original allocation.
-      allocate (tau_wgs(num_integ_points))
+      allocate (tau_weights(num_integ_points))
 
-      do jquad = 1, num_integ_points
-         tau_mesh(jquad) = x_tw(jquad)/scaling
-         tau_wgs(jquad) = x_tw(jquad + num_integ_points)/scaling
+      do i_point = 1, num_integ_points
+         tau_mesh(i_point) = x_tw(i_point)/scaling
+         tau_weights(i_point) = x_tw(i_point + num_integ_points)/scaling
       end do
 
       ! scale grid from [1,R] to [Emin,Emax]
       tau_mesh(:) = tau_mesh(:)/Emin
-      tau_wgs(:) = tau_wgs(:)/Emin
+      tau_weights(:) = tau_weights(:)/Emin
 
       allocate (cosft_wt(num_integ_points, num_integ_points))
       allocate (cosft_tw(num_integ_points, num_integ_points))
       allocate (sinft_wt(num_integ_points, num_integ_points))
 
       ! get the weights for the cosine transform W^c(it) -> W^c(iw)
-      call get_tranformation_weights(num_integ_points, tau_mesh, iw_mesh, cosft_wt, &
-                                     Emin, Emax, max_errors(1), num_points_per_magnitude, 1, ierr)
+      call get_tranformation_weights(num_integ_points, tau_mesh, omega_mesh, cosft_wt, Emin, Emax, &
+                                     max_errors(1), num_points_per_magnitude, cos_t_to_cos_w, ierr)
       if (ierr /= 0) return
 
       ! get the weights for the cosine transform W^c(iw) -> W^c(it)
-      call get_tranformation_weights(num_integ_points, tau_mesh, iw_mesh, cosft_tw, &
-                                     Emin, Emax, max_errors(2), num_points_per_magnitude, 2, ierr)
+      call get_tranformation_weights(num_integ_points, tau_mesh, omega_mesh, cosft_tw, Emin, Emax, &
+                                     max_errors(2), num_points_per_magnitude, cos_w_to_cos_t, ierr)
       if (ierr /= 0) return
 
       ! get the weights for the sine transform Sigma^sin(it) -> Sigma^sin(iw) (PRB 94, 165109 (2016), Eq. 71)
-      call get_tranformation_weights(num_integ_points, tau_mesh, iw_mesh, sinft_wt, &
-                                     Emin, Emax, max_errors(3), num_points_per_magnitude, 3, ierr)
+      call get_tranformation_weights(num_integ_points, tau_mesh, omega_mesh, sinft_wt, Emin, Emax, &
+                                     max_errors(3), num_points_per_magnitude, sin_t_to_sin_w, ierr)
       if (ierr /= 0) return
 
       ! Compute the actual weights used for the inhomogeneous cosine/ FT and check whether
       ! the two matrices for the forward/backward transform are the inverse of each other.
-      do it = 1, num_integ_points
-         do iw = 1, num_integ_points
-            cosft_wt(iw, it) = cosft_wt(iw, it)*cos(tau_mesh(it)*iw_mesh(iw))
-            cosft_tw(it, iw) = cosft_tw(it, iw)*cos(tau_mesh(it)*iw_mesh(iw))
-            sinft_wt(iw, it) = sinft_wt(iw, it)*sin(tau_mesh(it)*iw_mesh(iw))
+      do i_point = 1, num_integ_points
+         do j_point = 1, num_integ_points
+            cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_mesh(i_point)*omega_mesh(j_point))
+            cosft_tw(i_point, j_point) = cosft_tw(i_point, j_point)*cos(tau_mesh(i_point)*omega_mesh(j_point))
+            sinft_wt(j_point, i_point) = sinft_wt(j_point, i_point)*sin(tau_mesh(i_point)*omega_mesh(j_point))
          end do
       end do
 
       allocate (mat(num_integ_points, num_integ_points))
       mat(:, :) = matmul(cosft_wt, cosft_tw)
-      do it = 1, num_integ_points
-         mat(it, it) = mat(it, it) - 1.0d0
+      do i_point = 1, num_integ_points
+         mat(i_point, i_point) = mat(i_point, i_point) - 1.0d0
       end do
       cosft_duality_error = maxval(abs(mat))
 
@@ -166,7 +161,8 @@ contains
       integer, intent(in)                                :: transformation_type
       integer, intent(out)                               :: ierr
 
-      integer                                            :: iii, jjj, jquad, lwork, num_x_nodes
+      integer                                            :: i_node, i_point, j_point, k_point, &
+                                                            lwork, num_x_nodes
       integer, allocatable, dimension(:)                 :: iwork
       real(kind=dp)                                      :: multiplicator, current_point
       real(kind=dp), allocatable, dimension(:)           :: weights_work, sing_values, vec_UTy, work, &
@@ -211,19 +207,19 @@ contains
 
       ! set the x-values logarithmically in the interval [Emin,Emax]
       multiplicator = (E_max/E_min)**(1.0d0/(real(num_x_nodes, kind=dp) - 1.0d0))
-      do iii = 1, num_x_nodes
-         x_values(iii) = E_min*multiplicator**(iii - 1)
+      do i_node = 1, num_x_nodes
+         x_values(i_node) = E_min*multiplicator**(i_node - 1)
       end do
 
       current_point = 0.0d0
       max_error = 0.0d0
 
       ! loop over all omega frequency points
-      do jquad = 1, num_integ_points
+      do i_point = 1, num_integ_points
 
         ! calculate mat_A
          call calculate_mat_A(num_integ_points, tau_tj, omega_tj, x_values, y_values, &
-                                     num_x_nodes, mat_A, jquad, current_point, transformation_type)
+                              num_x_nodes, mat_A, i_point, current_point, transformation_type)
 
          ! Singular value decomposition of mat_A
          call dgesdd('A', num_x_nodes, num_integ_points, mat_A, num_x_nodes, sing_values, mat_U, num_x_nodes, &
@@ -236,9 +232,9 @@ contains
 
          ! integration weights = V Sigma U^T y
          ! 1) V*Sigma
-         do jjj = 1, num_integ_points
-            do iii = 1, num_integ_points
-               mat_SinvVSinvSigma(iii, jjj) = mat_SinvVSinvT(jjj, iii)/sing_values(jjj)
+         do j_point = 1, num_integ_points
+            do k_point = 1, num_integ_points
+               mat_SinvVSinvSigma(k_point, j_point) = mat_SinvVSinvT(j_point, k_point)/sing_values(j_point)
             end do
          end do
 
@@ -250,12 +246,12 @@ contains
          call dgemm('N', 'N', num_integ_points, 1, num_x_nodes, 1.0d0, mat_SinvVSinvSigma, num_integ_points, vec_UTy, &
                     num_x_nodes, 0.0d0, weights_work, num_integ_points)
 
-         weights(jquad, :) = weights_work(:)
+         weights(i_point, :) = weights_work(:)
 
          ! calculate the maximum error of the fitting
          call calculate_max_error(max_error, current_point, tau_tj, omega_tj, weights_work, x_values, &
                                   y_values, num_integ_points, num_x_nodes, transformation_type)                                      
-      end do ! jquad
+      end do ! i_point
 
       deallocate (x_values, y_values, mat_A, weights_work, sing_values, mat_U, mat_SinvVSinvT, &
                   work, iwork, mat_SinvVSinvSigma, vec_UTy)
@@ -263,9 +259,9 @@ contains
    end subroutine get_tranformation_weights
 
    subroutine calculate_mat_A(num_integ_points, tau_tj, omega_tj, x_values, y_values, &
-                              num_x_nodes, mat_A, jquad, current_point, transformation_type)
+                              num_x_nodes, mat_A, i_point, current_point, transformation_type)
  
-      integer, intent(in)                                :: num_integ_points, num_x_nodes, jquad
+      integer, intent(in)                                :: num_integ_points, num_x_nodes, i_point
       real(kind=dp), allocatable, dimension(:), &
          intent(in)                                      :: tau_tj, omega_tj, x_values
       real(kind=dp), allocatable, dimension(:), &          
@@ -275,57 +271,59 @@ contains
       real(kind=dp), intent(inout)                       :: current_point
       integer, intent(in)                                :: transformation_type
 
-      integer                                            :: iii, jjj
-      real(kind=dp)                                      :: tau, omega, x_value
+      integer                                            :: i_node, j_point
+      real(kind=dp)                                      :: tau, omega
 
 
       if (transformation_type.eq.1) then
 
-         current_point = omega_tj(jquad)
+         omega = omega_tj(i_point)
+         current_point = omega
 
          ! y=2x/(x^2+omega_k^2)
-         do iii = 1, num_x_nodes
-            y_values(iii) = 2.0d0*x_values(iii)/((x_values(iii))**2 + current_point**2)
+         do i_node = 1, num_x_nodes
+            y_values(i_node) = 2.0d0*x_values(i_node)/((x_values(i_node))**2 + omega**2)
          end do
 
          ! calculate mat_A
-         do jjj = 1, num_integ_points
-            do iii = 1, num_x_nodes
-               mat_A(iii, jjj) = cos(current_point*tau_tj(jjj))*exp(-x_values(iii)*tau_tj(jjj))
+         do j_point = 1, num_integ_points
+            do i_node = 1, num_x_nodes
+               mat_A(i_node, j_point) = cos(omega*tau_tj(j_point))*exp(-x_values(i_node)*tau_tj(j_point))
             end do
         end do
 
       else if (transformation_type.eq.2) then
 
-         current_point = tau_tj(jquad)
+         tau = tau_tj(i_point)
+         current_point = tau
 
          ! y=exp(-x*|tau_k|)
-         do iii = 1, num_x_nodes
-            y_values(iii) = exp(-x_values(iii)*current_point)
+         do i_node = 1, num_x_nodes
+            y_values(i_node) = exp(-x_values(i_node)*tau)
          end do
 
          ! calculate mat_A
-         do jjj = 1, num_integ_points
-            do iii = 1, num_x_nodes
-               omega = omega_tj(jjj)
-               x_value = x_values(iii)
-               mat_A(iii, jjj) = cos(current_point*omega)*2.0d0*x_value/(x_value**2 + omega**2)
+         do j_point = 1, num_integ_points
+            omega = omega_tj(j_point)
+            do i_node = 1, num_x_nodes
+               mat_A(i_node, j_point) = cos(tau*omega)*2.0d0*x_values(i_node)/(x_values(i_node)**2 + omega**2)
             end do
          end do
 
       else if (transformation_type.eq.3) then
 
-         current_point = omega_tj(jquad)
+         omega = omega_tj(i_point)
+         current_point = omega
 
          ! y=2*omega_k/(x^2+omega_k^2)
-         do iii = 1, num_x_nodes
-            y_values(iii) = 2.0d0*current_point/((x_values(iii))**2 + current_point**2)
+         do i_node = 1, num_x_nodes
+            y_values(i_node) = 2.0d0*omega/((x_values(i_node))**2 + omega**2)
          end do
 
          ! calculate mat_A
-         do jjj = 1, num_integ_points
-            do iii = 1, num_x_nodes
-               mat_A(iii, jjj) = sin(current_point*tau_tj(jjj))*exp(-x_values(iii)*tau_tj(jjj))
+         do j_point = 1, num_integ_points
+            do i_node = 1, num_x_nodes
+               mat_A(i_node, j_point) = sin(omega*tau_tj(j_point))*exp(-x_values(i_node)*tau_tj(j_point))
             end do
          end do
 
@@ -343,7 +341,7 @@ contains
       integer, intent(in)                                :: num_integ_points, num_x_nodes
       integer, intent(in)                                :: transformation_type      
 
-      integer                                            :: iii,kkk
+      integer                                            :: i_node,i_point
       real(kind=dp)                                      :: func_val, func_val_temp, max_error_tmp, &
                                                             tau, omega, x_value
 
@@ -354,18 +352,19 @@ contains
 
          omega=current_point
 
-         do kkk = 1, num_x_nodes
+         do i_node = 1, num_x_nodes
 
             func_val = 0.0d0
-            x_value=x_values(kkk)
+            x_value=x_values(i_node)
 
             ! calculate value of the fit function
-            do iii = 1, num_integ_points
-              func_val = func_val + weights_work(iii)*cos(omega*tau_tj(iii))*exp(-x_value*tau_tj(iii))
+            do i_point = 1, num_integ_points
+              tau = tau_tj(i_point) 
+              func_val = func_val + weights_work(i_point)*cos(omega*tau)*exp(-x_value*tau)
             end do
 
-            if (abs(y_values(kkk) - func_val) > max_error_tmp) then
-               max_error_tmp = abs(y_values(kkk) - func_val)
+            if (abs(y_values(i_node) - func_val) > max_error_tmp) then
+               max_error_tmp = abs(y_values(i_node) - func_val)
                func_val_temp = func_val
             end if
 
@@ -376,19 +375,19 @@ contains
 
         tau = current_point
 
-        do kkk = 1, num_x_nodes
+        do i_node = 1, num_x_nodes
 
            func_val = 0.0d0
-           x_value=x_values(kkk)
+           x_value=x_values(i_node)
 
            ! calculate value of the fit function
-           do iii = 1, num_integ_points
-              omega = omega_tj(iii)
-              func_val = func_val +  weights_work(iii)*cos(tau*omega)*2.0d0*x_value/(x_value**2 + omega**2)
+           do i_point = 1, num_integ_points
+              omega = omega_tj(i_point)
+              func_val = func_val +  weights_work(i_point)*cos(tau*omega)*2.0d0*x_value/(x_value**2 + omega**2)
            end do
 
-           if (abs(y_values(kkk) - func_val) > max_error_tmp) THEN
-              max_error_tmp = abs(y_values(kkk) - func_val)
+           if (abs(y_values(i_node) - func_val) > max_error_tmp) THEN
+              max_error_tmp = abs(y_values(i_node) - func_val)
               func_val_temp = func_val
            end if
 
@@ -397,20 +396,21 @@ contains
       !!!! sine t to w !!!!
       else if (transformation_type.eq.3) then
 
-         omega=current_point
+         omega = current_point
 
-         do kkk = 1, num_x_nodes
+         do i_node = 1, num_x_nodes
 
             func_val = 0.0d0
-            x_value=x_values(kkk)
+            x_value=x_values(i_node)
 
             ! calculate value of the fit function
-            do iii = 1, num_integ_points
-               func_val = func_val +  weights_work(iii)*sin(omega*tau_tj(iii))*exp(-x_value*tau_tj(iii))
+            do i_point = 1, num_integ_points
+               tau = tau_tj(i_point)
+               func_val = func_val +  weights_work(i_point)*sin(omega*tau)*exp(-x_value*tau)
             end do
 
-            if (abs(y_values(kkk) - func_val) > max_error_tmp) then
-               max_error_tmp = abs(y_values(kkk) - func_val)
+            if (abs(y_values(i_node) - func_val) > max_error_tmp) then
+               max_error_tmp = abs(y_values(i_node) - func_val)
               func_val_temp = func_val
             end if
          end do   
@@ -448,7 +448,7 @@ contains
       integer, parameter                                 :: cos_w_to_cos_t = 2
       integer, parameter                                 :: sin_t_to_sin_w = 3      
 
-      integer                                            :: ierr, jquad, i_exp
+      integer                                            :: ierr, i_point, i_exp
       real(kind=dp)                                      :: E_Range, Emax, Emin, max_error_min, &
                                                             scaling, Range_from_i_exp
 
@@ -479,8 +479,8 @@ contains
 
             write (ounit, fmt="(T3,A,T66,F15.4)") "Range for the minimax approximation:", Range_from_i_exp
             write (ounit, fmt="(T3,A)") "minimax frequency omega_i     weight of frequency omega_i"
-            do jquad = 1, num_integ_points
-               write (ounit, fmt="(T15,F20.10,F20.10)") x_tw(jquad), x_tw(jquad + num_integ_points)
+            do i_point = 1, num_integ_points
+               write (ounit, fmt="(T15,F20.10,F20.10)") x_tw(i_point), x_tw(i_point + num_integ_points)
             end do
 
             ! GET AND PRINT TIME GRIDS
@@ -492,8 +492,8 @@ contains
             end if
 
             write (ounit, fmt="(T3,A)") "minimax time tau_j     weight of time tau_j"
-            do jquad = 1, num_integ_points
-               write (ounit, fmt="(T15,F20.10,F20.10)") x_tw(jquad), x_tw(jquad + num_integ_points)
+            do i_point = 1, num_integ_points
+               write (ounit, fmt="(T15,F20.10,F20.10)") x_tw(i_point), x_tw(i_point + num_integ_points)
             end do
 
             write (ounit, fmt="(T3,A)") " "
@@ -531,9 +531,9 @@ contains
          call get_rpa_minimax_grids(num_integ_points, E_Range, x_tw, ierr)
          stop "The grid size you choose is not available."
 
-         do jquad = 1, num_integ_points
-            tj(jquad) = x_tw(jquad)
-            wj(jquad) = x_tw(jquad + num_integ_points)
+         do i_point = 1, num_integ_points
+            tj(i_point) = x_tw(i_point)
+            wj(i_point) = x_tw(i_point + num_integ_points)
          end do
 
          deallocate (x_tw)
@@ -563,9 +563,9 @@ contains
 
 
 
-         do jquad = 1, num_integ_points
-            tau_tj(jquad) = x_tw(jquad)/scaling
-            tau_wj(jquad) = x_tw(jquad + num_integ_points)/scaling
+         do i_point = 1, num_integ_points
+            tau_tj(i_point) = x_tw(i_point)/scaling
+            tau_wj(i_point) = x_tw(i_point + num_integ_points)/scaling
          end do
 
          deallocate (x_tw)
@@ -574,14 +574,14 @@ contains
          !tau_tj(:) = tau_tj(:)/Emin*Emin
          !tau_wj(:) = tau_wj(:)/Emin*Emin
 
-         call get_tranformation_weights(num_integ_points, tau_tj, tj, weights_cos_tf_t_to_w, &
-                 Emin, Emax, max_error_min, num_points_per_magnitude, 1, ierr)
+         call get_tranformation_weights(num_integ_points, tau_tj, tj, weights_cos_tf_t_to_w, Emin, Emax, &
+                                        max_error_min, num_points_per_magnitude, cos_t_to_cos_w, ierr)
 
-         call get_tranformation_weights(num_integ_points, tau_tj, tj, weights_cos_tf_w_to_t, &
-                 Emin, Emax, max_error_min, num_points_per_magnitude, 2, ierr)
+         call get_tranformation_weights(num_integ_points, tau_tj, tj, weights_cos_tf_w_to_t, Emin, Emax, &
+                                        max_error_min, num_points_per_magnitude, cos_w_to_cos_t, ierr)
 
-         call get_tranformation_weights(num_integ_points, tau_tj, tj, weights_sin_tf_t_to_w, &
-                 Emin, Emax, max_error_min, num_points_per_magnitude, 3, ierr)
+         call get_tranformation_weights(num_integ_points, tau_tj, tj, weights_sin_tf_t_to_w, Emin, Emax, &
+                                        max_error_min, num_points_per_magnitude, sin_t_to_sin_w, ierr)
 
          if (present(ounit)) then
             write(ounit, fmt="(T3,A,T66,F15.4)") "Range for the minimax approximation:", Range_from_i_exp
@@ -600,4 +600,4 @@ contains
 
    end subroutine get_minimax_grid
 
-end module mp2_grids
+end module minimax_grids

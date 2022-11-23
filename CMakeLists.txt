@@ -58,7 +58,7 @@ endif()
 
 # Our library directories
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
-#add_subdirectory(GX-AnalyticContinuation)
+add_subdirectory(GX-AnalyticContinuation)
 add_subdirectory(GX-common)
 add_subdirectory(GX-TimeFrequency)
 
