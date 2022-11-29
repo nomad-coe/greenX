@@ -1,19 +1,14 @@
-!--------------------------------------------------------------------------------------------------!
-!   cp2k: a general program to perform molecular dynamics simulations                              !
-!   copyright 2000-2022 cp2k developers group <https://cp2k.org>                                   !
-!                                                                                                  !
-!   spdx-license-identifier: gpl-2.0-or-later                                                      !
-!--------------------------------------------------------------------------------------------------!
-
-! **************************************************************************************************
-!> \brief routines to return tabulated the minimax coefficients in order to
-!>        approximate 1/x as a sum over exponential functions
-!>        1/x ~ sum_{i}^{k} w_i exp(-a_i * x) for x belonging to [1:rc].
-!>        this module contains coefficients for minimax approximations with 26, 28, 30, 32, 34 points
-!>        that give well-converged gw results
-!> \par history
-!>      03.2020 created [jan wilhelm]
-! **************************************************************************************************
+! ***************************************************************************************************
+!  Copyright (C) 2020-2022 Green-X library                                                          
+!  This file is distributed under the terms of the APACHE2 License.                                 
+!                                                                                                   
+! ***************************************************************************************************
+!> \brief This module contains the tabulated minimax coefficients that approximate                  
+!>        1/x ~ sum_{i}^{k} w_i exp(-a_i * x) with x \in [1:rc]                                     
+!> The arrays containing the coefficients and weights are stored in the `acoeff_weight` derived type.
+!> To extend this module, add the new entries to `tau_npoints_supported`, `energy_ranges_grids`,
+!> and fill the corresponding arrays in the derived type.
+! ***************************************************************************************************
 module minimax_gw
 #include "gx_common.h"
   use kinds, only: dp
@@ -3442,7 +3437,7 @@ contains
     integer, intent(out)                               :: ierr
 
     !> Internal variables
-    integer                                            :: idx, kloc, bup
+    integer                                            :: jdx, kloc, bup
     real(kind=dp)                                      :: e_ratio
 
     !> Begin work
@@ -3453,18 +3448,20 @@ contains
        kloc = findloc(tau_npoints_supported, k, 1)
        bup = ubound(aw%arrays(kloc)%energy_range)
 
-       if (e_range >= aw%arrays(kloc)%energy_range(bup)) then
+       if (e_range >= max(aw%arrays(kloc)%energy_range)) then
           ac_we(:) = aw%arrays(kloc)%subarrays(:, bup + 1)
+          return
        end if
 
-       do idx = 1, energy_ranges_grids(kloc)
-          if (e_range < aw%arrays(kloc)%energy_range(idx)) then
-             ac_we(:) = aw%arrays(kloc)%subarrays(:, idx)
+       do jdx = 1, energy_ranges_grids(kloc)
+          if (e_range < aw%arrays(kloc)%energy_range(jdx)) then
+             ac_we(:) = aw%arrays(kloc)%subarrays(:, jdx)
              exit
           end if
        end do
     else
        ierr = 1
+       return
     end if
 
   end subroutine get_acoef_weight_gw
