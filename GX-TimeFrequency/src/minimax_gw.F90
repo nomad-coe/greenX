@@ -3431,14 +3431,14 @@ contains
   !> \param aw ...
   ! **************************************************************************************************
   subroutine get_acoef_weight_gw(k, e_range, ac_we, ierr)
-    integer, intent(in)                                :: k
-    real(kind=dp), intent(in)                          :: e_range
-    real(kind=dp), dimension(2*k), intent(out)         :: ac_we
-    integer, intent(out)                               :: ierr
+    integer, intent(in)                          :: k
+    real(kind=dp), intent(in)                    :: e_range
+    real(kind=dp), dimension(2*k), intent(out)   :: ac_we
+    integer, intent(out)                         :: ierr
 
     !> Internal variables
-    integer                                            :: jdx, kloc, bup
-    real(kind=dp)                                      :: e_ratio
+    integer                                      :: jdx, kloc, bup
+    real(kind=dp)                                :: e_ratio
 
     !> Begin work
     ierr = 0

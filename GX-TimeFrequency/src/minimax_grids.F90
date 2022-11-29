@@ -15,7 +15,7 @@ module minimax_grids
    use kinds,           only: dp
    use error_handling,  only: register_exc
    use constants,       only: pi
-   use minimax_gw,      only: get_exp_minimax_coeff_gw
+   use minimax_gw,      only: get_acoef_weight_gw
    use minimax_rpa,     only: get_rpa_minimax_grids
 
    implicit none
@@ -85,7 +85,7 @@ contains
       omega_weights(:) = omega_weights(:)*e_min
 
       ! set up the minimax time grid
-      call get_exp_minimax_coeff_gw(num_points, e_range, x_tw, ierr)
+      call get_acoef_weight_gw(num_points, e_range, x_tw, ierr)
       if (ierr /= 0) return
 
       ! For RPA we include already a factor of two (see later steps)
