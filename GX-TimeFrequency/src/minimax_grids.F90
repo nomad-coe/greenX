@@ -12,11 +12,11 @@
 
 module minimax_grids
 #include "gx_common.h"
-  use kinds,           only: dp
-  use error_handling,  only: register_exc
-  use constants,       only: pi
-  use minimax_tau,     only: get_acoef_weight_tau
-  use minimax_rpa,     only: get_rpa_minimax_grids
+  use kinds,             only: dp
+  use error_handling,    only: register_exc
+  use constants,         only: pi
+  use minimax_tau,       only: get_points_weights_tau
+  use minimax_omega,     only: get_points_weights_omega
 
   implicit none
 
@@ -71,7 +71,7 @@ contains
 
     allocate (x_tw(2*num_points))
 
-    call get_rpa_minimax_grids(num_points, e_range, x_tw, ierr)
+    call get_points_weights_omega(num_points, e_range, x_tw, ierr)
     if (ierr /= 0) return
 
     allocate (omega_points(num_points))
@@ -87,7 +87,7 @@ contains
     omega_weights(:) = omega_weights(:)*e_min
 
     ! set up the minimax time grid
-    call get_acoef_weight_tau(num_points, e_range, x_tw, ierr)
+    call get_points_weights_tau(num_points, e_range, x_tw, ierr)
     if (ierr /= 0) return
 
     ! For RPA we include already a factor of two (see later steps)

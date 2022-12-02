@@ -31,7 +31,7 @@ module minimax_tau
      real(kind=dp), dimension(:, :), allocatable :: aw_erange_matrix
   end type er_aw_aux
 
-  public :: get_acoef_weight_tau
+  public :: get_points_weights_tau
 
 contains
 
@@ -3442,7 +3442,7 @@ contains
   !>  ac_we - vector containing coefficients and weights
   !>  ierr - error code
   ! **************************************************************************************************
-  subroutine get_acoef_weight_tau(k, e_range, ac_we, ierr)
+  subroutine get_points_weights_tau(k, e_range, ac_we, ierr)
     integer, intent(in)                          :: k
     real(kind=dp), intent(in)                    :: e_range
     real(kind=dp), dimension(2*k), intent(inout) :: ac_we
@@ -3474,10 +3474,10 @@ contains
        deallocate(aw%aw_erange_matrix)
     else
        ierr = 1
-       _REGISTER_EXC("The grid size you chose is not available.")
+       !_REGISTER_EXC("The grid size you chose is not available.")
     end if
 
-  end subroutine get_acoef_weight_tau
+  end subroutine get_points_weights_tau
 
   ! **************************************************************************************************
   !> \brief Modified bisection search to find first element in sorted array
