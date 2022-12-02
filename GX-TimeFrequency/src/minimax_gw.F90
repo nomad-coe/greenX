@@ -5,7 +5,7 @@
 ! ***************************************************************************************************
 !> \brief This module contains the tabulated minimax coefficients that approximate                  
 !>        1/x ~ sum_{i}^{k} w_i exp(-a_i * x) with x \in [1:rc]                                     
-!> The arrays containing the coefficients and weights are stored in the `acoeff_weight` derived type.
+!> The arrays containing the coefficients and weights are stored in the `er_aw_aux` derived type.
 !> To extend this module, add the new entries to `tau_npoints_supported`, `energy_ranges_grids`,
 !> and fill the corresponding arrays in the derived type.
 ! ***************************************************************************************************
@@ -23,11 +23,12 @@ module minimax_gw
   integer, parameter :: energy_ranges_grids(ngrids) = &
        [13, 13, 15, 18, 21, 36, 37, 39, 40, 40, 19, 28, 28, 18, 7]
 
-  !> derived type to store the hard-coded arrays containing the exponents and weights
-  type :: acoeff_weight
+  type :: er_aw_aux
+     ! Sorted array of the energy ranges
      real(kind=dp), dimension(:), allocatable :: energy_range
+     ! Matrices with coefficients and weights per energy region
      real(kind=dp), dimension(:, :), allocatable :: aw_erange_matrix
-  end type acoeff_weight
+  end type er_aw_aux
 
   public :: get_acoef_weight_gw
 
@@ -36,13 +37,13 @@ contains
   ! **************************************************************************************************
   !> \brief Stores the minimax coefficients for all supported grid sizes
   !>  k - grid size
-  !>  aw - array of the coefficients and weights
+  !>  aw - derived type of energy ranges and coefficients:weights
   !>  ierr - error code
   ! **************************************************************************************************
   subroutine set_aw_array(kval, aw, ierr)
-    integer, intent(in)              :: kval
-    type(acoeff_weight), intent(out) :: aw
-    integer, intent(out)             :: ierr
+    integer, intent(in)            :: kval
+    type(er_aw_aux), intent(inout) :: aw
+    integer, intent(inout)         :: ierr
 
     !> Begin work
     ierr = 0
@@ -54,9 +55,9 @@ contains
             100.0000_dp, 158.4893_dp, 251.1886_dp, 398.1072_dp]
        aw%aw_erange_matrix(:,:) = reshape([0.1534423273_dp, 0.8208030144_dp, 2.0763266378_dp, 4.0375449448_dp, 6.9549672561_dp,&
             11.4891014500_dp, 0.3951503587_dp, 0.9483584804_dp, 1.5813287669_dp, 2.3797403876_dp, 3.5481339356_dp,&
-            5.8817260742_dp, 0.1205040984_dp, 0.6471706375_dp, 1.6495023836_dp, 3.2457669505_dp, 5.6881108969_dp, 9.6288261179_dp, &
-            0.3106082604_dp, 0.7514093561_dp, 1.2720076125_dp, 1.9595162536_dp, 3.0177199430_dp, 5.2126406909_dp, 0.1005838109_dp, &
-            0.5423052006_dp, 1.3926894069_dp, 2.7733849876_dp, 4.9443770209_dp, 8.5653072999_dp, 0.2594925337_dp, 0.6326994282_dp, &
+            5.8817260742_dp, 0.1205040984_dp, 0.6471706375_dp, 1.6495023836_dp, 3.2457669505_dp, 5.6881108969_dp, 9.6288261179_dp,&
+            0.3106082604_dp, 0.7514093561_dp, 1.2720076125_dp, 1.9595162536_dp, 3.0177199430_dp, 5.2126406909_dp, 0.1005838109_dp,&
+            0.5423052006_dp, 1.3926894069_dp, 2.7733849876_dp, 4.9443770209_dp, 8.5653072999_dp, 0.2594925337_dp, 0.6326994282_dp,&
             1.0873449642_dp, 1.7143811393_dp, 2.7218526271_dp, 4.8651609155_dp, 0.0745374837_dp, 0.4051625322_dp, 1.0572745177_dp,&
             2.1597944537_dp, 3.9894964633_dp, 7.2237871301_dp, 0.1926489629_dp, 0.4774754563_dp, 0.8471482105_dp, 1.4011198768_dp,&
             2.3561324362_dp, 4.4544447949_dp, 0.0543212595_dp, 0.2985187630_dp, 0.7962225874_dp, 1.6836229509_dp, 3.2535534712_dp,&
@@ -3451,12 +3452,12 @@ contains
   subroutine get_acoef_weight_gw(k, e_range, ac_we, ierr)
     integer, intent(in)                          :: k
     real(kind=dp), intent(in)                    :: e_range
-    real(kind=dp), dimension(2*k), intent(out)   :: ac_we
+    real(kind=dp), dimension(2*k), intent(inout) :: ac_we
     integer, intent(out)                         :: ierr
 
     !> Internal variables
-    integer                                      :: jdx, kloc, bup
-    type(acoeff_weight)                          :: aw
+    integer                                      :: ien, kloc, bup
+    type(er_aw_aux)                              :: aw
 
     !> Begin work
     ierr = 0
@@ -3466,24 +3467,16 @@ contains
        kloc = findloc(tau_npoints_supported, k, 1)
        bup = energy_ranges_grids(kloc)
 
-       ! Set array elements
+       ! Allocate and set type elements
        allocate(aw%energy_range(bup))
        allocate(aw%aw_erange_matrix(2*k, bup+1))
        call set_aw_array(k, aw, ierr)
 
-       ! Select values for energy range
-       if (e_range >= maxval(aw%energy_range, 1)) then
-          ac_we(:) = aw%aw_erange_matrix(:, bup+1)
-          return
-       end if
+       ! Select energy region with binary search
+       ien = bsearch_erange(bup, aw%energy_range, e_range)
+       ac_we(:) = aw%aw_erange_matrix(:, ien)
 
-       do jdx = 1, bup
-          if (e_range < aw%energy_range(jdx)) then
-             ac_we(:) = aw%aw_erange_matrix(:, jdx)
-             exit
-          end if
-       end do
-
+       ! Deallocate
        deallocate(aw%energy_range)
        deallocate(aw%aw_erange_matrix)
     else
@@ -3492,5 +3485,38 @@ contains
     end if
 
   end subroutine get_acoef_weight_gw
+
+  ! **************************************************************************************************
+  !> \brief Modified bisection search to find first element in sorted array
+  !>        that is strictly greater than a given value
+  !>  lenght - lenght of sorted array
+  !>  einter - sorted array of the energy intervals
+  !>  eval - the energy value
+  ! **************************************************************************************************
+  function bsearch_erange(length, einter, eval) result(idx)
+    integer, intent(in)                     :: length
+    real(dp), dimension(length), intent(in) :: einter
+    real(dp), intent(in)                    :: eval
+    integer                                 :: idx
+
+    ! Auxiliary variables
+    integer                                 :: left, right, middle
+
+    ! Begin work
+    left = 1
+    right = length
+    idx = length + 1
+
+    do while (left <= right)
+       middle = (left + right) / 2
+       if (einter(middle) <= eval) then
+          left = middle + 1
+       else
+          right = middle - 1
+          idx = middle
+       end if
+    end do
+
+  end function bsearch_erange
 
 end module minimax_gw
