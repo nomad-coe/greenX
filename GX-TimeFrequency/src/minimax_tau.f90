@@ -9,9 +9,10 @@
 !> To extend this module, add the new entries to `tau_npoints_supported`, `energy_ranges_grids`,
 !> and fill the corresponding arrays in the derived type.
 ! ***************************************************************************************************
-module minimax_gw
+module minimax_tau
 #include "gx_common.h"
-  use kinds, only: dp
+  use kinds,          only: dp
+  use error_handling, only: register_exc
   implicit none
 
   private
@@ -30,7 +31,7 @@ module minimax_gw
      real(kind=dp), dimension(:, :), allocatable :: aw_erange_matrix
   end type er_aw_aux
 
-  public :: get_acoef_weight_gw
+  public :: get_acoef_weight_tau
 
 contains
 
@@ -38,15 +39,10 @@ contains
   !> \brief Stores the minimax coefficients for all supported grid sizes
   !>  k - grid size
   !>  aw - derived type of energy ranges and coefficients:weights
-  !>  ierr - error code
   ! **************************************************************************************************
-  subroutine set_aw_array(kval, aw, ierr)
+  subroutine set_aw_array(kval, aw)
     integer, intent(in)            :: kval
     type(er_aw_aux), intent(inout) :: aw
-    integer, intent(inout)         :: ierr
-
-    !> Begin work
-    ierr = 0
 
     select case(kval)
     case(6)
@@ -3434,9 +3430,6 @@ contains
             0.040417626126145245_dp, 0.06336363493503006_dp, 0.09843823938908386_dp, 0.1516353587304579_dp, 0.23175010955983177_dp, 0.35168177852781385_dp,&
             0.5304884039781542_dp, 0.7970145382697631_dp, 1.197557199061726_dp, 1.8163260289376923_dp,&
             2.848850144582029_dp, 5.042342061181277_dp], shape(aw%aw_erange_matrix))
-    case default
-       ierr = 1
-       return
     end select
 
   end subroutine set_aw_array
@@ -3449,7 +3442,7 @@ contains
   !>  ac_we - vector containing coefficients and weights
   !>  ierr - error code
   ! **************************************************************************************************
-  subroutine get_acoef_weight_gw(k, e_range, ac_we, ierr)
+  subroutine get_acoef_weight_tau(k, e_range, ac_we, ierr)
     integer, intent(in)                          :: k
     real(kind=dp), intent(in)                    :: e_range
     real(kind=dp), dimension(2*k), intent(inout) :: ac_we
@@ -3470,7 +3463,7 @@ contains
        ! Allocate and set type elements
        allocate(aw%energy_range(bup))
        allocate(aw%aw_erange_matrix(2*k, bup+1))
-       call set_aw_array(k, aw, ierr)
+       call set_aw_array(k, aw)
 
        ! Select energy region with binary search
        ien = bsearch_erange(bup, aw%energy_range, e_range)
@@ -3481,10 +3474,10 @@ contains
        deallocate(aw%aw_erange_matrix)
     else
        ierr = 1
-       return
+       _REGISTER_EXC("The grid size you chose is not available.")
     end if
 
-  end subroutine get_acoef_weight_gw
+  end subroutine get_acoef_weight_tau
 
   ! **************************************************************************************************
   !> \brief Modified bisection search to find first element in sorted array
@@ -3519,4 +3512,4 @@ contains
 
   end function bsearch_erange
 
-end module minimax_gw
+end module minimax_tau
