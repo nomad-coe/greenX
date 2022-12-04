@@ -3474,7 +3474,7 @@ contains
        deallocate(aw%aw_erange_matrix)
     else
        ierr = 1
-       !_REGISTER_EXC("The grid size you chose is not available.")
+       _REGISTER_EXC("The grid size you chose is not available.")
     end if
 
   end subroutine get_points_weights_tau
