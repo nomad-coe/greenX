@@ -19,6 +19,7 @@ target_include_directories(LibGXMiniMax PUBLIC src/ api/ utilities/)
 # Define source that comprise LibGXMiniMax
 target_sources(LibGXMiniMax PRIVATE
         src/gx_common.h
+	src/minimax_utils.F90
         src/minimax_tau.F90
         src/minimax_omega.F90
         src/minimax_grids.F90
