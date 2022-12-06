@@ -23,7 +23,7 @@ module minimax_omega
   integer, parameter, public :: omega_npoints_supported(ngrids) = &
        [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34]
   integer, parameter :: energy_ranges_grids(ngrids) = &
-       [13, 13, 15, 18, 21, 36, 37, 39, 40, 40, 19, 28, 28, 18, 7]
+       [13, 13, 15, 18, 21, 36, 37, 40, 40, 40, 19, 28, 28, 18, 7]
 
   type :: er_aw_aux
      ! Sorted array of the energy ranges
