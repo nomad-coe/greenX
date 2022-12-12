@@ -1,3 +1,10 @@
+! ***************************************************************************************************
+!  Copyright (C) 2020-2022 Green-X library                                                          
+!  This file is distributed under the terms of the APACHE2 License.                                 
+!                                                                                                   
+! ***************************************************************************************************
+!> \brief This module contains auxiliary procedures and data structures for the main minimax routines
+! ***************************************************************************************************
 module minimax_utils
 #include "gx_common.h"
   use kinds, only: dp
@@ -5,17 +12,22 @@ module minimax_utils
 
   private
 
-  public :: bsearch_erange
+  type :: er_aw_aux
+     ! Sorted array of the energy ranges
+     real(kind=dp), dimension(:), allocatable :: energy_range
+     ! Matrices with coefficients and weights per energy region
+     real(kind=dp), dimension(:, :), allocatable :: aw_erange_matrix
+  end type er_aw_aux
+
+  public :: bsearch_erange, er_aw_aux
 
 contains
 
-  ! **************************************************************************************************
   !> \brief Modified bisection search to find first element in sorted array
   !>        that is strictly greater than a given value
-  !>  lenght - lenght of sorted array
-  !>  einter - sorted array of the energy intervals
-  !>  eval - the energy value
-  ! **************************************************************************************************
+  !! @param[in] lenght - lenght of sorted array
+  !! @param[in] einter - sorted array of the energy intervals
+  !! @param[in] eval - the energy value
   function bsearch_erange(length, einter, eval) result(idx)
     integer, intent(in)                     :: length
     real(dp), dimension(length), intent(in) :: einter

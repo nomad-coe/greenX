@@ -13,7 +13,7 @@ module minimax_omega
 #include "gx_common.h"
   use kinds,          only: dp
   use error_handling, only: register_exc
-  use minimax_utils,  only: bsearch_erange
+  use minimax_utils,  only: bsearch_erange, er_aw_aux
   implicit none
 
   private
@@ -25,22 +25,13 @@ module minimax_omega
   integer, parameter :: energy_ranges_grids(ngrids) = &
        [13, 13, 15, 18, 21, 36, 37, 40, 40, 40, 19, 28, 28, 18, 7]
 
-  type :: er_aw_aux
-     ! Sorted array of the energy ranges
-     real(kind=dp), dimension(:), allocatable :: energy_range
-     ! Matrices with coefficients and weights per energy region
-     real(kind=dp), dimension(:, :), allocatable :: aw_erange_matrix
-  end type er_aw_aux
-
   public :: get_points_weights_omega
 
 contains
 
-  ! **************************************************************************************************
   !> \brief Stores the minimax coefficients for all supported grid sizes
-  !>  k - grid size
-  !>  aw - derived type of energy ranges and coefficients:weights
-  ! **************************************************************************************************
+  !! @param[in] k - grid size
+  !! @param[inout] aw - derived type of energy ranges and coefficients:weights
   subroutine set_aw_array(kval, aw)
     integer, intent(in)            :: kval
     type(er_aw_aux), intent(inout) :: aw
@@ -3043,13 +3034,11 @@ contains
   end subroutine set_aw_array
 
 
-  ! **************************************************************************************************
   !> \brief Unpacks the minimax coefficients for the desired energy range
-  !>  k - size of the grid
-  !>  e_range - the selected energy range
-  !>  ac_we - vector containing coefficients and weights
-  !>  ierr - error code
-  ! **************************************************************************************************
+  !! @param[in] k - size of the grid
+  !! @param[in] e_range - the selected energy range
+  !! @param[inout] ac_we - vector containing coefficients and weights
+  !! @param[out] ierr - error code
   subroutine get_points_weights_omega(k, e_range, ac_we, ierr)
     integer, intent(in)                          :: k
     real(kind=dp), intent(in)                    :: e_range
