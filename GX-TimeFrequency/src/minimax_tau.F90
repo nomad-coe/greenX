@@ -30,13 +30,13 @@ module minimax_tau
 contains
 
   !> \brief Stores the minimax coefficients for all supported grid sizes
-  !! @param[in] k - grid size
+  !! @param[in] grid_size  - size of the grid
   !! @param[inout] aw - derived type of energy ranges and coefficients:weights
-  subroutine set_aw_array(kval, aw)
-    integer, intent(in)            :: kval
+  subroutine set_aw_array(grid_size, aw)
+    integer, intent(in)            :: grid_size
     type(er_aw_aux), intent(inout) :: aw
 
-    select case(kval)
+    select case(grid_size)
     case(6)
        aw%energy_range(:) = [1.5849_dp, 2.5119_dp, 3.9811_dp, 6.3096_dp, 10.0000_dp,&
             15.8489_dp, 25.1189_dp, 39.8107_dp, 63.0957_dp,&
@@ -3432,28 +3432,28 @@ contains
   !! @param[in] e_range - the selected energy range
   !! @param[inout] ac_we - vector containing coefficients and weights
   !! @param[out] ierr - error code
-  subroutine get_points_weights_tau(k, e_range, ac_we, ierr)
-    integer, intent(in)                          :: k
-    real(kind=dp), intent(in)                    :: e_range
-    real(kind=dp), dimension(2*k), intent(inout) :: ac_we
-    integer, intent(out)                         :: ierr
+  subroutine get_points_weights_tau(grid_size, e_range, ac_we, ierr)
+    integer, intent(in)                                    :: grid_size
+    real(kind=dp), intent(in)                              :: e_range
+    real(kind=dp), dimension(2*grid_size), intent(inout)   :: ac_we
+    integer, intent(out)                                   :: ierr
 
     !> Internal variables
-    integer                                      :: ien, kloc, bup
-    type(er_aw_aux)                              :: aw
+    integer                                                :: ien, kloc, bup
+    type(er_aw_aux)                                        :: aw
 
     !> Begin work
     ierr = 0
 
-    if (any(tau_npoints_supported == k)) then
+    if (any(tau_npoints_supported == grid_size)) then
        ! Find location of grid size
-       kloc = findloc(tau_npoints_supported, k, 1)
+       kloc = findloc(tau_npoints_supported, grid_size, 1)
        bup = energy_ranges_grids(kloc)
 
        ! Allocate and set type elements
        allocate(aw%energy_range(bup))
-       allocate(aw%aw_erange_matrix(2*k, bup+1))
-       call set_aw_array(k, aw)
+       allocate(aw%aw_erange_matrix(2*grid_size, bup+1))
+       call set_aw_array(grid_size, aw)
 
        ! Select energy region with binary search
        ien = bsearch_erange(bup, aw%energy_range, e_range)

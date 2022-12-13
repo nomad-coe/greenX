@@ -68,44 +68,34 @@ contains
     real(kind=dp), dimension(:, :), allocatable       :: mat
 
     ! Begin work
-    e_range = e_max/e_min
+    e_range = e_max/e_min   
     ierr = 0
 
+    ! Allocations
     allocate (x_tw(2*num_points))
-
-    call get_points_weights_omega(num_points, e_range, x_tw, ierr)
-    if (ierr /= 0) return
-
     allocate (omega_points(num_points))
     allocate (omega_weights(num_points))
-
-    do i_point = 1, num_points
-       omega_points(i_point) = x_tw(i_point)
-       omega_weights(i_point) = x_tw(i_point + num_points)
-    end do
-
-    ! scale the minimax parameters
-    omega_points(:) = omega_points(:)*e_min
-    omega_weights(:) = omega_weights(:)*e_min
-
-    ! set up the minimax time grid
-    call get_points_weights_tau(num_points, e_range, x_tw, ierr)
-    if (ierr /= 0) return
-
-    ! For RPA we include already a factor of two (see later steps)
-    scaling = 2.0_dp
-
     allocate (tau_points(num_points))
     allocate (tau_weights(num_points))
 
-    do i_point = 1, num_points
-       tau_points(i_point) = x_tw(i_point)/scaling
-       tau_weights(i_point) = x_tw(i_point + num_points)/scaling
-    end do
+    ! Get the frequency grid points and weights 
+    call get_points_weights_omega(num_points, e_range, x_tw, ierr)
+    if (ierr /= 0) return
 
-    ! scale grid from [1,R] to [e_min,e_max]
-    tau_points(:) = tau_points(:)/e_min
-    tau_weights(:) = tau_weights(:)/e_min
+    ! Scale the frequency grid points and weights from [1,R] to [e_min,e_max]
+    ! Note: the frequency grid points and weights include a factor of two
+    scaling = e_min
+    omega_points = x_tw(1: num_points) *scaling
+    omega_weights = x_tw(num_points+1: 2* num_points) *scaling   
+
+    ! Get the time grid points and weights
+    call get_points_weights_tau(num_points, e_range, x_tw, ierr)
+    if (ierr /= 0) return
+
+    ! Scale the time grid points and weights from [1,R] to [e_min,e_max]
+    scaling = 2.0_dp *e_min
+    tau_points = x_tw(1: num_points) /scaling
+    tau_weights = x_tw(num_points+1: 2* num_points) /scaling
 
     allocate (cosft_wt(num_points, num_points))
     allocate (cosft_tw(num_points, num_points))
@@ -128,8 +118,8 @@ contains
 
     ! Compute the actual weights used for the inhomogeneous cosine/ FT and check whether
     ! the two matrices for the forward/backward transform are the inverse of each other.
-    do i_point = 1, num_points
-       do j_point = 1, num_points
+    do j_point = 1, num_points
+       do i_point = 1, num_points
           cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_points(i_point)*omega_points(j_point))
           cosft_tw(i_point, j_point) = cosft_tw(i_point, j_point)*cos(tau_points(i_point)*omega_points(j_point))
           sinft_wt(j_point, i_point) = sinft_wt(j_point, i_point)*sin(tau_points(i_point)*omega_points(j_point))
@@ -137,7 +127,7 @@ contains
     end do
 
     allocate (mat(num_points, num_points))
-    mat(:, :) = matmul(cosft_wt, cosft_tw)
+    mat = matmul(cosft_wt, cosft_tw)
     do i_point = 1, num_points
        mat(i_point, i_point) = mat(i_point, i_point) - 1.0_dp
     end do
@@ -191,8 +181,7 @@ contains
     ! Begin work
     ierr = 0
 
-    allocate (weights_work(num_points))
-    weights_work = 0.0_dp
+    allocate (weights_work(num_points), source=0.0_dp)
 
     ! compute the number of x nodes per magnitude points per 10-interval
     num_x_nodes = (int(log10(e_max/e_min)) + 1)*nodes_factor
@@ -200,31 +189,21 @@ contains
     ! make sure that the number of x nodes are at least as many integration points
     num_x_nodes = max(num_x_nodes, num_points)
 
-    allocate (x_mu(num_x_nodes))
-    x_mu = 0.0_dp
-    allocate (psi(num_x_nodes))
-    psi = 0.0_dp
+    allocate (x_mu(num_x_nodes), source=0.0_dp)
+    allocate (psi(num_x_nodes), source=0.0_dp)
 
     ! Allocations for the BLAS routines
     ! double the value nessary for 'A' to achieve good performance
     lwork = 8*num_points*num_points + 12*num_points + 2*num_x_nodes
-    allocate (iwork(8*num_points))
-    iwork = 0
-    allocate (work(lwork))
-    work = 0.0_dp      
+    allocate (iwork(8*num_points), source=0)
+    allocate (work(lwork), source=0.0_dp)
 
-    allocate (mat_A(num_x_nodes, num_points))
-    mat_A = 0.0_dp      
-    allocate (mat_U(num_x_nodes, num_x_nodes))
-    mat_U = 0.0_dp
-    allocate (mat_VT(num_x_nodes, num_points))
-    mat_VT = 0.0_dp
-    allocate (mat_VT_s(num_points, num_x_nodes))
-    mat_VT_s = 0.0_dp
-    allocate (vec_S(num_points))
-    vec_S = 0.0_dp      
-    allocate (vec_UT_psi(num_x_nodes))
-    vec_UT_psi = 0.0_dp
+    allocate (mat_A(num_x_nodes, num_points), source=0.0_dp)
+    allocate (mat_U(num_x_nodes, num_x_nodes), source=0.0_dp)
+    allocate (mat_VT(num_x_nodes, num_points), source=0.0_dp)
+    allocate (mat_VT_s(num_points, num_x_nodes), source=0.0_dp)
+    allocate (vec_S(num_points), source=0.0_dp)
+    allocate (vec_UT_psi(num_x_nodes), source=0.0_dp)
 
     ! set the x-mu logarithmically in the interval [e_min,e_max]
     x_factor = (e_max/e_min)**(1.0_dp/(real(num_x_nodes, kind=dp) - 1.0_dp))
@@ -406,7 +385,7 @@ contains
 
        do i_node = 1, num_x_nodes
           func_val = 0.0_dp
-          ! calculate value of the fit function f(x) = f(x) - weights(omega)cos(omega*tau)psi(tau.x)
+          ! calculate value of the fit function f(x) = f(x) + weights(omega)cos(omega*tau)psi(tau.x)
           do i_point = 1, num_points
              tau = tau_points(i_point) 
              func_val = func_val + weights_work(i_point)*cos(omega*tau)*exp(-x_mu(i_node)*tau)
@@ -425,7 +404,7 @@ contains
        do i_node = 1, num_x_nodes
           func_val = 0.0_dp
           x_val=x_mu(i_node)
-          ! calculate value of the fit function f(x) = f(x) - weights(tau)cos(omega*tau)psi(omega.x)
+          ! calculate value of the fit function f(x) = f(x) + weights(tau)cos(omega*tau)psi(omega.x)
           do i_point = 1, num_points
              omega = omega_points(i_point)
              func_val = func_val +  weights_work(i_point)*cos(tau*omega)*2.0_dp*x_val/(x_val**2 + omega**2)
@@ -443,7 +422,7 @@ contains
 
        do i_node = 1, num_x_nodes
           func_val = 0.0_dp
-          ! calculate value of the fit function f(x) = f(x) - weights(omega)sin(omega*tau)psi(tau.x)
+          ! calculate value of the fit function f(x) = f(x) + weights(omega)sin(omega*tau)psi(tau.x)
           do i_point = 1, num_points
              tau = tau_points(i_point)
              func_val = func_val +  weights_work(i_point)*sin(omega*tau)*exp(-x_mu(i_node)*tau)
