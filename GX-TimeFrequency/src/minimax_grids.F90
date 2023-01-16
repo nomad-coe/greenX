@@ -24,7 +24,7 @@ module minimax_grids
   private
 
   !> Main entry point for client code.
-  public :: gx_minimax_grid
+  public :: gx_minimax_grid, gx_minimax_grid_frequency
 
 contains
 
@@ -73,10 +73,18 @@ contains
 
     ! Allocations
     allocate (x_tw(2*num_points))
-    allocate (omega_points(num_points))
-    allocate (omega_weights(num_points))
-    allocate (tau_points(num_points))
-    allocate (tau_weights(num_points))
+    if (.not. allocated(omega_points)) then
+       allocate (omega_points(num_points))
+    end if
+    if (.not. allocated(omega_weights)) then
+       allocate (omega_weights(num_points))
+    end if
+    if (.not. allocated(tau_points)) then
+       allocate (tau_points(num_points))
+    end if
+    if (.not. allocated(tau_weights)) then
+       allocate (tau_weights(num_points))
+    end if
 
     ! Get the frequency grid points and weights 
     call get_points_weights_omega(num_points, e_range, x_tw, ierr)
@@ -137,6 +145,46 @@ contains
     deallocate (x_tw)
 
   end subroutine gx_minimax_grid
+
+  !> \brief Retrieves the frequency grid for a canonical GW calculation
+  !! @param[in] num_points: Number of mesh points.
+  !! @param[in] e_min: Minimum transition energy. Arbitrary units as we only need e_max/e_min
+  !! @param[in] e_max: Maximum transition energy.
+  !! @param[out] omega_points: imaginary frequency grid points
+  !! @param[out] omega_weights: weights for imaginary frequency grid points
+  !! @param[out] ierr: Exit status
+  subroutine gx_minimax_grid_frequency (num_points, e_min, e_max, omega_points, omega_weights, ierr)
+    integer, intent(in)                               :: num_points
+    real(kind=dp), intent(in)                         :: e_min, e_max
+    real(kind=dp), allocatable, dimension(:), &
+         intent(out)                                  :: omega_points(:), omega_weights(:)
+    integer, intent(out)                              :: ierr
+
+    ! Internal variables
+    real(kind=dp)                                     :: e_range, scaling
+    real(kind=dp), dimension(:), allocatable          :: x_tw
+    
+    ! Begin work
+    e_range = e_max/e_min   
+    ierr = 0
+
+    ! Allocations
+    allocate (x_tw(2*num_points))
+
+    ! Get the frequency grid points and weights 
+    call get_points_weights_omega(num_points, e_range, x_tw, ierr)
+    if (ierr /= 0) return
+
+    ! Scale the frequency grid points and weights from [1,R] to [e_min,e_max]
+    ! Note: the frequency grid points and weights include a factor of two
+    scaling = e_min
+    omega_points = x_tw(1: num_points) *scaling
+    omega_weights = x_tw(num_points+1: 2* num_points) *scaling
+
+    deallocate (x_tw)
+    
+  end subroutine gx_minimax_grid_frequency
+
 
   !> \brief Get the weights eiter for the cosine/sin transformation for tau to omega or viceversa
   !! @param[in] num_points: Number of mesh points.
