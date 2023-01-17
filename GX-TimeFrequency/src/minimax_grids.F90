@@ -170,6 +170,12 @@ contains
 
     ! Allocations
     allocate (x_tw(2*num_points))
+    if (.not. allocated(omega_points)) then
+       allocate (omega_points(num_points))
+    end if
+    if (.not. allocated(omega_weights)) then
+       allocate (omega_weights(num_points))
+    end if
 
     ! Get the frequency grid points and weights 
     call get_points_weights_omega(num_points, e_range, x_tw, ierr)
