@@ -19,39 +19,36 @@ module minimax_utils
      real(kind=dp), dimension(:, :), allocatable :: aw_erange_matrix
   end type er_aw_aux
 
-  public :: bsearch_erange, er_aw_aux
+  public :: find_erange, er_aw_aux
 
 contains
 
-  !> \brief Modified bisection search to find first element in sorted array
-  !>        that is strictly greater than a given value
+  !> \brief Find first element in unsorted array that is strictly greater than a given value
+  !>        This algorithm is O(n), difficult to do better with unsorted arrays
   !! @param[in] lenght - lenght of sorted array
   !! @param[in] einter - sorted array of the energy intervals
   !! @param[in] eval - the energy value
-  function bsearch_erange(length, einter, eval) result(idx)
+  function find_erange(length, einter, eval) result(idx)
     integer, intent(in)                     :: length
     real(dp), dimension(length), intent(in) :: einter
     real(dp), intent(in)                    :: eval
     integer                                 :: idx
 
     ! Auxiliary variables
-    integer                                 :: left, right, middle
+    integer                                 :: jdx
+    real(dp)                                :: tmp_min_max
 
     ! Begin work
-    left = 1
-    right = length
+    tmp_min_max = huge(0.0_dp)
     idx = length + 1
 
-    do while (left <= right)
-       middle = (left + right) / 2
-       if (einter(middle) <= eval) then
-          left = middle + 1
-       else
-          right = middle - 1
-          idx = middle
+    do jdx = 1, length
+       if (eval < einter(jdx) .and. einter(jdx) < tmp_min_max) then
+          idx = jdx
+          tmp_min_max = einter(jdx)
        end if
     end do
 
-  end function bsearch_erange
+  end function find_erange
 
 end module minimax_utils

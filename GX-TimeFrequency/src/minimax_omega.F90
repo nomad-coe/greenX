@@ -13,7 +13,7 @@ module minimax_omega
 #include "gx_common.h"
   use kinds,          only: dp
   use error_handling, only: register_exc
-  use minimax_utils,  only: bsearch_erange, er_aw_aux
+  use minimax_utils,  only: find_erange, er_aw_aux
   implicit none
 
   private
@@ -2573,7 +2573,7 @@ contains
        call set_aw_array(grid_size, aw)
 
        ! Select energy region with binary search
-       ien = bsearch_erange(bup, aw%energy_range, e_range)
+       ien = find_erange(bup, aw%energy_range, e_range)
        ac_we(:) = aw%aw_erange_matrix(:, ien)
 
        ! Deallocate
