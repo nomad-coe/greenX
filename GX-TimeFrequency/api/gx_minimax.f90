@@ -12,8 +12,8 @@
 !> ```
 !>
 module gx_minimax
-  use mp2_grids, only : gx_minimax_grid
-  use minimax_gw, only : tau_npoints_supported
+  use minimax_grids, only : gx_minimax_grid, gx_minimax_grid_frequency
+  use minimax_tau, only : tau_npoints_supported
   use api_utilites, only: gx_check_ntau, gx_get_error_message
  end module gx_minimax     
  

@@ -52,7 +52,7 @@ call gx_minimax_grid(n_mesh_points, e_transition_min, e_transition_max, &
                      max_errors, cosft_duality_error, ierr)
 ```
 
-For a description of the variables, please consult `src/mp2_grids.F90`.
+For a description of the variables, please consult `src/minimax_grids.F90`.
 For an example of how to call `gx_minimax_grid`, please consult `test/test_gx_minimax_grid.f90`.
 
 Additionally, one can also call a utility routine to query whether the 

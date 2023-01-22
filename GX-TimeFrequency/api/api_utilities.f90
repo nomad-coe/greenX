@@ -1,7 +1,7 @@
 module api_utilites
     use error_handling, only: error_message__
-    use minimax_rpa,    only : omega_npoints_supported
-    use minimax_gw, only : tau_npoints_supported
+    use minimax_omega,    only : omega_npoints_supported
+    use minimax_tau, only : tau_npoints_supported
     implicit none
     private
     public :: gx_check_ntau, gx_get_error_message
