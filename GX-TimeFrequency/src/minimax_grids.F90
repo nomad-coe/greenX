@@ -18,6 +18,7 @@ module minimax_grids
   use constants,         only: pi
   use minimax_tau,       only: get_points_weights_tau
   use minimax_omega,     only: get_points_weights_omega
+  use minimax_utils,     only: cosine_wt, cosine_tw, sine_tw
 
   implicit none
 
@@ -345,7 +346,7 @@ contains
     ! Begin work
 
     ! the cosine transform cos(it) -> cos(iw)
-    if (transformation_type.eq.1) then
+    if (transformation_type == cosine_tw) then
        omega = omega_points(i_point)
        current_point = omega
 
@@ -363,7 +364,7 @@ contains
        end do
 
     ! the cosine transform cos(iw) -> cos(it)  
-    else if (transformation_type.eq.2) then
+    else if (transformation_type == cosine_wt) then
        tau = tau_points(i_point)
        current_point = tau
 
@@ -381,13 +382,13 @@ contains
        end do
 
     ! the sine transform sin(it) -> sin(iw)         
-    else if (transformation_type.eq.3) then
+    else if (transformation_type == sine_tw) then
        omega = omega_points(i_point)
        current_point = omega
 
        ! psi(omega_k,x) = 2*omega_k/(x^2+omega_k^2)
        do i_node = 1, num_x_nodes
-          psi(i_node) = 2.0_dp*omega/((x_mu(i_node))**2 + omega**2)
+          psi(i_node) = 2.0_dp*omega/(x_mu(i_node)**2 + omega**2)
        end do
 
        ! mat_A = sin(omega_k,tau)*phi(tau,x)
@@ -434,7 +435,7 @@ contains
     max_error_tmp = 0.0_dp
 
     ! the cosine transform cos(it) -> cos(iw)
-    if (transformation_type.eq.1) then
+    if (transformation_type == cosine_tw) then
        omega=current_point
 
        do i_node = 1, num_x_nodes
@@ -452,7 +453,7 @@ contains
        end do
 
     ! the cosine transform cos(iw) -> cos(it)
-    else if (transformation_type.eq.2) then
+    else if (transformation_type == cosine_wt) then
        tau = current_point
 
        do i_node = 1, num_x_nodes
@@ -464,14 +465,14 @@ contains
              func_val = func_val +  weights_work(i_point)*cos(tau*omega)*2.0_dp*x_val/(x_val**2 + omega**2)
           end do
 
-          if (abs(psi(i_node) - func_val) > max_error_tmp) THEN
+          if (abs(psi(i_node) - func_val) > max_error_tmp) then
              max_error_tmp = abs(psi(i_node) - func_val)
              func_val_temp = func_val
           end if
        end do
 
     ! the sine transform sin(it) -> sin(iw)
-    else if (transformation_type.eq.3) then
+    else if (transformation_type == sine_tw) then
        omega = current_point
 
        do i_node = 1, num_x_nodes

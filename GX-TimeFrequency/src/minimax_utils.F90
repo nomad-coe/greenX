@@ -19,6 +19,11 @@ module minimax_utils
      real(kind=dp), dimension(:, :), allocatable :: aw_erange_matrix
   end type er_aw_aux
 
+  !> Transformation types
+  integer, parameter, public :: cosine_tw = 1
+  integer, parameter, public :: cosine_wt = 2
+  integer, parameter, public :: sine_tw = 3
+
   public :: find_erange, er_aw_aux
 
 contains
