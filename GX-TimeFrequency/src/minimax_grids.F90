@@ -46,7 +46,7 @@ contains
   subroutine gx_minimax_grid(num_points, e_min, e_max, &
        tau_points, tau_weights, omega_points, omega_weights, &
        cosft_wt, cosft_tw, sinft_wt, &
-       max_errors, cosft_duality_error, ierr)
+       max_errors, cosft_duality_error, ierr, bare_cossine_weights)
 
     integer, intent(in)                               :: num_points
     real(kind=dp), intent(in)                         :: e_min, e_max
@@ -57,9 +57,11 @@ contains
     real(kind=dp), allocatable, dimension(:, :), &
          intent(out)                                  :: cosft_wt(:, :), cosft_tw(:, :), sinft_wt(:, :)
     real(kind=dp), intent(out)                        :: max_errors(3), cosft_duality_error
+    logical, intent(in), optional                     :: bare_cossine_weights
     integer, intent(out)                              :: ierr
 
     ! Internal variables
+    logical                                           :: my_bare_cossine_weights
     integer, parameter                                :: cos_t_to_cos_w = 1
     integer, parameter                                :: cos_w_to_cos_t = 2
     integer, parameter                                :: sin_t_to_sin_w = 3
@@ -67,6 +69,11 @@ contains
     real(kind=dp)                                     :: e_range, scaling
     real(kind=dp), dimension(:), allocatable          :: x_tw
     real(kind=dp), dimension(:, :), allocatable       :: mat
+
+    my_bare_cossine_weights = .false.
+    if (present(bare_cossine_weights)) then
+      if(bare_cossine_weights) my_bare_cossine_weights = .true.
+    endif
 
     ! Begin work
     e_range = e_max/e_min   
@@ -127,13 +134,16 @@ contains
 
     ! Compute the actual weights used for the inhomogeneous cosine/ FT and check whether
     ! the two matrices for the forward/backward transform are the inverse of each other.
-    do j_point = 1, num_points
-       do i_point = 1, num_points
-          cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_points(i_point)*omega_points(j_point))
-          cosft_tw(i_point, j_point) = cosft_tw(i_point, j_point)*cos(tau_points(i_point)*omega_points(j_point))
-          sinft_wt(j_point, i_point) = sinft_wt(j_point, i_point)*sin(tau_points(i_point)*omega_points(j_point))
-       end do
-    end do
+    if(.not.my_bare_cossine_weights) then
+      write(*,*) "not bare"
+      do j_point = 1, num_points
+         do i_point = 1, num_points
+            cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_points(i_point)*omega_points(j_point))
+            cosft_tw(i_point, j_point) = cosft_tw(i_point, j_point)*cos(tau_points(i_point)*omega_points(j_point))
+            sinft_wt(j_point, i_point) = sinft_wt(j_point, i_point)*sin(tau_points(i_point)*omega_points(j_point))
+         end do
+      end do
+    end if
 
     allocate (mat(num_points, num_points))
     mat = matmul(cosft_wt, cosft_tw)
