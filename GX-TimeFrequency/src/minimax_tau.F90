@@ -2907,6 +2907,8 @@ contains
     !> Internal variables
     integer                                                :: ien, kloc, bup
     type(er_aw_aux)                                        :: aw
+    real(kind=dp)                                               :: e_ratio
+
 
     !> Begin work
     ierr = 0
@@ -2921,9 +2923,21 @@ contains
        allocate(aw%aw_erange_matrix(2*grid_size, bup+1))
        call set_aw_array(grid_size, aw)
 
+
+       e_ratio = 1
+
+       if (bup == 1 .and. grid_size > 20) then
+          e_ratio = aw%energy_range(1)/e_range
+          if (e_ratio > 1.5_dp) then
+             e_ratio = e_ratio/1.5_dp
+          endif
+       end if
+
        ! Select energy region with binary search
        ien = find_erange(bup, aw%energy_range, e_range)
        ac_we(:) = aw%aw_erange_matrix(:, ien)
+
+       ac_we(:) = ac_we(:) * e_ratio
 
        ! Deallocate
        deallocate(aw%energy_range)
