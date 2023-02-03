@@ -37,16 +37,18 @@ install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 # -----------------------------------------------
 # Unit Testing Set-up
 # -----------------------------------------------
+if (${ENABLE_UNITTESTS})
+    # Create a directory in the build folder to place generated test drivers and binaries
+    set(UNIT_TEST_DIR "${PROJECT_BINARY_DIR}/unit_tests/analytic-continuation")
+    file(MAKE_DIRECTORY ${UNIT_TEST_DIR})
+    message("-- Analytic continuation unit tests written to: ${UNIT_TEST_DIR}")
 
-# Create a directory in the build folder to place generated test drivers and binaries
-set(UNIT_TEST_DIR "${PROJECT_BINARY_DIR}/unit_tests/analytic-continuation")
-file(MAKE_DIRECTORY ${UNIT_TEST_DIR})
-message("-- Analytic continuation unit tests written to: ${UNIT_TEST_DIR}")
+    # Libraries on which the unit tests depend
+    set(LIBS_FOR_UNIT_TESTS LibGXAC)
 
-# Libraries on which the unit tests depend
-set(LIBS_FOR_UNIT_TESTS LibGXAC)
+    # For unit tests for many modules, put this in a loop
+    create_unit_test_executable(TARGET_TEST_DIR ${UNIT_TEST_DIR}
+            TEST_NAME "test_pade_approximant"
+            REQUIRED_LIBS ${LIBS_FOR_UNIT_TESTS})
+endif()
 
-# For unit tests for many modules, put this in a loop
-create_unit_test_executable(TARGET_TEST_DIR ${UNIT_TEST_DIR}
-                            TEST_NAME "test_pade_approximant"
-                            REQUIRED_LIBS ${LIBS_FOR_UNIT_TESTS})
