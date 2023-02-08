@@ -2924,17 +2924,19 @@ contains
        call set_aw_array(grid_size, aw)
 
 
-       e_ratio = 1.0_dp
+       ! Select energy region with binary search
+       ien = find_erange(bup, aw%energy_range, e_range)
 
-       if (bup == 1 .and. grid_size > 20) then
+       ! Scale grids for large sizes when erange falls in the
+       ! first energy range
+       e_ratio = 1.0_dp
+       if (ien == 1 .and. grid_size > 20) then
           e_ratio = aw%energy_range(1)/e_range
           if (e_ratio > 1.5_dp) then
              e_ratio = e_ratio/1.5_dp
           endif
        end if
 
-       ! Select energy region with binary search
-       ien = find_erange(bup, aw%energy_range, e_range)
        ac_we(:) = aw%aw_erange_matrix(:, ien)
 
        ac_we(:) = ac_we(:) * e_ratio
