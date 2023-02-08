@@ -2574,7 +2574,7 @@ contains
        allocate(aw%aw_erange_matrix(2*grid_size, bup+1))
        call set_aw_array(grid_size, aw)
 
-       e_ratio = 1
+       e_ratio = 1.0_dp
 
        if (bup == 1 .and. grid_size > 20) then
           e_ratio = aw%energy_range(1)/e_range
