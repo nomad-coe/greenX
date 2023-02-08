@@ -2929,7 +2929,7 @@ contains
        if (bup == 1 .and. grid_size > 20) then
           e_ratio = aw%energy_range(1)/e_range
           if (e_ratio > 1.5_dp) then
-             e_ratio = e_ratio*1.5_dp
+             e_ratio = e_ratio/1.5_dp
           endif
        end if
 

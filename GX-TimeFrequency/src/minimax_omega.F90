@@ -2587,7 +2587,7 @@ contains
        ien = find_erange(bup, aw%energy_range, e_range)
        ac_we(:) = aw%aw_erange_matrix(:, ien)
 
-       ac_we(:) = ac_we(:) * e_ratio
+       ac_we(:) = ac_we(:) / e_ratio
 
        ! Deallocate
        deallocate(aw%energy_range)
