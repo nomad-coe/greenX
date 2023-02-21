@@ -12,6 +12,9 @@ project(greenX
     VERSION 0.0.1
 )
 
+#To use the Intel MKL implementation of BLAS, a project must enable at least one of the C or CXX languages.
+enable_language(CXX)
+
 # Set folder structure for build directory
 set(CMAKE_Fortran_BIN_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_Fortran_LIB_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
@@ -58,7 +61,7 @@ endif()
 
 # Our library directories
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
-#add_subdirectory(GX-AnalyticContinuation)
+add_subdirectory(GX-AnalyticContinuation)
 add_subdirectory(GX-common)
 add_subdirectory(GX-TimeFrequency)
 
