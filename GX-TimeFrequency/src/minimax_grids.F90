@@ -135,7 +135,6 @@ contains
     ! Compute the actual weights used for the inhomogeneous cosine/ FT and check whether
     ! the two matrices for the forward/backward transform are the inverse of each other.
     if(.not.my_bare_cossine_weights) then
-      write(*,*) "not bare"
       do j_point = 1, num_points
          do i_point = 1, num_points
             cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_points(i_point)*omega_points(j_point))
