@@ -25,11 +25,11 @@ module minimax_grids
   private
 
   !> Main entry point for client code.
-  public :: gx_minimax_grid, gx_minimax_grid_frequency
+  public :: gx_minimax_grid, gx_minimax_grid_frequency, gx_minimax_grid_rpa
 
 contains
 
-  !> \brief Compute minimax grid for RPA energy and GW calculation on imaginary time/frequency domain.
+  !> \brief Compute minimax grid for GW calculation on imaginary time/frequency domain.
   !! @param[in] num_points: Number of mesh points.
   !! @param[in] e_min: Minimum transition energy. Arbitrary units as we only need e_max/e_min
   !! @param[in] e_max: Maximum transition energy.
@@ -156,7 +156,88 @@ contains
 
   end subroutine gx_minimax_grid
 
-  !> \brief Retrieves the frequency grid for a canonical GW calculation
+  !> \brief Compute minimax grid for RPA correlation energy on imaginary time/frequency domain.
+  !! @param[in] num_points: Number of mesh points.
+  !! @param[in] e_min: Minimum transition energy. Arbitrary units as we only need e_max/e_min
+  !! @param[in] e_max: Maximum transition energy.
+  !! @param[out] tau_points: imaginary time grid points
+  !! @param[out] tau_weights: weights for imaginary time grid points weights
+  !! @param[out] omega_points: imaginary frequency grid points
+  !! @param[out] omega_weights: weights for imaginary frequency grid points
+  !! @param[out] cosft_wt: weights for tau -> omega cosine transform. cos(w*t) factor is included.
+  !! @param[out] max_errors: Max error for transforms (same order as previous args)
+  !! @param[out] ierr: Exit status  
+  subroutine gx_minimax_grid_rpa(num_points, e_min, e_max, &
+       tau_points, tau_weights, omega_points, omega_weights, &
+       cosft_wt,max_errors,ierr)
+
+    integer, intent(in)                               :: num_points
+    real(kind=dp), intent(in)                         :: e_min, e_max
+    real(kind=dp), allocatable, dimension(:), &
+         intent(out)                                  :: tau_points, tau_weights
+    real(kind=dp), allocatable, dimension(:), &
+         intent(out)                                  :: omega_points(:), omega_weights(:)
+    real(kind=dp), allocatable, dimension(:, :), &
+         intent(out)                                  :: cosft_wt(:, :)
+    real(kind=dp), intent(out)                        :: max_errors
+    integer, intent(out)                              :: ierr
+
+    ! Internal variables
+    integer, parameter                                :: cos_t_to_cos_w = 1
+    integer                                           :: i_point, j_point
+    real(kind=dp)                                     :: e_range, scaling
+    real(kind=dp), dimension(:), allocatable          :: x_tw
+
+    ! Begin work
+    e_range = e_max/e_min
+    ierr = 0
+
+    ! Allocations
+    allocate (x_tw(2*num_points))
+    if (.not. allocated(omega_points)) then
+       allocate (omega_points(num_points))
+    end if
+    if (.not. allocated(omega_weights)) then
+       allocate (omega_weights(num_points))
+    end if
+    if (.not. allocated(tau_points)) then
+       allocate (tau_points(num_points))
+    end if
+    if (.not. allocated(tau_weights)) then
+       allocate (tau_weights(num_points))
+    end if
+
+    ! Get the frequency grid points and weights 
+    call get_points_weights_omega(num_points, e_range, x_tw, ierr)
+    if (ierr /= 0) return
+
+    ! Scale the frequency grid points and weights from [1,R] to [e_min,e_max]
+    ! Note: the frequency grid points and weights include a factor of two
+    scaling = e_min
+    omega_points = x_tw(1: num_points) *scaling
+    omega_weights = x_tw(num_points+1: 2* num_points) *scaling
+
+    ! Get the time grid points and weights
+    call get_points_weights_tau(num_points, e_range, x_tw, ierr)
+    if (ierr /= 0) return
+
+    ! Scale the time grid points and weights from [1,R] to [e_min,e_max]
+    scaling = 2.0_dp *e_min
+    tau_points = x_tw(1: num_points) /scaling
+    tau_weights = x_tw(num_points+1: 2* num_points) /scaling
+
+    allocate (cosft_wt(num_points, num_points))
+
+    ! get the weights for the cosine transform W^c(it) -> W^c(iw)
+    call get_transformation_weights(num_points, tau_points, omega_points, cosft_wt, e_min, e_max, &
+         max_errors, cos_t_to_cos_w, ierr)
+    if (ierr /= 0) return
+
+    deallocate (x_tw)
+
+  end subroutine gx_minimax_grid_rpa
+
+  !> \brief Retrieves the frequency grid for a canonical GW/RPA calculation
   !! @param[in] num_points: Number of mesh points.
   !! @param[in] e_min: Minimum transition energy. Arbitrary units as we only need e_max/e_min
   !! @param[in] e_max: Maximum transition energy.
