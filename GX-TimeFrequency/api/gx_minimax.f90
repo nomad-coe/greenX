@@ -2,7 +2,8 @@
 !  Copyright (C) 2020-2023 Green-X library
 !  This file is distributed under the terms of the APACHE2 License.
 !
-! **************************************************************************************************!> Public API for minimax library
+! **************************************************************************************************
+!> Public API for minimax library
 !>
 !> Compute minimax grid for RPA energy and GW calculation on imaginary time/frequency domain.
 !> Usage:
