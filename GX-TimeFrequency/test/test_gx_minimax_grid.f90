@@ -1,4 +1,8 @@
-!> Note, this is essentially a unit test but there's no fortran unit test framework
+! **************************************************************************************************
+!  Copyright (C) 2020-2023 Green-X library
+!  This file is distributed under the terms of the APACHE2 License.
+!
+! **************************************************************************************************!> Note, this is essentially a unit test but there's no fortran unit test framework
 !> in place. As such, we have to a) run by python, b) write to file c) python parse data and assert.
 !>
 !> Cannot write python bindings as all grids/weights are allocated in the library
