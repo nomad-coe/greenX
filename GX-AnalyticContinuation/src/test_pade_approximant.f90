@@ -1,3 +1,8 @@
+! **************************************************************************************************
+!  Copyright (C) 2020-2023 Green-X library
+!  This file is distributed under the terms of the APACHE2 License.
+!
+! **************************************************************************************************
 module test_pade_approximant
     ! External libs
     use zofu, only: unit_test_type
