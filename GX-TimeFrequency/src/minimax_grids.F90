@@ -9,6 +9,8 @@
 !> NB: When dealing with runtime exceptions, we set ierr to a non-zero value and return immediately
 !  to the caller so we don't need to goto to a cleanup section at the end of the procedure.
 !  Assume -std=f2008: i.e. allocatable arrays are automatically deallocated when going out of scope.
+!> reference: https://doi.org/10.1021/ct5001268
+!> reference: https://doi.org/10.1103/PhysRevB.94.165109
 ! **************************************************************************************************
 
 module minimax_grids
