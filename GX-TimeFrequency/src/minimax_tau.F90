@@ -8,6 +8,8 @@
 !> The arrays containing the coefficients and weights are stored in the `er_aw_aux` derived type.
 !> To extend this module, add the new entries to `tau_npoints_supported`, `energy_ranges_grids`,
 !> and fill the corresponding arrays in the derived type.
+!> reference: https://doi.org/10.1021/ct5001268
+!> reference: https://doi.org/10.1103/PhysRevB.94.165109
 ! ***************************************************************************************************
 module minimax_tau
 #include "gx_common.h"
