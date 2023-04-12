@@ -29,6 +29,32 @@ module minimax_grids
   !> Main entry point for client code.
   public :: gx_minimax_grid, gx_minimax_grid_frequency
 
+  !> Declare interfaces for BLAS/LAPACK subroutines
+  interface
+     subroutine dgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
+       use kinds, only: dp
+       implicit none
+       character(len=1), intent(in) :: transa, transb
+       integer, intent(in)          :: m, n, k, lda, ldb, ldc
+       real(kind=dp), intent(in)    :: alpha, beta
+       real(kind=dp), intent(in)    :: a(lda, *), b(ldb, *)
+       real(kind=dp), intent(inout) :: c(ldc, *)
+     end subroutine dgemm
+  end interface
+
+  interface
+     subroutine dgesdd(jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, iwork, info)
+       use kinds, only: dp
+       implicit none
+       character(len=1), intent(in) :: jobz
+       integer, intent(in)          :: m, n, lda, ldu, ldvt, lwork
+       integer, intent(out)         :: info
+       real(kind=dp), intent(out)   :: s(*), u(ldu, *), vt(ldvt, *), work(*)
+       real(kind=dp), intent(inout) :: a(lda, *)
+       integer, intent(inout)       :: iwork(*)
+     end subroutine dgesdd
+  end interface
+  
 contains
 
   !> \brief Compute minimax grid for GW calculation on imaginary time/frequency domain.
@@ -105,8 +131,8 @@ contains
     ! Scale the frequency grid points and weights from [1,R] to [e_min,e_max]
     ! Note: the frequency grid points and weights include a factor of two
     scaling = e_min
-    omega_points = x_tw(1: num_points) *scaling
-    omega_weights = x_tw(num_points+1: 2* num_points) *scaling   
+    omega_points(:) = x_tw(1: num_points) *scaling
+    omega_weights(:) = x_tw(num_points+1: 2* num_points) *scaling   
 
     ! Get the time grid points and weights
     call get_points_weights_tau(num_points, e_range, x_tw, ierr)
@@ -114,8 +140,8 @@ contains
 
     ! Scale the time grid points and weights from [1,R] to [e_min,e_max]
     scaling = 2.0_dp *e_min
-    tau_points = x_tw(1: num_points) /scaling
-    tau_weights = x_tw(num_points+1: 2* num_points) /scaling
+    tau_points(:) = x_tw(1:num_points) / scaling
+    tau_weights(:) = x_tw(num_points+1:2*num_points) / scaling
 
     allocate (cosft_wt(num_points, num_points))
     allocate (cosft_tw(num_points, num_points))
@@ -159,9 +185,9 @@ contains
 
     allocate (mat(num_points, num_points))
     if(.not.my_bare_cossine_weights) then
-      mat = matmul(cosft_wt, cosft_tw)
+      mat(:,:) = matmul(cosft_wt, cosft_tw)
     else
-      mat = matmul(tmp_cosft_wt, tmp_cosft_tw)
+      mat(:,:) = matmul(tmp_cosft_wt, tmp_cosft_tw)
     endif
     do i_point = 1, num_points
        mat(i_point, i_point) = mat(i_point, i_point) - 1.0_dp
@@ -212,8 +238,8 @@ contains
     ! Scale the frequency grid points and weights from [1,R] to [e_min,e_max]
     ! Note: the frequency grid points and weights include a factor of two
     scaling = e_min
-    omega_points = x_tw(1: num_points) *scaling
-    omega_weights = x_tw(num_points+1: 2* num_points) *scaling
+    omega_points(:) = x_tw(1: num_points) *scaling
+    omega_weights(:) = x_tw(num_points+1: 2* num_points) *scaling
 
     deallocate (x_tw)
     
