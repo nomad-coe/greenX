@@ -56,9 +56,9 @@ contains
     real(kind=dp), allocatable, dimension(:), &  
          intent(out)                                  :: tau_points, tau_weights
     real(kind=dp), allocatable, dimension(:), &
-         intent(out)                                  :: omega_points(:), omega_weights(:)
+         intent(out)                                  :: omega_points, omega_weights
     real(kind=dp), allocatable, dimension(:, :), &
-         intent(out)                                  :: cosft_wt(:, :), cosft_tw(:, :), sinft_wt(:, :)
+         intent(out)                                  :: cosft_wt, cosft_tw, sinft_wt
     real(kind=dp), intent(out)                        :: max_errors(3), cosft_duality_error
     logical, intent(in), optional                     :: bare_cossine_weights
     integer, intent(out)                              :: ierr
