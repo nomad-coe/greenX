@@ -8,6 +8,8 @@
 !> The arrays containing the coefficients and weights are stored in the `er_aw_aux` derived type.
 !> To extend this module, add the new entries to `tau_npoints_supported`, `energy_ranges_grids`,
 !> and fill the corresponding arrays in the derived type.
+!> reference: https://doi.org/10.1021/ct5001268
+!> reference: https://doi.org/10.1103/PhysRevB.94.165109
 ! ***************************************************************************************************
 module minimax_tau
 #include "gx_common.h"
@@ -2907,6 +2909,8 @@ contains
     !> Internal variables
     integer                                                :: ien, kloc, bup
     type(er_aw_aux)                                        :: aw
+    real(kind=dp)                                          :: e_ratio
+
 
     !> Begin work
     ierr = 0
@@ -2921,9 +2925,23 @@ contains
        allocate(aw%aw_erange_matrix(2*grid_size, bup+1))
        call set_aw_array(grid_size, aw)
 
+
        ! Select energy region with binary search
        ien = find_erange(bup, aw%energy_range, e_range)
+
+       ! Scale grids for large sizes when erange falls in the
+       ! first energy range
+       e_ratio = 1.0_dp
+       if (ien == 1 .and. grid_size > 20) then
+          e_ratio = aw%energy_range(1)/e_range
+          if (e_ratio > 1.5_dp) then
+             e_ratio = e_ratio/1.5_dp
+          endif
+       end if
+
        ac_we(:) = aw%aw_erange_matrix(:, ien)
+
+       ac_we(:) = ac_we(:) * e_ratio
 
        ! Deallocate
        deallocate(aw%energy_range)
