@@ -45,6 +45,7 @@ contains
   !! @param[out] max_errors: Max error for the three kind of transforms (same order as previous args)
   !! @param[out] cosft_duality_error. Max_{ij} |AB - I| where A and B are the cosft_wt and cosft_tw matrices.
   !! @param[out] ierr: Exit status
+  !! @param[out] bare_cossine_weights: if true, cosft/sinft weights are not multiplied by cos/sin term, optional
   subroutine gx_minimax_grid(num_points, e_min, e_max, &
        tau_points, tau_weights, omega_points, omega_weights, &
        cosft_wt, cosft_tw, sinft_wt, &
@@ -71,6 +72,7 @@ contains
     real(kind=dp)                                     :: e_range, scaling
     real(kind=dp), dimension(:), allocatable          :: x_tw
     real(kind=dp), dimension(:, :), allocatable       :: mat
+    real(kind=dp), dimension(:, :), allocatable       :: tmp_cosft_wt, tmp_cosft_tw
 
     my_bare_cossine_weights = .false.
     if (present(bare_cossine_weights)) then
@@ -118,6 +120,8 @@ contains
     allocate (cosft_wt(num_points, num_points))
     allocate (cosft_tw(num_points, num_points))
     allocate (sinft_wt(num_points, num_points))
+    allocate (tmp_cosft_wt(num_points, num_points))
+    allocate (tmp_cosft_tw(num_points, num_points))
 
     ! get the weights for the cosine transform W^c(it) -> W^c(iw)
     call get_transformation_weights(num_points, tau_points, omega_points, cosft_wt, e_min, e_max, &
@@ -144,10 +148,21 @@ contains
             sinft_wt(j_point, i_point) = sinft_wt(j_point, i_point)*sin(tau_points(i_point)*omega_points(j_point))
          end do
       end do
+    else
+      do j_point = 1, num_points
+         do i_point = 1, num_points
+            tmp_cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_points(i_point)*omega_points(j_point))
+            tmp_cosft_tw(i_point, j_point) = cosft_tw(i_point, j_point)*cos(tau_points(i_point)*omega_points(j_point))
+         end do
+      end do
     end if
 
     allocate (mat(num_points, num_points))
-    mat = matmul(cosft_wt, cosft_tw)
+    if(.not.my_bare_cossine_weights) then
+      mat = matmul(cosft_wt, cosft_tw)
+    else
+      mat = matmul(tmp_cosft_wt, tmp_cosft_tw)
+    endif
     do i_point = 1, num_points
        mat(i_point, i_point) = mat(i_point, i_point) - 1.0_dp
     end do
@@ -155,6 +170,7 @@ contains
 
     deallocate (mat)
     deallocate (x_tw)
+    deallocate (tmp_cosft_wt,tmp_cosft_tw)
 
   end subroutine gx_minimax_grid
 
