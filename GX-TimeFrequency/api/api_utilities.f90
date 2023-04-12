@@ -1,3 +1,8 @@
+! **************************************************************************************************
+!  Copyright (C) 2020-2023 Green-X library
+!  This file is distributed under the terms of the APACHE2 License.
+!
+! **************************************************************************************************
 module api_utilites
     use error_handling, only: error_message__
     use minimax_omega,    only : omega_npoints_supported

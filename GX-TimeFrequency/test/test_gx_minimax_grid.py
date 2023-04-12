@@ -1,4 +1,11 @@
-""" Inputs and assertions for test_gx_minimax_grid.f90
+"""
+! **************************************************************************************************
+!  Copyright (C) 2020-2023 Green-X library
+!  This file is distributed under the terms of the APACHE2 License.
+!
+! **************************************************************************************************
+
+Inputs and assertions for test_gx_minimax_grid.f90
 
 Would be better if one had python API to GX, and avoid the need for this intermediate binary.
 Indeed, MUCH of the complication regarding running tests comes from this.

@@ -1,6 +1,13 @@
 """
 Module to run an executable
 """
+"""
+! **************************************************************************************************
+!  Copyright (C) 2020-2023 Green-X library
+!  This file is distributed under the terms of the APACHE2 License.
+!
+! **************************************************************************************************
+"""
 import os
 import pathlib
 import enum

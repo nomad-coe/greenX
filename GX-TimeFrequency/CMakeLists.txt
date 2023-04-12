@@ -1,3 +1,9 @@
+# **************************************************************************************************
+#  Copyright (C) 2020-2023 Green-X library
+#  This file is distributed under the terms of the APACHE2 License.
+#
+# **************************************************************************************************
+
 # CMakeLists for TimeFrequency Library (MiniMax)
 
 # GreenXMiniMax Library

@@ -1,3 +1,8 @@
+! **************************************************************************************************
+!  Copyright (C) 2020-2023 Green-X library
+!  This file is distributed under the terms of the APACHE2 License.
+!
+! **************************************************************************************************
 !> Program to print minimax meshes and the associated errors.
 !> Use: gx_tabulate_grids.exe -help to list available options.
 program gx_tabulate_minimax
