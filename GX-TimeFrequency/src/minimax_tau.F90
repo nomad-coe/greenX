@@ -8,8 +8,8 @@
 !> The arrays containing the coefficients and weights are stored in the `er_aw_aux` derived type.
 !> To extend this module, add the new entries to `tau_npoints_supported`, `energy_ranges_grids`,
 !> and fill the corresponding arrays in the derived type.
-!> reference: https://doi.org/10.1021/ct5001268
-!> reference: https://doi.org/10.1103/PhysRevB.94.165109
+!> reference: [https://doi.org/10.1021/ct5001268](https://doi.org/10.1021/ct5001268)
+!> reference: [https://doi.org/10.1103/PhysRevB.94.165109](https://doi.org/10.1103/PhysRevB.94.165109)
 ! ***************************************************************************************************
 module minimax_tau
 #include "gx_common.h"
@@ -2894,7 +2894,6 @@ contains
 
   end subroutine set_aw_array
 
-
   !> \brief Unpacks the minimax coefficients for the desired energy range
   !! @param[in] k - size of the grid
   !! @param[in] e_range - the selected energy range
@@ -2915,42 +2914,40 @@ contains
     !> Begin work
     ierr = 0
 
-    if (any(tau_npoints_supported == grid_size)) then
-       ! Find location of grid size
-       kloc = findloc(tau_npoints_supported, grid_size, 1)
-       bup = energy_ranges_grids(kloc)
-
-       ! Allocate and set type elements
-       allocate(aw%energy_range(bup))
-       allocate(aw%aw_erange_matrix(2*grid_size, bup+1))
-       call set_aw_array(grid_size, aw)
-
-
-       ! Select energy region with binary search
-       ien = find_erange(bup, aw%energy_range, e_range)
-
-       ! Scale grids for large sizes when erange falls in the
-       ! first energy range
-       e_ratio = 1.0_dp
-       if (ien == 1 .and. grid_size > 20) then
-          e_ratio = aw%energy_range(1)/e_range
-          if (e_ratio > 1.5_dp) then
-             e_ratio = e_ratio/1.5_dp
-          endif
-       end if
-
-       ac_we(:) = aw%aw_erange_matrix(:, ien)
-
-       ac_we(:) = ac_we(:) * e_ratio
-
-       ! Deallocate
-       deallocate(aw%energy_range)
-       deallocate(aw%aw_erange_matrix)
-    else
+    if (.not. any(tau_npoints_supported == grid_size)) then
        ierr = 1
        _REGISTER_EXC("The grid size you chose is not available.")
+       return
     end if
 
-  end subroutine get_points_weights_tau
+    ! Find location of grid size
+    kloc = findloc(tau_npoints_supported, grid_size, 1)
+    bup = energy_ranges_grids(kloc)
 
+    ! Allocate and set type elements
+    allocate(aw%energy_range(bup))
+    allocate(aw%aw_erange_matrix(2*grid_size, bup+1))
+    call set_aw_array(grid_size, aw)
+
+    ! Select energy region with binary search
+    ien = find_erange(bup, aw%energy_range, e_range)
+
+    ! Scale grids for large sizes when erange falls in the first energy range
+    e_ratio = 1.0_dp
+    if (ien == 1 .and. grid_size > 20) then
+       e_ratio = aw%energy_range(1)/e_range
+       if (e_ratio > 1.5_dp) then
+          e_ratio = e_ratio/1.5_dp
+       endif
+    end if
+
+    ac_we(:) = aw%aw_erange_matrix(:, ien)
+    ac_we(:) = ac_we(:) * e_ratio
+
+    ! Deallocate
+    deallocate(aw%energy_range)
+    deallocate(aw%aw_erange_matrix)
+
+  end subroutine get_points_weights_tau
+  
 end module minimax_tau
