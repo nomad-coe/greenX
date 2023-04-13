@@ -15,7 +15,7 @@ module minimax_tau
 #include "gx_common.h"
   use kinds,          only: dp
   use error_handling, only: register_exc
-  use minimax_utils,  only: find_erange, er_aw_aux
+  use minimax_utils,  only: er_aw_aux
   implicit none
 
   private
@@ -34,7 +34,7 @@ contains
   !> \brief Stores the minimax coefficients for all supported grid sizes
   !! @param[in] grid_size  - size of the grid
   !! @param[inout] aw - derived type of energy ranges and coefficients:weights
-  subroutine set_aw_array(grid_size, aw)
+  subroutine set_aw_array_tau(grid_size, aw)
     integer, intent(in)            :: grid_size
     type(er_aw_aux), intent(inout) :: aw
 
@@ -2892,7 +2892,7 @@ contains
             1.8163260289376923_dp,  2.848850144582029_dp,  5.042342061181277_dp]
     end select
 
-  end subroutine set_aw_array
+  end subroutine set_aw_array_tau
 
   !> \brief Unpacks the minimax coefficients for the desired energy range
   !! @param[in] k - size of the grid
@@ -2906,14 +2906,12 @@ contains
     integer, intent(out)                                   :: ierr
 
     !> Internal variables
-    integer                                                :: ien, kloc, bup
+    integer                                                :: kloc, bup
     type(er_aw_aux)                                        :: aw
     real(kind=dp)                                          :: e_ratio
 
-
     !> Begin work
     ierr = 0
-
     if (.not. any(tau_npoints_supported == grid_size)) then
        ierr = 1
        _REGISTER_EXC("The grid size you chose is not available.")
@@ -2927,21 +2925,11 @@ contains
     ! Allocate and set type elements
     allocate(aw%energy_range(bup))
     allocate(aw%aw_erange_matrix(2*grid_size, bup+1))
-    call set_aw_array(grid_size, aw)
+    call set_aw_array_tau(grid_size, aw)
 
-    ! Select energy region with binary search
-    ien = find_erange(bup, aw%energy_range, e_range)
-
-    ! Scale grids for large sizes when erange falls in the first energy range
+    ! Get coefficients and weights
     e_ratio = 1.0_dp
-    if (ien == 1 .and. grid_size > 20) then
-       e_ratio = aw%energy_range(1)/e_range
-       if (e_ratio > 1.5_dp) then
-          e_ratio = e_ratio/1.5_dp
-       endif
-    end if
-
-    ac_we(:) = aw%aw_erange_matrix(:, ien)
+    call aw%get_coeff_weight(grid_size, bup, e_range, ac_we, e_ratio)
     ac_we(:) = ac_we(:) * e_ratio
 
     ! Deallocate

@@ -6,6 +6,7 @@
 !> \brief Declare interfaces for BLAS/LAPACK subroutines
 ! **************************************************************************************************
 module lapack_interfaces
+  implicit none
 
   interface blas3
      subroutine dgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
