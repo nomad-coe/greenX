@@ -46,11 +46,11 @@ contains
   !! @param[out] max_errors: Max error for the three kind of transforms (same order as previous args)
   !! @param[out] cosft_duality_error. Max_{ij} |AB - I| where A and B are the cosft_wt and cosft_tw matrices.
   !! @param[out] ierr: Exit status
-  !! @param[in] bare_cosine_weights: if true, cosft/sinft weights are not multiplied by cos/sin term, optional
+  !! @param[in] bare_cos_sin_weights: whether the cosine and sine weights are multiplied by cos and sin term, optional
   subroutine gx_minimax_grid(num_points, e_min, e_max, &
        tau_points, tau_weights, omega_points, omega_weights, &
        cosft_wt, cosft_tw, sinft_wt, &
-       max_errors, cosft_duality_error, ierr, bare_cosine_weights)
+       max_errors, cosft_duality_error, ierr, bare_cos_sin_weights)
 
     integer, intent(in)                               :: num_points
     real(kind=dp), intent(in)                         :: e_min, e_max
@@ -61,11 +61,11 @@ contains
     real(kind=dp), allocatable, dimension(:, :), &
          intent(out)                                  :: cosft_wt, cosft_tw, sinft_wt
     real(kind=dp), intent(out)                        :: max_errors(3), cosft_duality_error
-    logical, intent(in), optional                     :: bare_cosine_weights
+    logical, intent(in), optional                     :: bare_cos_sin_weights
     integer, intent(out)                              :: ierr
 
     ! Internal variables
-    logical                                           :: my_bare_cosine_weights
+    logical                                           :: my_bare_cos_sin_weights
     integer, parameter                                :: cos_t_to_cos_w = 1
     integer, parameter                                :: cos_w_to_cos_t = 2
     integer, parameter                                :: sin_t_to_sin_w = 3
@@ -75,9 +75,9 @@ contains
     real(kind=dp), dimension(:, :), allocatable       :: mat
     real(kind=dp), dimension(:, :), allocatable       :: tmp_cosft_wt, tmp_cosft_tw
 
-    my_bare_cosine_weights = .false.
-    if (present(bare_cosine_weights)) then
-       my_bare_cosine_weights = .true.
+    my_bare_cos_sin_weights = .false.
+    if (present(bare_cos_sin_weights)) then
+       my_bare_cos_sin_weights = .true.
     endif
 
     ! Begin work
@@ -141,7 +141,7 @@ contains
 
     ! Compute the actual weights used for the inhomogeneous cosine/ FT and check whether
     ! the two matrices for the forward/backward transform are the inverse of each other.
-    if(.not.my_bare_cosine_weights) then
+    if(.not.my_bare_cos_sin_weights) then
        do j_point = 1, num_points
           do i_point = 1, num_points
              cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_points(i_point)*omega_points(j_point))
@@ -159,7 +159,7 @@ contains
     end if
 
     allocate (mat(num_points, num_points))
-    if(.not.my_bare_cosine_weights) then
+    if(.not.my_bare_cos_sin_weights) then
        mat(:,:) = matmul(cosft_wt, cosft_tw)
     else
        mat(:,:) = matmul(tmp_cosft_wt, tmp_cosft_tw)
