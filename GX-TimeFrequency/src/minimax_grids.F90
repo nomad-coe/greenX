@@ -77,7 +77,7 @@ contains
 
     my_bare_cos_sin_weights = .false.
     if (present(bare_cos_sin_weights)) then
-       my_bare_cos_sin_weights = .true.
+       my_bare_cos_sin_weights = bare_cos_sin_weights
     endif
 
     ! Begin work
