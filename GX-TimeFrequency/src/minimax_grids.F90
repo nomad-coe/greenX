@@ -9,8 +9,8 @@
 !> NB: When dealing with runtime exceptions, we set ierr to a non-zero value and return immediately
 !  to the caller so we don't need to goto to a cleanup section at the end of the procedure.
 !  Assume -std=f2008: i.e. allocatable arrays are automatically deallocated when going out of scope.
-!> reference: https://doi.org/10.1021/ct5001268
-!> reference: https://doi.org/10.1103/PhysRevB.94.165109
+!> reference: [https://doi.org/10.1021/ct5001268](https://doi.org/10.1021/ct5001268)
+!> reference: [https://doi.org/10.1103/PhysRevB.94.165109](https://doi.org/10.1103/PhysRevB.94.165109)
 ! **************************************************************************************************
 
 module minimax_grids
@@ -21,6 +21,7 @@ module minimax_grids
   use minimax_tau,       only: get_points_weights_tau
   use minimax_omega,     only: get_points_weights_omega
   use minimax_utils,     only: cosine_wt, cosine_tw, sine_tw
+  use lapack_interfaces, only: dgemm, dgesdd
 
   implicit none
 
@@ -29,32 +30,6 @@ module minimax_grids
   !> Main entry point for client code.
   public :: gx_minimax_grid, gx_minimax_grid_frequency
 
-  !> Declare interfaces for BLAS/LAPACK subroutines
-  interface
-     subroutine dgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
-       use kinds, only: dp
-       implicit none
-       character(len=1), intent(in) :: transa, transb
-       integer, intent(in)          :: m, n, k, lda, ldb, ldc
-       real(kind=dp), intent(in)    :: alpha, beta
-       real(kind=dp), intent(in)    :: a(lda, *), b(ldb, *)
-       real(kind=dp), intent(inout) :: c(ldc, *)
-     end subroutine dgemm
-  end interface
-
-  interface
-     subroutine dgesdd(jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, iwork, info)
-       use kinds, only: dp
-       implicit none
-       character(len=1), intent(in) :: jobz
-       integer, intent(in)          :: m, n, lda, ldu, ldvt, lwork
-       integer, intent(out)         :: info
-       real(kind=dp), intent(out)   :: s(*), u(ldu, *), vt(ldvt, *), work(*)
-       real(kind=dp), intent(inout) :: a(lda, *)
-       integer, intent(inout)       :: iwork(*)
-     end subroutine dgesdd
-  end interface
-  
 contains
 
   !> \brief Compute minimax grid for GW calculation on imaginary time/frequency domain.
@@ -71,11 +46,11 @@ contains
   !! @param[out] max_errors: Max error for the three kind of transforms (same order as previous args)
   !! @param[out] cosft_duality_error. Max_{ij} |AB - I| where A and B are the cosft_wt and cosft_tw matrices.
   !! @param[out] ierr: Exit status
-  !! @param[out] bare_cossine_weights: if true, cosft/sinft weights are not multiplied by cos/sin term, optional
+  !! @param[in] bare_cos_sin_weights: whether the cosine and sine weights are multiplied by cos and sin term, optional
   subroutine gx_minimax_grid(num_points, e_min, e_max, &
        tau_points, tau_weights, omega_points, omega_weights, &
        cosft_wt, cosft_tw, sinft_wt, &
-       max_errors, cosft_duality_error, ierr, bare_cossine_weights)
+       max_errors, cosft_duality_error, ierr, bare_cos_sin_weights)
 
     integer, intent(in)                               :: num_points
     real(kind=dp), intent(in)                         :: e_min, e_max
@@ -86,11 +61,11 @@ contains
     real(kind=dp), allocatable, dimension(:, :), &
          intent(out)                                  :: cosft_wt, cosft_tw, sinft_wt
     real(kind=dp), intent(out)                        :: max_errors(3), cosft_duality_error
-    logical, intent(in), optional                     :: bare_cossine_weights
+    logical, intent(in), optional                     :: bare_cos_sin_weights
     integer, intent(out)                              :: ierr
 
     ! Internal variables
-    logical                                           :: my_bare_cossine_weights
+    logical                                           :: my_bare_cos_sin_weights
     integer, parameter                                :: cos_t_to_cos_w = 1
     integer, parameter                                :: cos_w_to_cos_t = 2
     integer, parameter                                :: sin_t_to_sin_w = 3
@@ -100,9 +75,9 @@ contains
     real(kind=dp), dimension(:, :), allocatable       :: mat
     real(kind=dp), dimension(:, :), allocatable       :: tmp_cosft_wt, tmp_cosft_tw
 
-    my_bare_cossine_weights = .false.
-    if (present(bare_cossine_weights)) then
-      if(bare_cossine_weights) my_bare_cossine_weights = .true.
+    my_bare_cos_sin_weights = .false.
+    if (present(bare_cos_sin_weights)) then
+       my_bare_cos_sin_weights = bare_cos_sin_weights
     endif
 
     ! Begin work
@@ -166,29 +141,30 @@ contains
 
     ! Compute the actual weights used for the inhomogeneous cosine/ FT and check whether
     ! the two matrices for the forward/backward transform are the inverse of each other.
-    if(.not.my_bare_cossine_weights) then
-      do j_point = 1, num_points
-         do i_point = 1, num_points
-            cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_points(i_point)*omega_points(j_point))
-            cosft_tw(i_point, j_point) = cosft_tw(i_point, j_point)*cos(tau_points(i_point)*omega_points(j_point))
-            sinft_wt(j_point, i_point) = sinft_wt(j_point, i_point)*sin(tau_points(i_point)*omega_points(j_point))
-         end do
-      end do
+    if(.not.my_bare_cos_sin_weights) then
+       do j_point = 1, num_points
+          do i_point = 1, num_points
+             cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_points(i_point)*omega_points(j_point))
+             cosft_tw(i_point, j_point) = cosft_tw(i_point, j_point)*cos(tau_points(i_point)*omega_points(j_point))
+             sinft_wt(j_point, i_point) = sinft_wt(j_point, i_point)*sin(tau_points(i_point)*omega_points(j_point))
+          end do
+       end do
     else
-      do j_point = 1, num_points
-         do i_point = 1, num_points
-            tmp_cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_points(i_point)*omega_points(j_point))
-            tmp_cosft_tw(i_point, j_point) = cosft_tw(i_point, j_point)*cos(tau_points(i_point)*omega_points(j_point))
-         end do
-      end do
+       do j_point = 1, num_points
+          do i_point = 1, num_points
+             tmp_cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_points(i_point)*omega_points(j_point))
+             tmp_cosft_tw(i_point, j_point) = cosft_tw(i_point, j_point)*cos(tau_points(i_point)*omega_points(j_point))
+          end do
+       end do
     end if
 
     allocate (mat(num_points, num_points))
-    if(.not.my_bare_cossine_weights) then
-      mat(:,:) = matmul(cosft_wt, cosft_tw)
+    if(.not.my_bare_cos_sin_weights) then
+       mat(:,:) = matmul(cosft_wt, cosft_tw)
     else
-      mat(:,:) = matmul(tmp_cosft_wt, tmp_cosft_tw)
+       mat(:,:) = matmul(tmp_cosft_wt, tmp_cosft_tw)
     endif
+
     do i_point = 1, num_points
        mat(i_point, i_point) = mat(i_point, i_point) - 1.0_dp
     end do
@@ -217,7 +193,7 @@ contains
     ! Internal variables
     real(kind=dp)                                     :: e_range, scaling
     real(kind=dp), dimension(:), allocatable          :: x_tw
-    
+
     ! Begin work
     e_range = e_max/e_min   
     ierr = 0
@@ -242,7 +218,7 @@ contains
     omega_weights(:) = x_tw(num_points+1: 2* num_points) *scaling
 
     deallocate (x_tw)
-    
+
   end subroutine gx_minimax_grid_frequency
 
 
@@ -416,7 +392,7 @@ contains
           end do
        end do
 
-    ! the cosine transform cos(iw) -> cos(it)  
+       ! the cosine transform cos(iw) -> cos(it)  
     else if (transformation_type == cosine_wt) then
        tau = tau_points(i_point)
        current_point = tau
@@ -434,7 +410,7 @@ contains
           end do
        end do
 
-    ! the sine transform sin(it) -> sin(iw)         
+       ! the sine transform sin(it) -> sin(iw)         
     else if (transformation_type == sine_tw) then
        omega = omega_points(i_point)
        current_point = omega
@@ -482,7 +458,7 @@ contains
     ! Internal variables
     integer                                          :: i_node,i_point
     real(kind=dp)                                    :: func_val, func_val_temp, max_error_tmp, &
-                                                        tau, omega, x_val
+         tau, omega, x_val
 
     ! Begin work
     max_error_tmp = 0.0_dp
@@ -505,7 +481,7 @@ contains
           end if
        end do
 
-    ! the cosine transform cos(iw) -> cos(it)
+       ! the cosine transform cos(iw) -> cos(it)
     else if (transformation_type == cosine_wt) then
        tau = current_point
 
@@ -524,7 +500,7 @@ contains
           end if
        end do
 
-    ! the sine transform sin(it) -> sin(iw)
+       ! the sine transform sin(it) -> sin(iw)
     else if (transformation_type == sine_tw) then
        omega = current_point
 

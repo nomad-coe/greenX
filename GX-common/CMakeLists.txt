@@ -19,6 +19,7 @@ target_sources(GXCommon PRIVATE
         src/constants.f90
         src/unit_conversion.f90
         src/error_handling.f90
+        src/lapack_interfaces.f90
         )
 
 # Install library
