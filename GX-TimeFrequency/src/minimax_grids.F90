@@ -9,6 +9,8 @@
 !> NB: When dealing with runtime exceptions, we set ierr to a non-zero value and return immediately
 !  to the caller so we don't need to goto to a cleanup section at the end of the procedure.
 !  Assume -std=f2008: i.e. allocatable arrays are automatically deallocated when going out of scope.
+!> reference: [https://doi.org/10.1021/ct5001268](https://doi.org/10.1021/ct5001268)
+!> reference: [https://doi.org/10.1103/PhysRevB.94.165109](https://doi.org/10.1103/PhysRevB.94.165109)
 ! **************************************************************************************************
 
 module minimax_grids
@@ -19,6 +21,7 @@ module minimax_grids
   use minimax_tau,       only: get_points_weights_tau
   use minimax_omega,     only: get_points_weights_omega
   use minimax_utils,     only: cosine_wt, cosine_tw, sine_tw
+  use lapack_interfaces, only: dgemm, dgesdd
 
   implicit none
 
@@ -29,7 +32,7 @@ module minimax_grids
 
 contains
 
-  !> \brief Compute minimax grid for RPA energy and GW calculation on imaginary time/frequency domain.
+  !> \brief Compute minimax grid for GW calculation on imaginary time/frequency domain.
   !! @param[in] num_points: Number of mesh points.
   !! @param[in] e_min: Minimum transition energy. Arbitrary units as we only need e_max/e_min
   !! @param[in] e_max: Maximum transition energy.
@@ -43,23 +46,26 @@ contains
   !! @param[out] max_errors: Max error for the three kind of transforms (same order as previous args)
   !! @param[out] cosft_duality_error. Max_{ij} |AB - I| where A and B are the cosft_wt and cosft_tw matrices.
   !! @param[out] ierr: Exit status
+  !! @param[in] bare_cos_sin_weights: whether the cosine and sine weights are multiplied by cos and sin term, optional
   subroutine gx_minimax_grid(num_points, e_min, e_max, &
        tau_points, tau_weights, omega_points, omega_weights, &
        cosft_wt, cosft_tw, sinft_wt, &
-       max_errors, cosft_duality_error, ierr)
+       max_errors, cosft_duality_error, ierr, bare_cos_sin_weights)
 
     integer, intent(in)                               :: num_points
     real(kind=dp), intent(in)                         :: e_min, e_max
     real(kind=dp), allocatable, dimension(:), &  
          intent(out)                                  :: tau_points, tau_weights
     real(kind=dp), allocatable, dimension(:), &
-         intent(out)                                  :: omega_points(:), omega_weights(:)
+         intent(out)                                  :: omega_points, omega_weights
     real(kind=dp), allocatable, dimension(:, :), &
-         intent(out)                                  :: cosft_wt(:, :), cosft_tw(:, :), sinft_wt(:, :)
+         intent(out)                                  :: cosft_wt, cosft_tw, sinft_wt
     real(kind=dp), intent(out)                        :: max_errors(3), cosft_duality_error
+    logical, intent(in), optional                     :: bare_cos_sin_weights
     integer, intent(out)                              :: ierr
 
     ! Internal variables
+    logical                                           :: my_bare_cos_sin_weights
     integer, parameter                                :: cos_t_to_cos_w = 1
     integer, parameter                                :: cos_w_to_cos_t = 2
     integer, parameter                                :: sin_t_to_sin_w = 3
@@ -67,6 +73,12 @@ contains
     real(kind=dp)                                     :: e_range, scaling
     real(kind=dp), dimension(:), allocatable          :: x_tw
     real(kind=dp), dimension(:, :), allocatable       :: mat
+    real(kind=dp), dimension(:, :), allocatable       :: tmp_cosft_wt, tmp_cosft_tw
+
+    my_bare_cos_sin_weights = .false.
+    if (present(bare_cos_sin_weights)) then
+       my_bare_cos_sin_weights = bare_cos_sin_weights
+    endif
 
     ! Begin work
     e_range = e_max/e_min   
@@ -94,8 +106,8 @@ contains
     ! Scale the frequency grid points and weights from [1,R] to [e_min,e_max]
     ! Note: the frequency grid points and weights include a factor of two
     scaling = e_min
-    omega_points = x_tw(1: num_points) *scaling
-    omega_weights = x_tw(num_points+1: 2* num_points) *scaling   
+    omega_points(:) = x_tw(1: num_points) *scaling
+    omega_weights(:) = x_tw(num_points+1: 2* num_points) *scaling   
 
     ! Get the time grid points and weights
     call get_points_weights_tau(num_points, e_range, x_tw, ierr)
@@ -103,12 +115,14 @@ contains
 
     ! Scale the time grid points and weights from [1,R] to [e_min,e_max]
     scaling = 2.0_dp *e_min
-    tau_points = x_tw(1: num_points) /scaling
-    tau_weights = x_tw(num_points+1: 2* num_points) /scaling
+    tau_points(:) = x_tw(1:num_points) / scaling
+    tau_weights(:) = x_tw(num_points+1:2*num_points) / scaling
 
     allocate (cosft_wt(num_points, num_points))
     allocate (cosft_tw(num_points, num_points))
     allocate (sinft_wt(num_points, num_points))
+    allocate (tmp_cosft_wt(num_points, num_points))
+    allocate (tmp_cosft_tw(num_points, num_points))
 
     ! get the weights for the cosine transform W^c(it) -> W^c(iw)
     call get_transformation_weights(num_points, tau_points, omega_points, cosft_wt, e_min, e_max, &
@@ -127,16 +141,30 @@ contains
 
     ! Compute the actual weights used for the inhomogeneous cosine/ FT and check whether
     ! the two matrices for the forward/backward transform are the inverse of each other.
-    do j_point = 1, num_points
-       do i_point = 1, num_points
-          cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_points(i_point)*omega_points(j_point))
-          cosft_tw(i_point, j_point) = cosft_tw(i_point, j_point)*cos(tau_points(i_point)*omega_points(j_point))
-          sinft_wt(j_point, i_point) = sinft_wt(j_point, i_point)*sin(tau_points(i_point)*omega_points(j_point))
+    if(.not.my_bare_cos_sin_weights) then
+       do j_point = 1, num_points
+          do i_point = 1, num_points
+             cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_points(i_point)*omega_points(j_point))
+             cosft_tw(i_point, j_point) = cosft_tw(i_point, j_point)*cos(tau_points(i_point)*omega_points(j_point))
+             sinft_wt(j_point, i_point) = sinft_wt(j_point, i_point)*sin(tau_points(i_point)*omega_points(j_point))
+          end do
        end do
-    end do
+    else
+       do j_point = 1, num_points
+          do i_point = 1, num_points
+             tmp_cosft_wt(j_point, i_point) = cosft_wt(j_point, i_point)*cos(tau_points(i_point)*omega_points(j_point))
+             tmp_cosft_tw(i_point, j_point) = cosft_tw(i_point, j_point)*cos(tau_points(i_point)*omega_points(j_point))
+          end do
+       end do
+    end if
 
     allocate (mat(num_points, num_points))
-    mat = matmul(cosft_wt, cosft_tw)
+    if(.not.my_bare_cos_sin_weights) then
+       mat(:,:) = matmul(cosft_wt, cosft_tw)
+    else
+       mat(:,:) = matmul(tmp_cosft_wt, tmp_cosft_tw)
+    endif
+
     do i_point = 1, num_points
        mat(i_point, i_point) = mat(i_point, i_point) - 1.0_dp
     end do
@@ -144,10 +172,11 @@ contains
 
     deallocate (mat)
     deallocate (x_tw)
+    deallocate (tmp_cosft_wt,tmp_cosft_tw)
 
   end subroutine gx_minimax_grid
 
-  !> \brief Retrieves the frequency grid for a canonical GW calculation
+  !> \brief Retrieves the frequency grid for a canonical GW/RPA calculation
   !! @param[in] num_points: Number of mesh points.
   !! @param[in] e_min: Minimum transition energy. Arbitrary units as we only need e_max/e_min
   !! @param[in] e_max: Maximum transition energy.
@@ -164,7 +193,7 @@ contains
     ! Internal variables
     real(kind=dp)                                     :: e_range, scaling
     real(kind=dp), dimension(:), allocatable          :: x_tw
-    
+
     ! Begin work
     e_range = e_max/e_min   
     ierr = 0
@@ -185,11 +214,11 @@ contains
     ! Scale the frequency grid points and weights from [1,R] to [e_min,e_max]
     ! Note: the frequency grid points and weights include a factor of two
     scaling = e_min
-    omega_points = x_tw(1: num_points) *scaling
-    omega_weights = x_tw(num_points+1: 2* num_points) *scaling
+    omega_points(:) = x_tw(1: num_points) *scaling
+    omega_weights(:) = x_tw(num_points+1: 2* num_points) *scaling
 
     deallocate (x_tw)
-    
+
   end subroutine gx_minimax_grid_frequency
 
 
@@ -363,7 +392,7 @@ contains
           end do
        end do
 
-    ! the cosine transform cos(iw) -> cos(it)  
+       ! the cosine transform cos(iw) -> cos(it)  
     else if (transformation_type == cosine_wt) then
        tau = tau_points(i_point)
        current_point = tau
@@ -381,7 +410,7 @@ contains
           end do
        end do
 
-    ! the sine transform sin(it) -> sin(iw)         
+       ! the sine transform sin(it) -> sin(iw)         
     else if (transformation_type == sine_tw) then
        omega = omega_points(i_point)
        current_point = omega
@@ -429,7 +458,7 @@ contains
     ! Internal variables
     integer                                          :: i_node,i_point
     real(kind=dp)                                    :: func_val, func_val_temp, max_error_tmp, &
-                                                        tau, omega, x_val
+         tau, omega, x_val
 
     ! Begin work
     max_error_tmp = 0.0_dp
@@ -452,7 +481,7 @@ contains
           end if
        end do
 
-    ! the cosine transform cos(iw) -> cos(it)
+       ! the cosine transform cos(iw) -> cos(it)
     else if (transformation_type == cosine_wt) then
        tau = current_point
 
@@ -471,7 +500,7 @@ contains
           end if
        end do
 
-    ! the sine transform sin(it) -> sin(iw)
+       ! the sine transform sin(it) -> sin(iw)
     else if (transformation_type == sine_tw) then
        omega = current_point
 
