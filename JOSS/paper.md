@@ -110,22 +110,22 @@ To convert between imaginary time and frequency grids, we introduce a nonuniform
 with
 \begin{align}
 \hat{F}^\text{even}(i\tau)=\hat{F}^\text{even}(-i\tau) \hspace{2.4em} &\text{and} \hspace{1.9em} F^\text{even}(i\omega)=F^\text{even}(-i\omega)\,, \\
-\hat{F}^\text{odd}(i\tau)=-\hat{F}^\text{odd}(-i\tau) \hspace{2em} &\text{and} \hspace{2em} F^\text{odd}(i\omega)=-F^\text{odd}(-i\omega)\,.
+\hat{F}^\text{odd}(i\tau)=-\hat{F}^\text{odd}(-i\tau) \hspace{2em} &\text{and} \hspace{2em} F^\text{odd}(i\omega)=-F^\text{odd}(-i\omega)\,.\label{Fw_split}
 \end{align}
 
 The corresponding discretized Fourier transforms read [@liu2016cubic]
 \begin{align}\label{ct_st_even}
-    F^\text{even}(i\omega_k) &= \sum_{j=1}^{N} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)
+    F^\text{even}(i\omega_k) &= \sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\,,
     \\
-    \hat{F}^\text{even}(i\tau_j)& = \sum_{k=1}^{N} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\,,
+    \hat{F}^\text{even}(i\tau_j)& = \sum_{k=1}^{n} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\,,\label{ct_even_w_to_t}
  \\
-    F^\text{odd}(i\omega_k)& = i\sum_{j=1}^{N} \lambda_{kj} \mathrm{sin}(\omega_k\tau_j)\hat{F}^\text{odd}(i\tau_j)\,,\label{st_odd_t_to_w}
+    F^\text{odd}(i\omega_k)& = i\sum_{j=1}^{n} \lambda_{kj} \mathrm{sin}(\omega_k\tau_j)\hat{F}^\text{odd}(i\tau_j)\,,\label{st_odd_t_to_w}
     \\
-    \hat{F}^\text{odd}(i\tau_j)&= -i \sum_{k=1}^{N} \zeta_{jk} \mathrm{sin}(\tau_j\omega_k)F^\text{odd}(i\omega_k),\label{ct_st_odd}
+    \hat{F}^\text{odd}(i\tau_j)&= -i \sum_{k=1}^{n} \zeta_{jk} \mathrm{sin}(\tau_j\omega_k)F^\text{odd}(i\omega_k),\label{ct_st_odd}
 \end{align}
 where $\{\tau_j\}_{j=1}^n, \tau_j\,{>}\,0$ are again the time grid points, $\{\omega_k\}_{k=1}^n,\omega_k\,{>}\,0$ frequency grid points and $\{\delta_{kj}\}_{k,j=1}^n$, $\{\eta_{jk}\}_{k,j=1}^n$,$\{\lambda_{kj}\}_{k,j=1}^n$, $\{\zeta_{jk}\}_{k,j=1}^n$ the corresponding Fourier integration weights. $\hat{\chi}^0(i\tau)$ is an even function and we need thus the transform defined in Eq. \eqref{ct_st_even} to obtain $\chi^0(i\omega)$. The screened Coulomb interaction is also even and we use expression \eqref{ct_even_w_to_t} to convert $W(i\omega)$ to $\widehat{W}(i\tau)$. The self-energy is neither odd nor even and we use Eq. \eqref{Fw_split} in combination with Eqs. \eqref{ct_st_even} and  \eqref{st_odd_t_to_w} to transform $\widehat{\Sigma}(i\tau)$ to $\Sigma(i\omega)$ [@liu2016cubic]. The transformation defined in Eq. \eqref{ct_st_odd} is not required for the methods summarized in Figure \ref{fig:flowchart}, but is added for the sake of completeness and clarity.
 
-Ideal grid parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$, $\delta_{kj}$, $\eta_{kj}$, $\lambda_{kj}$ feature a vanishing error for the LT-dMP2 and RPA correlation energy integrations and Fourier transforms of $\chi^0,W$ and $\Sigma$ (Figure \ref{flowchart}). We compute *minimax* grid parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$ that minimize the maximum error of the LT-dMP2 and RPA correlation energy integration (Fig. \ref{fig:flowchart}) over all possible functions $\hat{\chi}^0( \mathbf{r}, \mathbf{r'}, i\tau )$ and $\chi^0( \mathbf{r}, \mathbf{r'}, i\omega )$
+Ideal grid parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$, $\delta_{kj}$, $\eta_{kj}$, $\lambda_{kj}$ feature a vanishing error for the LT-dMP2 and RPA correlation energy integrations and Fourier transforms of $\chi^0,W$ and $\Sigma$ (Figure \ref{fig:flowchart}). We compute *minimax* grid parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$ that minimize the maximum error of the LT-dMP2 and RPA correlation energy integration (Fig. \ref{fig:flowchart}) over all possible functions $\hat{\chi}^0( \mathbf{r}, \mathbf{r'}, i\tau )$ and $\chi^0( \mathbf{r}, \mathbf{r'}, i\omega )$
 [@Takatsuka2008;@kaltak2014low;@liu2016cubic]. For this minimax grid optimization, we use the Remez algorithm [@kaltak2014low] which is an iterative, numerically ill-conditioned procedure requiring high numerical precision. As the generation of minimax parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$ is tedious, the most feasible strategy is to tabulate the computed minimax parameters $\{\tau_j\}_{j=1}^n$, $\{\sigma_j\}_{j=1}^n$, $\{\omega_k\}_{k=1}^n$, $\{\gamma_k\}_{k=1}^n$ for their later use in LT-dMP2, RPA and \textit{GW} calculations.
 
 It has been shown that minimax time and frequency grids $\{\tau_j\}_{j=1}^n$, $\{\omega_k\}_{k=1}^n$ are also suitable for performing Fourier transforms of $\chi^0,W$ and $\Sigma$ [@liu2016cubic]. With the knowledge of the tabulated $\{\tau_j\}_{j=1}^n$ and $\{\omega_k\}_{k=1}^n$ parameters, it is possible to use least-squares optimization to calculate the Fourier integration weights $\delta_{kj}$, $\eta_{kj}$, $\lambda_{kj}$ [@azizi_minimax]. The least-squares optimization can be executed by simple non-iterative linear matrix algebra which is straightforward and is done during the run time of the Green-X library [@azizi_minimax].
