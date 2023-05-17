@@ -154,7 +154,7 @@ with $\mathbb{I}$ being the identity matrix. Inputs and outputs are in atomic un
 |---|---|---|---|
 |$\{\tau_j^\text{mat}\}_{j=1}^n$ | time points | LT-dMP2, ls RPA, ls \textit{GW} | tabulated + rescaling |     
 |$\{\sigma_j^\text{mat}\}_{j=1}^n$ | integration weights time integral | LT-dMP2  | tabulated + rescaling      
-|$\{\omega_k^\text{mat}\}_{k=1}^n$ | frequency points | ls & canoncial RPA, ls \textit{GW} | tabulated + rescaling |     
+|$\{\omega_k^\text{mat}\}_{k=1}^n$ | frequency points | ls & canonical RPA, ls \textit{GW} | tabulated + rescaling |     
 |$\{\gamma_k^\text{mat}\}_{k=1}^n$ | integration weights frequency integral | ls & canonical RPA | tabulated + rescaling  |    
 |$\{\delta_{kj}\}_{k,j=1}^n$ | Fourier integration weights | ls RPA, ls \textit{GW} | on-the-fly least squares opt.  
 |  $\{\eta_{jk}\}_{k,j=1}^n$ | Fourier integration weights | ls \textit{GW} | on-the-fly least squares opt.|
