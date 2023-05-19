@@ -111,6 +111,7 @@ with
 \begin{align}
 \hat{F}^\text{even}(i\tau)=\hat{F}^\text{even}(-i\tau) \hspace{2.4em} &\text{and} \hspace{1.9em} F^\text{even}(i\omega)=F^\text{even}(-i\omega)\,, \\
 \hat{F}^\text{odd}(i\tau)=-\hat{F}^\text{odd}(-i\tau) \hspace{2em} &\text{and} \hspace{2em} F^\text{odd}(i\omega)=-F^\text{odd}(-i\omega)\,.
+\end{align}
 
 The corresponding discretized Fourier transforms read [@liu2016cubic]
 \begin{align}\label{ct_st_even}
