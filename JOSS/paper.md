@@ -86,8 +86,8 @@ The single-particle Green's function $G$ and the non-interacting susceptibility 
 where the indices $j$ and $a$ refer to occupied and unoccupied single particle states $\psi$ with energies $\varepsilon$. Transforming Eq. \eqref{susceptibility} into the imaginary time domain
 
 \begin{eqnarray}\label{susceptibility_low}
-    \hat{\chi}^0( \bold{r}, \bold{r'}, i\tau ) &=&\sum_j^\text{occ}\psi_j(\bold{r'})\psi^*_j(\bold{r})e^{\varepsilon_j|\tau|}\sum_a^\text{unocc}\psi^*_a(\bold{r'})\psi_a(\bold{r})e^{-\varepsilon_a|\tau|} \\
-    &=& G(\mathbf{r},\mathbf{r'},i\tau)G(\mathbf{r'},\mathbf{r},-i\tau)
+    \hat{\chi}^0( \bold{r}, \bold{r'}, i\tau ) &=&-i\sum_j^\text{occ}\psi_j(\bold{r'})\psi^*_j(\bold{r})e^{\varepsilon_j|\tau|}\sum_a^\text{unocc}\psi^*_a(\bold{r'})\psi_a(\bold{r})e^{-\varepsilon_a|\tau|} \\
+    &=&-i G(\mathbf{r},\mathbf{r'},i\tau)G(\mathbf{r'},\mathbf{r},-i\tau)
 \end{eqnarray}
 separates the two summations that can also be written as product of two Green's functions and leads to a favorable $\mathcal{O}(N^3)$ scaling.
 
