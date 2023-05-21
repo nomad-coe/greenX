@@ -1,8 +1,8 @@
 ---
-title: ' Time-frequency component of Green-X library: minimax grids for efficient RPA and GW calculations.'
+title: ' Time-frequency component of the Green-X library: minimax grids for efficient RPA and \textit{GW} calculations.'
 tags:
   - FORTRAN
-  - Low scaling GW calculations
+  - Low scaling \textit{GW} calculations
   - Low scaling RPA calculations
   - Minimax approximation
 
@@ -59,59 +59,53 @@ bibliography: refs.bib
 
 # Summary
 
-Electronic structure calculations based on many-body perturbation theory, such as the GW method and random-phase approximation (RPA), involve handling functions in the complex plane that vary over time and frequency. This includes performing inhomogeneous Fourier transforms. The Green-X library as a work package of the NOMAD CoE project aims to enable the electronic structure community to apply accurate beyond-DFT methodologies, based on Green's functions, to problems and systems currently out of reach with state-of-the-art supercomputers and software. The Green-X library's time-frequency component provides a coherent package of tools specifically designed for these tasks.
+The central objects in many-body electronic structure theory, such as the \textit{GW} method and the random-phase approximation (RPA), are defined in the complex frequency or time domain. We present here the time-frequency component of the Green-X library, which provides efficient imaginary time and imaginary frequency grids for Green's function based objects. The Green-X library emerged from the NOMAD Center of Excellence, whose objective is to enable accurate Green's function based electronic structure theory calculations on state-of-the-art supercomputers.
 
-The initial release of the package comprises a collection of minimax time and frequency grids. The package also provides routines which compute the integration weights for the Fourier transform of the RPA susceptibility and the GW self-energy in low-scaling implementations. While the package targets low-scaling RPA and GW algorithms, its compact frequency grids can be used to reduce the computational prefactor in RPA implementations with conventional scaling. In addition, the time grids can be employed in Laplace-MP2 calculations.
-
-The source code is freely available in GitHub, and comes equipped with a build system, a comprehensive set of tests, and detailed documentation.
+The package comprises minimax time and frequency grids [@Takatsuka2008; @kaltak2014low; @liu2016cubic] and corresponding integration weights to numerically compute time and frequency integrals of the correlation energy as well as the weights for Fourier transforms between time and frequency grids. While we target low-scaling RPA and \textit{GW} algorithms, its compact frequency grids can also be used to reduce the computational prefactor in RPA implementations with conventional scaling. In addition, the time grids can be employed in Laplace-transformed direct MP2 (LT-dMP2) calculations. The Green-X source code is freely available on GitHub, and comes equipped with a build system, a comprehensive set of tests, and detailed documentation.
 
 # Statement of need
 
-RPA is an accurate approach to compute the electronic correlation energy. The RPA correlation energy is non-local and includes long-range dispersion interactions [@ren2012random]. RPA takes dynamic electronic screening into account and is applicable to a wide range of systems, including molecules/clusters as well as extended structures [@eshuis2012electron],[@ren2012random]. The GW method [@hedin1965new] is based on the RPA susceptibility and has become the gold standard for the calculation of photoemission spectra of molecules and solids [@golze2019gw], [@reining2018gw], [@stankovski2011g], [@li2005quasiparticle], [@bruneval2008accurate], [@nabok2016accurate]. This can be followed by BSE (Bethe-Salpeter Equation) calculations of optoelectronic spectra [@onida2002electronic]. There are, however, several algorithmic bottlenecks that render RPA and GW calculations challenging, especially for disordered systems with large simulations cells.
+RPA is an accurate approach to compute the electronic correlation energy. It is non-local, includes long-range dispersion interactions and dynamic electronic screening and is applicable to a wide range of systems from 0 to 3 dimensions [@eshuis2012electron; @ren2012random]. The \textit{GW} method [@hedin1965new] is based on the RPA susceptibility and has become the method of choice for the calculation of direct and inverse photoemission spectra of molecules and solids [@golze2019gw;@reining2018gw;@stankovski2011g;@li2005quasiparticle;@bruneval2008accurate;@nabok2016accurate]. \textit{GW} forms the basis for the Bethe-Salpeter Equation (BSE) calculations of optical spectra [@onida2002electronic], where the \textit{GW} results are used as input to construct the BSE matrix.
 
-In conventional implementations of RPA and GW, the computational cost increases with the fourth power of the system size $N$. As a consequence, canonical RPA and GW calculations are usually limited to systems with a few hundred of atoms [@delben2013electron], [@wilhelm2016gw], [@stuke2020atomic].
-In order to reduce the computational cost of RPA and GW calculations, scaling reduction is a particularly promising strategy to tackle larger and more realistic systems.
+Despite their wide adoption, RPA and \textit{GW} face computational challenges, especially for large systems. Conventional RPA and \textit{GW} implementations scale with the fourth power of the system size $N$ and are therefore usually limited to systems of a few ten to at most hundred atoms [@delben2013electron; @wilhelm2016gw; @stuke2020atomic]. To tackle larger and more realistic systems, scaling reductions present a promising strategy to decrease the computational cost. Such low-scaling algorithms utilize real space representation and time-frequency transformations, such as the real-space/imaginary-time approach [@rojas1995space] that reduces the complexity to $\mathcal{O}(N^3)$. Several such cubic-scaling \textit{GW} algorithms have recently been implemented, e.g. in a plane-wave/projector-augmented-wave (PAW) \textit{GW} code [@kaltak2014low;@liu2016cubic] or with localized basis sets using Gaussian [@wilhelm2018toward;@wilhelm2021low;@duchemin2021cubic] or Slater-type orbitals [@forster2020low;@foerster2021GW100;@foerster2021loworder;@foerster2023twocomponent]. Similarly, low-scaling RPA algorithms were implemented with different basis sets [@kaltak2014cubic;@kaltak2014low;@wilhelm2016rpa;@luenser2017;@graf2018accurate;@duchemin2019separable;@drontschenko2022efficient].
 
-Low-scaling algorithms rely on real space representation and time-frequency transforms, such as the real-space/imaginary-time approach [@rojas1995space]
-with $\mathcal{O}(N^3)$ instead of $\mathcal{O}(N^4)$ complexity. Several cubic scaling GW algorithms have been recently implemented, e.g. in a plane-wave/projector-augmented-wave (PAW) GW code [@kaltak2014cubic], [@kaltak2014low], [@liu2016cubic] or with localized basis sets using Gaussian [@wilhelm2018toward], [@wilhelm2021low], [@duchemin2021cubic] or Slater-type orbitals [@forster2020low],[@foerster2021GW100], [@foerster2021loworder], [@foerster2023twocomponent]. Similarly, low-scaling RPA algorithms were implemented with different basis sets [@kaltak2014cubic], [@kaltak2014low], [@luenser2017], [@graf2018accurate], [@duchemin2019separable], [@drontschenko2022efficient].
-An important property of low-scaling algorithms is the crossover point. The latter refers to the system size, where the low-scaling algorithm, which has usually a larger computational prefactor, becomes computationally more efficient than the canonical scheme [@wilhelm2018toward]. Another challenge for pioneering low-scaling GW algorithms was to reach
-high numerical precision [@vlcek2017stochastic], [@wilhelm2018toward], [@forster2020low].
+An important consideration for low-scaling algorithms is the crossover point. Due to their larger pre-factor, low-scaling algorithms are typically more expensive for smaller systems and only become more cost effective than canonical implementations for larger systems due to their reduced scaling [@wilhelm2018toward]. Furthermore, the numerical precision of low-scaling \textit{GW} algorithms is strongly coupled to the time-frequency treatment  [@wilhelm2021low]. Early low-scaling \textit{GW} algorithms did not reach the same numerical accuracy as canonical implementations [@vlcek2017stochastic; @wilhelm2018toward; @forster2020low]. Although appropriate Fourier transforms and corresponding time-frequency grids have been implemented [@wilhelm2021low; @duchemin2021cubic; @foerster2021GW100], these implementations and grids are tied to particular codes and are often buried deeply inside the code. Furthermore, reuse of such implementations elsewhere is often restricted by license requirements or dependencies on definitions made in the host code.
 
-It has been found that the numerical precision of low-scaling GW algorithms is strongly coupled to the accuracy of the time-frequency grids as well as the technique used to numerically perform the analytic continuation of the self-energy matrix elements from the imaginary to the real axis. The existing implementations of the time-frequency and inverse transformations are concealed within electronic structure codes. Reusing these implementations elsewhere is either restricted by license requirements or dependencies on definitions made in the host code. In this work, we present an open-source package distributed under the Apache license (Version 2.0). The package handles the task by providing time and frequency grids and associated integration weights for low-scaling RPA and low-scaling GW as well as Laplace-Transform MP2 [@almloef1991elimination], [@jung2004scaled], [@kaltak2014low], [@glasbrenner2020efficient]. The package also offers an improvement over existing implementations by providing a broader selection of grids with an improved precision as shown in [@azizi_minimax]. As the generation of time-frequency grids can be numerically unstable and thus challenging and time demanding, the provided time-frequency grids could be considered as a comprehensive data set for low-scaling GW calculations for both molecules and solids.
+In this work, we present the Green-X library, an open-source package distributed under the Apache license (Version 2.0). Green-X provides time and frequency grids and the corresponding integration weights to compute correlation energies for Green's function implementations. It also provides Fourier weights to convert between imaginary time and imaginary frequency. The library can be used for low-scaling RPA and \textit{GW} implementations. BSE codes, which use (low-scaling) \textit{GW} as input, can also utilize our library. The minimax grids are also suitable for RPA implementations with conventional scaling [@delben2015enabling]: The minimax grids are more compact than, e.g., Gauss-Legendre grids, resulting in a reduction of the computational prefactor, while yielding the same accuracy [@delben2015enabling;@azizi_minimax]. We note that the minimax grids are not recommended for conventional imaginary-frequency-only \textit{GW} implementations [@ren2012resolution;@wilhelm2016gw] since they have not been optimized for the computation of the self-energy frequency integral.
+
+While not being the main target of the library, the minimax time grids can also be utilized to calculate the LT-dMP2 correlation energy [@almloef1991elimination; @jung2004scaled; @Takatsuka2008; @kaltak2014low; @glasbrenner2020efficient]. The dMP2 term is one of two terms of the MP2 correlation energy. In a diagrammatic representation, dMP2 is the first order of the RPA correlation energy [@ren2012random]. The second contribution of the MP2 correlation energy is the first term in the second-order screened exchange (SOSEX) diagrams [@ren2012random]. The dMP2 correlation energy can be reformulated using the Laplace transform to obtain the LT-dMP2 expression which scales cubically in contrast to the $O(N^5)$ scaling of standard MP2.
 
 # Mathematical framework
 
-In the Adler-Wiser formula [@Adler1962],[@Wiser1963], the non-interacting susceptibility in the imaginary-frequency domain can be computed as follows
+The single-particle Green's function $G$ and the non-interacting susceptibility $\chi^0$ are the starting point for a set of many-body perturbation theory (MBPT) methods. In canonical implementations, the non-interacting susceptibility is often expressed in the Adler-Wiser form [@Adler1962;@Wiser1963]
 
-\begin{eqnarray}\label{susceptibility}
-\chi^0( \bold{r}, \bold{r'}, i\omega ) = \sum_j^\text{occ}\sum_a^\text{unocc} \psi^*_a(\bold{r'})\psi_j(\bold{r'})\psi^*_j(\bold{r})\psi_a(\bold{r})\frac{2(\varepsilon_j - \varepsilon_a)}{\omega^2 + (\varepsilon_j - \varepsilon_a)^2},
-\end{eqnarray}
+\begin{equation}\label{susceptibility}
+\chi^0( \mathbf{r}, \mathbf{r'}, i\omega ) = \sum_j^\text{occ}\sum_a^\text{unocc} \psi^*_a(\mathbf{r'})\psi_j(\mathbf{r'})\psi^*_j(\mathbf{r})\psi_a(\mathbf{r})\frac{2(\varepsilon_j - \varepsilon_a)}{\omega^2 + (\varepsilon_j - \varepsilon_a)^2},
+\end{equation}
 
-where the indices $j$ and $a$ refer to occupied and unoccupied eigenstates, respectively, with energies $\varepsilon$ and wavefunctions $\psi$.
+where the indices $j$ and $a$ refer to occupied and unoccupied single particle states $\psi$ with energies $\varepsilon$. Transforming Eq. \eqref{susceptibility} into the imaginary time domain
 
-Writing Eq.(\ref{susceptibility}) in imaginary time 
 \begin{eqnarray}\label{susceptibility_low}
-    \hat{\chi}^0( \bold{r}, \bold{r'}, i\tau ) =\sum_j^\text{occ}\psi_j(\bold{r'})\psi^*_j(\bold{r})e^{\varepsilon_j|\tau|}\sum_a^\text{unocc}\psi^*_a(\bold{r'})\psi_a(\bold{r})e^{-\varepsilon_a|\tau|} 
+    \hat{\chi}^0( \bold{r}, \bold{r'}, i\tau ) &=&-i\sum_j^\text{occ}\psi_j(\bold{r'})\psi^*_j(\bold{r})e^{\varepsilon_j|\tau|}\sum_a^\text{unocc}\psi^*_a(\bold{r'})\psi_a(\bold{r})e^{-\varepsilon_a|\tau|} \\
+    &=&-i G(\mathbf{r},\mathbf{r'},i\tau)G(\mathbf{r'},\mathbf{r},-i\tau)
 \end{eqnarray}
-allows to separate the two summations leading to a favorable computational scaling of $\mathcal{O}(N^3)$. 
-Eq. \eqref{susceptibility_low} is employed as starting point of the low-scaling GW space-time method [@rojas1995space]. The imaginary-frequency result $\chi^0( \bold{r}, \bold{r'}, i\omega )$ is needed in RPA and GW calculations, thus requiring the Fourier transform
-\begin{eqnarray}
-    \chi^0( \bold{r}, \bold{r'}, i\omega ) = \int\limits_{-\infty}^{\infty} e^{-i \omega \tau} \, \hat{\chi}^0( \bold{r}, \bold{r'}, i\tau ) \, d\tau\label{ft_chi} \,.
-\end{eqnarray}
-The time integration is performed numerically using a discrete time and frequency grid [@rojas1995space], [@kaltak2014low]. For the sake of computational efficiency, the number of time and frequency grid points should be as small as possible. 
-However, the function $\hat{\chi}^0( \bold{r}, \bold{r'}, i\tau )$ usually has long tails as well as very localized features in imaginary time. As such, the usual Fast Fourier Transform, with homogeneously spaced points, applied to Eq. \eqref{ft_chi} needs many sampling points. Instead, a nonuniform Fourier transform approach allows to significantly reduce the number of time and frequency grid points.
+separates the two summations that can also be written as product of two Green's functions and leads to a favorable $\mathcal{O}(N^3)$ scaling.
 
-As a next step in GW, the screened Coulomb interaction $W( \bold{r}, \bold{r'}, i\omega )$ is computed which is then transformed to imaginary time
-\begin{eqnarray} \label{ft_W}
-       \hat{W}( \bold{r}, \bold{r'}, i\tau ) = \frac{1}{2\pi}\int\limits_{-\infty}^{\infty} e^{i \omega \tau} \, W( \bold{r}, \bold{r'}, i\omega )\, d\omega\,.
-\end{eqnarray}
-Moreover, a Fourier transform of the self-energy from imaginary time to imaginary frequency needs to be performed in the GW space-time method [@rojas1995space], [@liu2016cubic].
+Equation \eqref{susceptibility_low} is the starting point for LT-dMP2 and low-scaling RPA and \textit{GW}, as summarized in Figure \ref{fig:flowchart}. The low-scaling \textit{GW} procedure shown in Figure \ref{fig:flowchart} is known as the space-time method and is given here in its original formulation for plane-wave codes [@rojas1995space].
 
-For constructing the discrete time and frequency grids, we split the computation of the functions $\hat{F}(i\tau)$ and $F(i\omega)$ in an even and an odd part [@liu2016cubic]
+![Sketch of the methods supported by Green-X which start from $\hat{\chi}^0(i\tau)$. In addition to the discrete time and frequency grids $\{\tau_{j}\}$ and $\{\omega_{k}\}$, the library provides the corresponding weights $\{\sigma_{j}\}$ and $\{\gamma_{k}\}$ for the integration of the correlation energy $E_c$ as well as the Fourier weights $\delta_{kj}$, $\eta_{jk}$ and  $\lambda_{kj}$ defined in Eqs. \eqref{ct_st_even}-\eqref{st_odd_t_to_w}. The bare and screened Coulomb interactions are indicated by $v(\mathbf{r},\mathbf{r}')=1/|\mathbf{r}-\mathbf{r}|'$ and $W(i\omega)$, respectively. $\epsilon(i\omega)$ is the dynamical dielectric function, $\Sigma$ the \textit{GW} self-energy and AC is short for analytic continuation.\label{fig:flowchart}](flowchart.png)
+
+
+The time-frequency integrals in Figure \ref{fig:flowchart} are performed numerically. All three methods in Figure \ref{fig:flowchart} require a discrete time grid $\{\tau_j\}_{j=1}^n$, where $n$ is the number of grid points. RPA and \textit{GW} additionally need the discrete frequency grid $\{\omega_{k}\}_{k=1}^n$. Since $\hat{\chi}^0( \mathbf{r}, \mathbf{r'}, i\tau )$ is sharply peaked around the origin and then decays slowly, homogeneous time and frequency grids are inefficient. For this reason, non-uniform grids like Gauss-Legendre [@rieger1999gw], modified Gauss-Legendre [@ren2012resolution] and the here presented minimax [@kaltak2014low] grids are used. The minimax grids include also integration weights for the computation of the correlation energies. For the calculation of the LT-dMP2 correlation energy $E_c^{\text{dMP2}}$ [@kaltak2014low], a time quadrature is performed, for which our library provides the integration weights $\{\sigma_j\}_{j=1}^n$. Similarly, the RPA correlation energy $E_c^{\text{RPA}}$ [@kaltak2014low;@delben2015enabling] is computed from a frequency quadrature using the integration weights $\{\gamma_k\}_{k=1}^n$.
+
+Low-scaling RPA and \textit{GW} algorithms include the Fourier transform of $\hat{\chi}^0(i\tau)$ to $\chi^0(i\omega)$ (blue dashed box in Figure \ref{fig:flowchart}). The \textit{GW} space-time method performs two additional Fourier transforms: The screened Coulomb interaction $W(i\omega)$ is transformed to imaginary time (red dashed box) and the self-energy $\widehat{\Sigma}(i\tau)$ is Fourier transformed back to the imaginary frequency domain (green dashed box).
+
+To convert between imaginary time and frequency grids, we introduce a nonuniform discrete cosine and sine transformation for even and odd functions $F^\text{even/odd}$ respectively [@liu2016cubic]. If the function $F$ is neither odd nor even we split the computation of functions $\hat{F}(i\tau)$ and $F(i\omega)$ into even and an odd parts [@liu2016cubic]
+
 \begin{align}
 \hat{F}(i\tau) &= \hat{F}^\text{even}(i\tau) + \hat{F}^\text{odd}(i\tau)
 \\
-{F}(i\omega) &=  {F}^\text{even}(i\omega) +  {F}^\text{odd}(i\omega)
+{F}(i\omega) &=  {F}^\text{even}(i\omega) +  {F}^\text{odd}(i\omega)\label{Fw_split}
 \end{align}
 with
 \begin{align}
@@ -121,31 +115,56 @@ with
 
 The corresponding discretized Fourier transforms read [@liu2016cubic]
 \begin{align}\label{ct_st_even}
-    F^\text{even}(i\omega_k) &= \sum_{j=1}^{N} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)
+    F^\text{even}(i\omega_k) &= \sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\,,
     \\
-    \hat{F}^\text{even}(i\tau_j)& = \sum_{k=1}^{N} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\,,
+    \hat{F}^\text{even}(i\tau_j)& = \sum_{k=1}^{n} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\,,\label{ct_even_w_to_t}
  \\
-    F^\text{odd}(i\omega_k)& = i\sum_{j=1}^{N} \lambda_{kj} \mathrm{sin}(\omega_k\tau_j)\hat{F}^\text{odd}(i\tau_j)\,,\label{st_odd_t_to_w}
+    F^\text{odd}(i\omega_k)& = i\sum_{j=1}^{n} \lambda_{kj} \mathrm{sin}(\omega_k\tau_j)\hat{F}^\text{odd}(i\tau_j)\,,\label{st_odd_t_to_w}
     \\
-    \hat{F}^\text{odd}(i\tau_j)&= -i \sum_{k=1}^{N} \zeta_{jk} \mathrm{sin}(\tau_j\omega_k)F^\text{odd}(i\omega_k),\label{ct_st_odd}
+    \hat{F}^\text{odd}(i\tau_j)&= -i \sum_{k=1}^{n} \zeta_{jk} \mathrm{sin}(\tau_j\omega_k)F^\text{odd}(i\omega_k),\label{ct_st_odd}
 \end{align}
-where $N$ is the number of grid points, $\{\tau_j\}_{j=1}^N, \tau_j>0$ are time grid points, $\{\omega_k\}_{k=1}^N,\omega_k>0$ are frequency grid points and
-$\{\delta_{kj}\}_{k,j=1}^N$, $\{\eta_{jk}\}_{k,j=1}^N$, $\{\lambda_{kj}\}_{k,j=1}^N$, $\{\zeta_{jk}\}_{k,j=1}^N$ are integration weights. 
-The transform \eqref{ct_st_even} is needed in low-scaling RPA calculations [@kaltak2014low], while the transforms \eqref{ct_st_even}-\eqref{st_odd_t_to_w} are needed in low-scaling GW calculations [@liu2016cubic]. We note  that $\{\zeta_{jk}\}_{k,j=1}^N$ is neither required for low-scaling RPA nor GW calculations and thus is not returned by our package.  
+where $\{\tau_j\}_{j=1}^n, \tau_j\,{>}\,0$ are again the time grid points, $\{\omega_k\}_{k=1}^n,\omega_k\,{>}\,0$ frequency grid points and $\{\delta_{kj}\}_{k,j=1}^n$, $\{\eta_{jk}\}_{k,j=1}^n$,$\{\lambda_{kj}\}_{k,j=1}^n$, $\{\zeta_{jk}\}_{k,j=1}^n$ the corresponding Fourier integration weights. $\hat{\chi}^0(i\tau)$ is an even function and we need thus the transform defined in Eq. \eqref{ct_st_even} to obtain $\chi^0(i\omega)$. The screened Coulomb interaction is also even and we use expression \eqref{ct_even_w_to_t} to convert $W(i\omega)$ to $\widehat{W}(i\tau)$. The self-energy is neither odd nor even and we use Eq. \eqref{Fw_split} in combination with Eqs. \eqref{ct_st_even} and  \eqref{st_odd_t_to_w} to transform $\widehat{\Sigma}(i\tau)$ to $\Sigma(i\omega)$ [@liu2016cubic]. The transformation defined in Eq. \eqref{ct_st_odd} is not required for the methods summarized in Figure \ref{fig:flowchart}, but is added for the sake of completeness and clarity.
 
-It is possible to construct optimal time and frequency points and optimal integration weights assuming that the functions have a specific shape in time and frequency. For RPA and GW, the assumed shape is inspired by Eqs. \eqref{susceptibility} and \eqref{susceptibility_low}, [@kaltak2014low]
+Ideal grid parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$, $\delta_{kj}$, $\eta_{jk}$, $\lambda_{kj}$ feature a vanishing error for the LT-dMP2 and RPA correlation energy integrations and Fourier transforms of $\chi^0,W$ and $\Sigma$ (Figure \ref{fig:flowchart}). We compute *minimax* grid parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$ that minimize the maximum error of the LT-dMP2 and RPA correlation energy integration (Fig. \ref{fig:flowchart}) over all possible functions $\hat{\chi}^0( \mathbf{r}, \mathbf{r'}, i\tau )$ and $\chi^0( \mathbf{r}, \mathbf{r'}, i\omega )$
+[@Takatsuka2008;@kaltak2014low;@liu2016cubic]. For this minimax grid optimization, we use the Remez algorithm [@kaltak2014low] which is an iterative, numerically ill-conditioned procedure requiring high numerical precision. As the generation of the minimax parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$ is tedious, the most feasible strategy is to tabulate the computed minimax parameters $\{\tau_j\}_{j=1}^n$, $\{\sigma_j\}_{j=1}^n$, $\{\omega_k\}_{k=1}^n$, $\{\gamma_k\}_{k=1}^n$ for their later use in LT-dMP2, RPA and \textit{GW} calculations.
+
+It has been shown that minimax time and frequency grids $\{\tau_j\}_{j=1}^n$, $\{\omega_k\}_{k=1}^n$ are also suitable for performing Fourier transforms of $\chi^0,W$ and $\Sigma$ [@liu2016cubic]. With the knowledge of the tabulated $\{\tau_j\}_{j=1}^n$ and $\{\omega_k\}_{k=1}^n$ parameters, it is possible to use least-squares optimization to calculate the Fourier integration weights $\delta_{kj}$, $\eta_{jk}$, $\lambda_{kj}$ [@azizi_minimax]. The least-squares optimization can be executed by simple non-iterative linear matrix algebra which is straightforward and is done during the run time of the Green-X library [@azizi_minimax].
+
+The optimal grid parameters $\tau_j$, $\sigma_j$, $\omega_k$,
+$\gamma_k$, $\delta_{kj}$, $\eta_{jk}$, $\lambda_{kj}$ depend on the energy gap $\text{min}(\varepsilon_{a}-\varepsilon_{j})$ and the maximum eigenvalue difference $\text{max}(\varepsilon_{a}-\varepsilon_{j})$ of the material. We generated minimax grid parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$ assuming energy differences $\varepsilon_a-\varepsilon_j\in [1,R]$, see details in Refs. [@kaltak2014low;@hackbusch2019computation;@azizi_minimax]. Our library stores minimax grid parameters $\{\tau_j(R)\}_{j=1}^n$, $\{\sigma_j(R)\}_{j=1}^n$, $\{\omega_k(R)\}_{k=1}^n$, $\{\gamma_k(R)\}_{k=1}^n$ for $n$ ranging from 6 to 34 and for different values of the *range* $R$ (on average 15 $R$-values for each $n$). For a material with gap $\Delta_\text{min}:=\text{min}(\varepsilon_{a}-\varepsilon_{j})\neq 1$ and maximum eigenvalue difference $\Delta_\text{max}:=\text{max}(\varepsilon_{a}-\varepsilon_{j})$, one easily obtains the material-targeted minimax parameters $\{\tau_j^\text{mat}\}_{j=1}^n$, $\{\sigma_j^\text{mat}\}_{j=1}^n$, $\{\omega_k^\text{mat}\}_{k=1}^n$, $\{\gamma_k^\text{mat}\}_{k=1}^n$ from rescaling stored parameters with a range $R\ge\Delta_\text{max}/\Delta_\text{min}$ [@kaltak2014low;@hackbusch2019computation],
 \begin{align}
-\hat{F}(i\tau) &= \sum_{x\in [x_\text{min},x_\text{max}]} \alpha_x \,e^{-\tau x}\hspace{3.65em}\text{for }\tau > 0\,,
-\\
-F(i\omega) &= \sum_{x\in [x_\text{min},x_\text{max}]} \alpha_x \,\frac{2x}{\omega^2+x^2}\hspace{2em}\text{for }\omega > 0\,,
+  \omega_k^\text{mat} = \Delta_\text{min}\,\omega_k(R)\,,
+ \hspace{1em}
+ \gamma_k^\text{mat} = \Delta_\text{min}\,\gamma_k(R)\,,
+ \hspace{1em}
+\tau_j^\text{mat} = \frac{\tau_j(R)}{2\Delta_\text{min}}\,,
+ \hspace{1em}
+\sigma_j^\text{mat} = \frac{\sigma_j(R)}{2\Delta_\text{min}}\,.\label{eq:rescaling}
 \end{align}
-where $x_\text{min} = \text{min}(\varepsilon_{a}-\varepsilon_{j})$ is the energy gap ($a$ refers to an unoccupied state, and $j$ to an occupied state) and $x_\text{max} = \text{max}(\varepsilon_{a}-\varepsilon_{j})$ is the maximum eigenvalue difference. $\alpha_x$ are expansion coefficients. Minimax grids are determined such that the error of the discretized Fourier transforms \eqref{ct_st_even} - \eqref{ct_st_odd} is minimized. For further details, we refer to [@braess2012nonlinear], [@kaltak2014low], [@hackbusch2019computation], [@liu2016cubic], [@azizi_minimax]. A minimax grid consists of $\{\tau_j\}_{j=1}^N, \tau_j>0$,   $\{\omega_k\}_{k=1}^N,\omega_k>0$,  $\{\delta_{kj}\}_{k,j=1}^N$, $\{\eta_{jk}\}_{k,j=1}^N$, $\{\lambda_{kj}\}_{k,j=1}^N$, $\{\zeta_{jk}\}_{k,j=1}^N$ and is specific to the interval  $[x_\text{min}, x_\text{max}]$. It is convenient to tabulate minimax grids for an interval $[1,R]$ with $R=x_\text{max}/x_\text{min}$ because these minimax grids relate to the minimax grid of the interval $[x_\text{min}, x_\text{max}]$ by rescaling [@kaltak2014low], [@hackbusch2019computation]. Our library provides minimax grids for grid points $N$ ranging from 6 to 34 and for a wide range of values for $R$.
 
-For the calculation of the RPA correlation energy, a frequency integral needs to be computed which is discretized using the frequency grid $\{\omega_{k}\}_{k=1}^N$ and integration weights $\{\gamma_k\}_{k=1}^N$ [@kaltak2014low], [@delben2015enabling]. For the calculation of the MP2 correlation energy, a time quadrature can be performed using the time grid $\{\tau_j\}_{j=1}^N$ and corresponding integration weights $\{\sigma_j\}_{j=1}^N$ [@kaltak2014low]. The weights $\{\gamma_k\}_{k=1}^N$ and $\{\sigma_j\}_{j=1}^N$ are also provided by our package.
+# Required input and output of the library
+
+Our library requires as input the grid size $n$, the minimal eigenvalue difference $\Delta_{\text{min}}$ and the maximal eigenvalue difference $\Delta_{\text{max}}$. The output parameters are summarized in Table \ref{tab:output}. The library retrieves the tabulated minimax parameters $\{\tau_j(R)\}_{j=1}^n$, $\{\sigma_j(R)\}_{j=1}^n$, $\{\omega_k(R)\}_{k=1}^n$, $\{\gamma_k(R)\}_{k=1}^n$ of the requested grid size $n$ for the smallest range $R$ that satisfies $R \ge \Delta_\text{max}/\Delta_\text{min}$. The library then rescales the retrieved minimax parameters according to Equation \eqref{eq:rescaling} with $\Delta_\text{min}$ and prints the results $\{\tau_j^\text{mat}\}_{j=1}^n$, $\{\sigma_j^\text{mat}\}_{j=1}^n$, $\{\omega_k^\text{mat}\}_{k=1}^n$, $\{\gamma_k^\text{mat}\}_{k=1}^n$. Fourier integration weights are computed on-the-fly via least-squares optimization. To evaluate the precision of a global forward cosine transformation followed by backward cosine transformations, we provide a measure of such error as 
+\begin{align}
+\Delta_\text{CT}=\max_{j,j'\in\{1,2,\ldots,n\}} \left| \sum_{k=1}^n \eta_{j'k} \cos(\tau_{j'}\omega_k) \cdot \delta_{kj} \cos(\omega_k\tau_j) - (\mathbb{I})_{j'j}\right|
+\end{align} 
+with $\mathbb{I}$ being the identity matrix. Inputs and outputs are in atomic units.
+
+| Output   | Description  |  Methods that make use of the output |  Computation |
+|---|---|---|---|
+|$\{\tau_j^\text{mat}\}_{j=1}^n$ | time points | LT-dMP2, ls RPA, ls \textit{GW} | tabulated + rescaling |     
+|$\{\sigma_j^\text{mat}\}_{j=1}^n$ | integration weights time integral | LT-dMP2  | tabulated + rescaling      
+|$\{\omega_k^\text{mat}\}_{k=1}^n$ | frequency points | ls & canonical RPA, ls \textit{GW} | tabulated + rescaling |     
+|$\{\gamma_k^\text{mat}\}_{k=1}^n$ | integration weights frequency integral | ls & canonical RPA | tabulated + rescaling  |    
+|$\{\delta_{kj}\}_{k,j=1}^n$ | Fourier integration weights | ls RPA, ls \textit{GW} | on-the-fly least squares opt.  
+|  $\{\eta_{jk}\}_{k,j=1}^n$ | Fourier integration weights | ls \textit{GW} | on-the-fly least squares opt.|
+|$\{\lambda_{kj}\}_{k,j=1}^n$ | Fourier integration weights | ls \textit{GW} | on-the-fly least squares opt.  
+|  $\Delta_\text{CT}$ | duality error cosine transforms | ls \textit{GW} | on-the-fly  |
+: Output returned by the Green-X library, we abbreviate low-scaling as ls.\label{tab:output}
 
 # Structure of the library
 
-The Green-X library [@GitHub], [@azizi_minimax] includes eight components each of which tackles a critical problem in electronic structure calculations. In this work, we focus on the `GX-common` and `GX-TimeFrequency` components. The former contains common functionality used by all remaining library components, such as error handling and unit conversion utilities. The latter includes the source code for the new time-frequency analysis functionality presented in this publication. It comprises an API directory, which provides the necessary utilities for accessing and utilizing the new functionality, a source directory with the implementation of the algorithms described on the previous section, and a test directory with scripts for verifying the correctness of the implementation. The relevant directory tree section is the following:
+The Green-X library [@GitHub;@azizi_minimax] will eventually provide a variety of tools for advanced electronic structure calculations. In this work, we focus on the 'GX-common' and 'GX-TimeFrequency' components. 'GX-common' provides functionality for all library components, such as error handling and unit conversion utilities. 'GX-TimeFrequency' provides an API directory for the time-frequency transformations, a source directory, and a test directory with scripts for verifying the implementation. The relevant directory tree section is:
 
 ```bash
 .
@@ -185,14 +204,15 @@ The Green-X library [@GitHub], [@azizi_minimax] includes eight components each o
 └── README.md
 ```
 
-The project is written mostly in the Fortran programming language, supporting versions of the standard from 2008 and above. Some additional files employed in testing and error handling are written in C and Python. Modern Fortran features are extensively utilized, including object-oriented programming and some of the latest intrinsic procedures that have been added to the standard of the language. We have developed a clear interface between the module and client code, promoting better modularity and reusability. Additionally, we use allocatable arrays and automatic deallocation to simplify the code and avoid memory-related issues, such as leaks and dangling pointers. The implementation is robust and reliable, as we use error handling techniques to signal and recover from exceptions.
+Green-X is written in Fortran 2008. Functionality needed for testing and error handling is written in C and Python. We utilize modern Fortran features such as object-oriented programming and intrinsic procedures that are available in Fortran 2008. We have developed a clear interface between the module code (our library) and the client code (MBPT code), promoting better modularity and reusability. Additionally, we use allocatable arrays and automatic deallocation to simplify the code and avoid memory-related issues, such as leaks and dangling pointers. The implementation is robust and reliable, as we use error handling techniques to signal and recover from exceptions.
 
-The time and frequency grids $\{\tau_k\}_{k=1}^N$, $\{\omega_j\}_{j=1}^N$ and the integration weights $\{\gamma_k\}_{k=1}^N$, $\{\sigma_j\}_{j=1}^N$ have been precomputed and are hard coded in the module `minimax_tau.f90` and `minimax_omega.f90` for various ranges $R$ of interest for solids and molecules. The module `minimax_grids.f90` calculates the weights $\{\delta_{kj}\}_{k,j=1}^N$, $\{\eta_{jk}\}_{k,j=1}^N$, $\{\lambda_{kj}\}_{k,j=1}^N$ of cosine and sine transforms during the runtime of the program via $L^2$ minimization [@azizi_minimax]. `minimax_grids.f90` also provides the corresponding maximum error of the $L^2$ minimization. To evaluate the precision of a global forward cosine transformation followed by backward cosine transformations, in the module `minimax grids` we provide a measure of such error as $\Delta_\text{CT}=\max_{j'j} | \sum_{k} \eta_{j'k} \cos(\tau_{j'}\omega_k) \cdot \delta_{kj} \cos(\omega_k\tau_j) - (\mathbb{I})_{j'j}|$ with $\mathbb{I}$ being the identity matrix. `minimax_utils.f90` contains auxiliary procedures and data structures for the main minimax routines.
+The time and frequency grids $\{\tau_k(R)\}_{k=1}^n$, $\{\omega_j(R)\}_{j=1}^n$ and the integration weights $\{\gamma_k(R)\}_{k=1}^n$, $\{\sigma_j(R)\}_{j=1}^n$ are tabulated (hard coded) in the module 'minimax\_tau.f90' and 'minimax\_omega.f90' for various ranges $R$ of interest for solids and molecules. The module 'minimax\_grids.f90' calculates the weights $\{\delta_{kj}\}_{k,j=1}^n$, $\{\eta_{jk}\}_{k,j=1}^n$, $\{\lambda_{kj}\}_{k,j=1}^n$ of cosine and sine transforms during the runtime of the program. 'minimax\_grids.f90' also provides the duality error $\Delta_{\text{CT}}$. 'minimax\_utils.f90' contains auxiliary procedures and data structures for the main minimax routines.
 
-To ensure the reproducibility of our results and improve the development process, we have implemented regression tests using the pytest infrastructure, combined with CMake and CTest. The tests rigorously verify the accuracy of the frequency grids and integration weights, the forward-backward cosine error, and the maximum errors of the transformations. Further details on the library structure, contents, build system, and testing are available in the various README.md files at the top level of the [@GitHub] repository and the individual component directories. The paper [@azizi_minimax] will also provide results of accuracy tests and realistic benchmarks.
+To ensure the reproducibility of our results, we have implemented regression tests using the pytest infrastructure, combined with CMake and CTest. The regression tests rigorously verify the accuracy of the frequency grids and integration weights and the forward-backward cosine error. Further details on the library structure, contents, build system, and testing are available in the various README.md files at the top level of the [@GitHub] repository and the individual component directories. Further benchmarks will be provided elsewhere
+[@azizi_minimax].
 
 # Acknowledgements
 
-This work is supported by the European Union's Horizon 2020 research and innovation program under the grant agreement N° 951786 (NOMAD CoE). J.W. and D.G. acknowledge funding by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) via the Emmy Noether Programme (Project No. 503985532 and 453275048, respectively).
+This work is supported by the European Union's Horizon 2020 research and innovation program under the grant agreement N° 951786 (NOMAD CoE). J.W. and D.G. acknowledge funding by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) via the Emmy Noether Programme (Project No. 503985532 and 453275048, respectively). 
 
 # References
