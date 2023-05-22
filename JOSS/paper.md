@@ -152,14 +152,14 @@ with $\mathbb{I}$ being the identity matrix. Inputs and outputs are in atomic un
 | Output| Description|Methods using the output|Computation|
 |--|----|-----|----|
 |$\{\tau_j^\text{mat}\}_{j=1}^n$&nbsp; &nbsp;  | time points | LT-dMP2, ls RPA, ls \textit{GW} | tabulated + rescaling |     
-|$\{\sigma_j^\text{mat}\}_{j=1}^n$ | intw time integral | LT-dMP2  | tabulated + rescaling      
+|$\{\sigma_j^\text{mat}\}_{j=1}^n$ | time integration weights | LT-dMP2  | tabulated + rescaling      
 |$\{\omega_k^\text{mat}\}_{k=1}^n$ | frequency points | ls & canonical RPA, ls \textit{GW}  | tabulated + rescaling |     
-|$\{\gamma_k^\text{mat}\}_{k=1}^n$ | intw frequency integral | ls & canonical RPA | tabulated + rescaling  |    
+|$\{\gamma_k^\text{mat}\}_{k=1}^n$ | frequency integration weights | ls & canonical RPA | tabulated + rescaling  |    
 |$\{\delta_{kj}\}_{k,j=1}^n$ | Fourier weights | ls RPA, ls \textit{GW} | on-the-fly L2 opt  
 |  $\{\eta_{jk}\}_{k,j=1}^n$ | Fourier weights | ls \textit{GW} | on-the-fly L2 opt|
 |$\{\lambda_{kj}\}_{k,j=1}^n$ | Fourier weights | ls \textit{GW} | on-the-fly L2 opt  
 |  $\Delta_\text{CT}$ | duality error cosine transforms | ls \textit{GW} | on-the-fly  |
-: Output returned by the Green-X library, we abbreviate low-scaling as ls, integration weights as intw, and least-squares optimization as L2 opt.\label{tab:output}
+: Output returned by the Green-X library. We abbreviate low-scaling as ls, and least-squares optimization as L2 opt.\label{tab:output}
 
 # Structure of the library
 
