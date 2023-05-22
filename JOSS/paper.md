@@ -78,7 +78,7 @@ While not being the main target of the library, the minimax time grids can also 
 # Mathematical framework
 
 The single-particle Green's function $G$ and the non-interacting susceptibility $\chi^0$ are the starting point for a set of many-body perturbation theory (MBPT) methods. In canonical implementations, the non-interacting susceptibility is often expressed in the Adler-Wiser form [@Adler1962;@Wiser1963]
-
+\label{fig:flowchart}](flowchart.png)
 \begin{equation}\label{susceptibility}
 \chi^0( \mathbf{r}, \mathbf{r'}, i\omega ) = \sum_j^\text{occ}\sum_a^\text{unocc} \psi^*_a(\mathbf{r'})\psi_j(\mathbf{r'})\psi^*_j(\mathbf{r})\psi_a(\mathbf{r})\frac{2(\varepsilon_j - \varepsilon_a)}{\omega^2 + (\varepsilon_j - \varepsilon_a)^2},
 \end{equation}
