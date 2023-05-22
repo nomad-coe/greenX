@@ -149,16 +149,16 @@ Our library requires as input the grid size $n$, the minimal eigenvalue differen
 \end{align} 
 with $\mathbb{I}$ being the identity matrix. Inputs and outputs are in atomic units.
 
-| Output| Description|Methods that make use of the output|Computation|
-|-|---|---|---|
-|$\{\tau_j^\text{mat}\}_{j=1}^n$&nbsp; &nbsp;  | time points | LT-dMP2, ls RPA, ls \textit{GW} | tabulated + rescaling |     
-|$\{\sigma_j^\text{mat}\}_{j=1}^n$ | intw time integral | LT-dMP2  | tabulated + rescaling      
-|$\{\omega_k^\text{mat}\}_{k=1}^n$ | frequency points | ls & canonical RPA, ls \textit{GW}&nbsp; &nbsp; &nbsp; &nbsp;  | tabulated + rescaling |     
-|$\{\gamma_k^\text{mat}\}_{k=1}^n$ | intw frequency integral | ls & canonical RPA | tabulated + rescaling  |    
-|$\{\delta_{kj}\}_{k,j=1}^n$ | Fourier intw | ls RPA, ls \textit{GW} | on-the-fly lso  
-|  $\{\eta_{jk}\}_{k,j=1}^n$ | Fourier intw | ls \textit{GW} | on-the-fly lso|
-|$\{\lambda_{kj}\}_{k,j=1}^n$ | Fourier intw | ls \textit{GW} | on-the-fly lso  
-|  $\Delta_\text{CT}$ | duality error cosine transforms | ls \textit{GW} | on-the-fly  |
+| Output| $&nbsp; &nbsp; Description|Methods that make use of the output|Computation|
+|-|---|----|---|
+|$\{\tau_j^\text{mat}\}_{j=1}^n | $&nbsp; &nbsp; time points | LT-dMP2, ls RPA, ls \textit{GW} | tabulated + rescaling |     
+|$\{\sigma_j^\text{mat}\}_{j=1}^n$ | $&nbsp; &nbsp; intw time integral | LT-dMP2  | tabulated + rescaling      
+|$\{\omega_k^\text{mat}\}_{k=1}^n$ | $&nbsp; &nbsp; frequency points | ls & canonical RPA, ls \textit{GW}&nbsp; &nbsp; &nbsp; &nbsp;  | tabulated + rescaling |     
+|$\{\gamma_k^\text{mat}\}_{k=1}^n$ | $&nbsp; &nbsp; intw frequency integral | ls & canonical RPA | tabulated + rescaling  |    
+|$\{\delta_{kj}\}_{k,j=1}^n$ | $&nbsp; &nbsp; Fourier intw | ls RPA, ls \textit{GW} | on-the-fly lso  
+|  $\{\eta_{jk}\}_{k,j=1}^n$ | $&nbsp; &nbsp; Fourier intw | ls \textit{GW} | on-the-fly lso|
+|$\{\lambda_{kj}\}_{k,j=1}^n$ | $&nbsp; &nbsp; Fourier intw | ls \textit{GW} | on-the-fly lso  
+|  $\Delta_\text{CT}$ | $&nbsp; &nbsp; duality error cosine transforms | ls \textit{GW} | on-the-fly  |
 : Output returned by the Green-X library, we abbreviate low-scaling as ls, integration weights as intw, and least-squares optimization as lso.\label{tab:output}
 
 # Structure of the library
