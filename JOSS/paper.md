@@ -77,8 +77,10 @@ While not being the main target of the library, the minimax time grids can also 
 
 # Mathematical framework
 
+![Sketch of the methods supported by Green-X which start from $\hat{\chi}^0(i\tau)$. In addition to the discrete time and frequency grids $\{\tau_{j}\}$ and $\{\omega_{k}\}$, the library provides the corresponding weights $\{\sigma_{j}\}$ and $\{\gamma_{k}\}$ for the integration of the correlation energy $E_c$ as well as the Fourier weights $\delta_{kj}$, $\eta_{jk}$ and  $\lambda_{kj}$ defined in Eqs. \eqref{ct_st_even}-\eqref{st_odd_t_to_w}. The bare and screened Coulomb interactions are indicated by $v(\mathbf{r},\mathbf{r}')=1/|\mathbf{r}-\mathbf{r}|'$ and $W(i\omega)$, respectively. $\epsilon(i\omega)$ is the dynamical dielectric function, $\Sigma$ the \textit{GW} self-energy and AC is short for analytic continuation.\label{fig:flowchart}](flowchart.png)
+
 The single-particle Green's function $G$ and the non-interacting susceptibility $\chi^0$ are the starting point for a set of many-body perturbation theory (MBPT) methods. In canonical implementations, the non-interacting susceptibility is often expressed in the Adler-Wiser form [@Adler1962;@Wiser1963]
-\label{fig:flowchart}](flowchart.png)
+
 \begin{equation}\label{susceptibility}
 \chi^0( \mathbf{r}, \mathbf{r'}, i\omega ) = \sum_j^\text{occ}\sum_a^\text{unocc} \psi^*_a(\mathbf{r'})\psi_j(\mathbf{r'})\psi^*_j(\mathbf{r})\psi_a(\mathbf{r})\frac{2(\varepsilon_j - \varepsilon_a)}{\omega^2 + (\varepsilon_j - \varepsilon_a)^2},
 \end{equation}
@@ -92,9 +94,6 @@ where the indices $j$ and $a$ refer to occupied and unoccupied single particle s
 separates the two summations that can also be written as product of two Green's functions and leads to a favorable $\mathcal{O}(N^3)$ scaling.
 
 Equation \eqref{susceptibility_low} is the starting point for LT-dMP2 and low-scaling RPA and \textit{GW}, as summarized in Figure \ref{fig:flowchart}. The low-scaling \textit{GW} procedure shown in Figure \ref{fig:flowchart} is known as the space-time method and is given here in its original formulation for plane-wave codes [@rojas1995space].
-
-![Sketch of the methods supported by Green-X which start from $\hat{\chi}^0(i\tau)$. In addition to the discrete time and frequency grids $\{\tau_{j}\}$ and $\{\omega_{k}\}$, the library provides the corresponding weights $\{\sigma_{j}\}$ and $\{\gamma_{k}\}$ for the integration of the correlation energy $E_c$ as well as the Fourier weights $\delta_{kj}$, $\eta_{jk}$ and  $\lambda_{kj}$ defined in Eqs. \eqref{ct_st_even}-\eqref{st_odd_t_to_w}. The bare and screened Coulomb interactions are indicated by $v(\mathbf{r},\mathbf{r}')=1/|\mathbf{r}-\mathbf{r}|'$ and $W(i\omega)$, respectively. $\epsilon(i\omega)$ is the dynamical dielectric function, $\Sigma$ the \textit{GW} self-energy and AC is short for analytic continuation.\label{fig:flowchart}](flowchart.png)
-
 
 The time-frequency integrals in Figure \ref{fig:flowchart} are performed numerically. All three methods in Figure \ref{fig:flowchart} require a discrete time grid $\{\tau_j\}_{j=1}^n$, where $n$ is the number of grid points. RPA and \textit{GW} additionally need the discrete frequency grid $\{\omega_{k}\}_{k=1}^n$. Since $\hat{\chi}^0( \mathbf{r}, \mathbf{r'}, i\tau )$ is sharply peaked around the origin and then decays slowly, homogeneous time and frequency grids are inefficient. For this reason, non-uniform grids like Gauss-Legendre [@rieger1999gw], modified Gauss-Legendre [@ren2012resolution] and the here presented minimax [@kaltak2014low] grids are used. The minimax grids include also integration weights for the computation of the correlation energies. For the calculation of the LT-dMP2 correlation energy $E_c^{\text{dMP2}}$ [@kaltak2014low], a time quadrature is performed, for which our library provides the integration weights $\{\sigma_j\}_{j=1}^n$. Similarly, the RPA correlation energy $E_c^{\text{RPA}}$ [@kaltak2014low;@delben2015enabling] is computed from a frequency quadrature using the integration weights $\{\gamma_k\}_{k=1}^n$.
 
