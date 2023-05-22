@@ -51,7 +51,7 @@ affiliations:
    index: 4
  - name: HInstitut für Physik und Iris Adlershof, Humboldt-Universität zu Berlin, Zum Großen Windkanal 2, 12489 \ Berlin,\ Germany
    index: 5
- - name: Department of Physics, University of Latvia, Jelgavas iela 3, \Riga, \ Latvia
+ - name: Department of Physics, University of Latvia,  \Riga, \ Latvia
    index: 6
 date: 22 May 2023self
 bibliography: refs.bib
