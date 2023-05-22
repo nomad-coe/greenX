@@ -78,7 +78,9 @@ While not being the main target of the library, the minimax time grids can also 
 # Mathematical framework
 
 The single-particle Green's function $G$ and the non-interacting susceptibility $\chi^0$ are the starting point for a set of many-body perturbation theory (MBPT) methods. In canonical implementations, the non-interacting susceptibility is often expressed in the Adler-Wiser form [@Adler1962;@Wiser1963]
+
 ![Sketch of the methods supported by Green-X which start from $\hat{\chi}^0(i\tau)$. In addition to the discrete time and frequency grids $\{\tau_{j}\}$ and $\{\omega_{k}\}$, the library provides the corresponding weights $\{\sigma_{j}\}$ and $\{\gamma_{k}\}$ for the integration of the correlation energy $E_c$ as well as the Fourier weights $\delta_{kj}$, $\eta_{jk}$ and  $\lambda_{kj}$ defined in Eqs. \eqref{ct_st_even}-\eqref{st_odd_t_to_w}. The bare and screened Coulomb interactions are indicated by $v(\mathbf{r},\mathbf{r}')=1/|\mathbf{r}-\mathbf{r}|'$ and $W(i\omega)$, respectively. $\epsilon(i\omega)$ is the dynamical dielectric function, $\Sigma$ the \textit{GW} self-energy and AC is short for analytic continuation.\label{fig:flowchart}](flowchart.png)
+
 \begin{equation}\label{susceptibility}
 \chi^0( \mathbf{r}, \mathbf{r'}, i\omega ) = \sum_j^\text{occ}\sum_a^\text{unocc} \psi^*_a(\mathbf{r'})\psi_j(\mathbf{r'})\psi^*_j(\mathbf{r})\psi_a(\mathbf{r})\frac{2(\varepsilon_j - \varepsilon_a)}{\omega^2 + (\varepsilon_j - \varepsilon_a)^2},
 \end{equation}
