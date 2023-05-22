@@ -41,19 +41,19 @@ authors:
     orcid: 0000-0002-8377-6829
     affiliation: 1
 affiliations:
- - name: Université\ Catholique\ de\ Louvain,\ Louvain-la-Neuve, Belgium
+ - name: Institute of Condensed Matter and Nanoscience, UCLouvain, B-1348 \ Louvain-la-Neuve,\ Belgium
    index: 1
- - name: University\ of Regensburg,\ Regensburg,\ Germany
+ - name: Institute of Theoretical Physics, University of Regensburg, D-93053 \ Regensburg,\ Germany
    index: 2
- - name: Technische\ Universität\ Dresden,\ Dresden,\ Germany
+ - name: Faculty of Chemistry and Food Chemistry, Technische Universität Dresden, 01062 \ Dresden,\ Germany
    index: 3
  - name: Department of Applied Physics, Aalto University, P.O. Box 11100, 00076 \ Aalto,\ Finland
    index: 4
- - name: Humboldt-Universität\ zu\ Berlin,\ Berlin,\ Germany
+ - name: Humboldt-Universität zu Berlin, \ Berlin, \ Germany
    index: 5
- - name: University\ of\ Latvia,\ Riga,\ Latvia
+ - name: Department of Physics, University of Latvia, Jelgavas iela 3, \Riga, LV-1004 \ Latvia
    index: 6
-date: 13 August 2017self
+date: 22 May 2023self
 bibliography: refs.bib
 ---
 
