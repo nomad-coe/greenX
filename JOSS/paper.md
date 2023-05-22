@@ -150,7 +150,7 @@ Our library requires as input the grid size $n$, the minimal eigenvalue differen
 with $\mathbb{I}$ being the identity matrix. Inputs and outputs are in atomic units.
 
 | Output| Description|Methods using the output|Computation|
-|--|-----|-----|----|
+|--|-----|------|----|
 |$\{\tau_j^\text{mat}\}_{j=1}^n$&nbsp; &nbsp;  | time points | LT-dMP2, ls RPA, ls \textit{GW} | tabulated + rescaling |     
 |$\{\sigma_j^\text{mat}\}_{j=1}^n$ | time integration weights | LT-dMP2  | tabulated + rescaling      
 |$\{\omega_k^\text{mat}\}_{k=1}^n$ | frequency points | ls & canonical RPA, ls \textit{GW}  | tabulated + rescaling |     
