@@ -41,15 +41,15 @@ authors:
     orcid: 0000-0002-8377-6829
     affiliation: 1
 affiliations:
- - name: Institute of Condensed Matter and Nanoscience, UCLouvain, B-1348 \ Louvain-la-Neuve,\ Belgium\\
+ - name: Institute of Condensed Matter and Nanoscience, UCLouvain, B-1348 \ Louvain-la-Neuve,\ Belgium<br/>
    index: 1
- - name: Institute of Theoretical Physics, University of Regensburg, D-93053 \ Regensburg,\ Germany\\
+ - name: Institute of Theoretical Physics, University of Regensburg, D-93053 \ Regensburg,\ Germany\newline
    index: 2
- - name: Faculty of Chemistry and Food Chemistry, Technische Universität Dresden, 01062 \ Dresden,\ Germany\\
+ - name: Faculty of Chemistry and Food Chemistry, Technische Universität Dresden, 01062 \ Dresden,\ Germany\linebreak
    index: 3
- - name: Department of Applied Physics, Aalto University, P.O. Box 11100, 00076 \ Aalto,\ Finland\\
+ - name: Department of Applied Physics, Aalto University, P.O. Box 11100, 00076 \ Aalto,\ Finland\\\\
    index: 4
- - name: Institut für Physik und Iris Adlershof, Humboldt-Universität zu Berlin, Zum Großen Windkanal 2, 12489 \ Berlin,\ Germany\\
+ - name: Institut für Physik und Iris Adlershof, Humboldt-Universität zu Berlin, Zum Großen Windkanal 2, 12489 \ Berlin,\ Germany\\\\
    index: 5
  - name: Department of Physics, University of Latvia, Jelgavas iela 3, Riga, LV-1004 Latvia
    index: 6
