@@ -112,7 +112,7 @@ with
 \hat{F}^\text{odd}(i\tau)=-\hat{F}^\text{odd}(-i\tau) \hspace{2em} &\text{and} \hspace{2em} F^\text{odd}(i\omega)=-F^\text{odd}(-i\omega)\,.
 \end{align}
 
-The corresponding discretized Fourier transforms read [@liu2016cubic]
+The corresponding discrete Fourier transforms read [@liu2016cubic]
 \begin{align}\label{ct_st_even}
     F^\text{even}(i\omega_k) &= \sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\,,
     \\
