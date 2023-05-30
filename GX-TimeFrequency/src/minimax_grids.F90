@@ -319,7 +319,8 @@ contains
        regularization = 0.01_dp
        do j_point = 1, num_points
           do k_point = 1, num_points
-             mat_VT_s(k_point, j_point) = mat_VT(j_point, k_point)/(vec_S(j_point)+regularization)
+             mat_VT_s(k_point, j_point) = mat_VT(j_point, k_point)*vec_S(j_point) / & 
+                                          (vec_S(j_point)**2+regularization**2)
           end do ! k_point
        end do ! j_point
 
