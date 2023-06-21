@@ -253,7 +253,7 @@ contains
     integer                                            :: i_node, i_point, j_point, k_point, &
          num_x_nodes
     integer, parameter                                 :: nodes_factor = 200
-    real(kind=dp)                                      :: current_point, x_factor
+    real(kind=dp)                                      :: current_point, x_factor, regularization
     real(kind=dp), allocatable, dimension(:)           :: weights_work, x_mu, psi
     real(kind=dp), allocatable, dimension(:, :)        :: mat_A
 
@@ -316,9 +316,11 @@ contains
        ! integration weights = (V Sigma^-1 U^T)*psi
 
        ! 1) V * Sigma^-1
+       regularization = 0.000001_dp
        do j_point = 1, num_points
           do k_point = 1, num_points
-             mat_VT_s(k_point, j_point) = mat_VT(j_point, k_point)/vec_S(j_point)
+             mat_VT_s(k_point, j_point) = mat_VT(j_point, k_point)*vec_S(j_point) / & 
+                                          (vec_S(j_point)**2+regularization**2)
           end do ! k_point
        end do ! j_point
 
