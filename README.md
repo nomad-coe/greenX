@@ -102,6 +102,7 @@ To build Zofu, from GreenX's root (noting that one must define `$GX_ROOT`):
 ```bash
 mkdir external && cd external
 git clone https://github.com/acroucher/zofu.git
+cd zofu
 mkdir build && cd build
 cmake \
    -DCMAKE_BUILD_TYPE=release \
