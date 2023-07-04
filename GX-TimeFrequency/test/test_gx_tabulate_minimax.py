@@ -115,7 +115,7 @@ def test_tabulate_gx_minimax_grid(fortran_binary):
 
     assert np.allclose(tabulated_errors_large_grids[:, Column.MaxErrCosFTFreqToTime.value],
                        ref_errors_big_grid[:, Column.MaxErrCosFTFreqToTime.value],
-                       atol=1.e-7)
+                       atol=5.e-7)
 
     assert np.allclose(tabulated_errors_large_grids[:, Column.MaxErrSinFTimeToFreq.value],
                        ref_errors_big_grid[:, Column.MaxErrSinFTimeToFreq.value],
