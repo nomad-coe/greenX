@@ -56,9 +56,12 @@ endif()
 enable_testing()
 
 # Application test python module
-# Note, `pygreenx` dependencies should be handled by itself
+# Note, pygreenx dependencies should be handled pygreenx
 # pygreenx version specified in its setup.cfg
-find_python_module(pygreenx REQUIRED VERSION 0.0.1)
+find_python_module(pygreenx VERSION 0.0.1)
+if (NOT pygreenx_FOUND)
+    message("-- pygreenx is required for application testing. To install it, cd <PROJECTROOT>/python and run `pip install -e .`")
+endif ()
 
 # Optional unit testing lib
 option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" OFF)
