@@ -44,11 +44,21 @@ find_package(LAPACK REQUIRED)
 
 # Python required for application testing
 include(cmake/python3.cmake)
-find_python_module(numpy)
-find_python_module(pytest)
+
+find_package(Python3 3.7 COMPONENTS Interpreter Development)
+if(Python3_FOUND)
+    message("-- Python 3 interpreter version: " ${Python3_VERSION})
+else()
+    message("-- Python 3 interpreter not found")
+endif()
 
 # Enable ctest
 enable_testing()
+
+# Application test python module
+# Note, `pygreenx` dependencies should be handled by itself
+# pygreenx version specified in its setup.cfg
+find_python_module(pygreenx REQUIRED VERSION 0.0.1)
 
 # Optional unit testing lib
 option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" OFF)
