@@ -45,8 +45,8 @@ make install
 ## Running the Tests
 
 GreenX uses pytest as its regression testing framework, in conjunction with 
-some custom python modules. First, one must ensure that the python utilities
-are installed. From the GreenX root directory:
+the custom python module `pygreenx`. First, one must ensure that `pygreenx`
+is installed. From the GreenX root directory:
 
 ```bash
 cd python
