@@ -72,11 +72,11 @@ ctest
 
 ## Building Documentation
 
-GreenX is documented using Doxygen, and documentation support is enabled by
-default. To disable CMake looking for Doxygen, configure with:
+GreenX is documented using Doxygen, and documentation support is disabled by
+default. To enable CMake looking for Doxygen, configure with:
 
 ```bash
-cmake ../ -DENABLE_DOCS=OFF
+cmake ../ -DENABLE_DOCS=ON
 ```
 
 To build the document, type in the build directory:
