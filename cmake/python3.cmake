@@ -1,7 +1,8 @@
 # Python helper functions
 
 function(find_python_module module)
-    # Find a python package
+    # Find a python package.
+    # Returns ${module}_FOUND
     #
     # Examples:
     # Find an optional python package, with any version number:
@@ -22,7 +23,7 @@ function(find_python_module module)
     cmake_parse_arguments(MY "${options}" "${oneValueArgs}" "" ${ARGN})
 
     if(NOT DEFINED Python3_EXECUTABLE)
-        message(FATAL_ERROR "No python interpeter has been found by CMake.")
+        message(FATAL_ERROR "No python interpreter has been found by CMake.")
     endif()
 
     # Shell command to query python package availability
@@ -30,7 +31,7 @@ function(find_python_module module)
             COMMAND ${Python3_EXECUTABLE} -c "import ${module}; print(${module}.__version__)"
             RESULT_VARIABLE CHECK_RESULT
             OUTPUT_VARIABLE MODULE_VERSION
-            #ERROR_QUIET
+            ERROR_QUIET
             OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
@@ -41,6 +42,7 @@ function(find_python_module module)
         if(DEFINED MY_VERSION)
             if(CHECK_RESULT EQUAL 0 AND MODULE_VERSION VERSION_GREATER_EQUAL MY_VERSION)
                 message(STATUS "Found ${module}: ${MODULE_VERSION}")
+                set(${module}_FOUND TRUE PARENT_SCOPE)
             elseif(CHECK_RESULT EQUAL 0 AND NOT MODULE_VERSION VERSION_GREATER_EQUAL MY_VERSION)
                 message(FATAL_ERROR "${module} version is not sufficient. Require ${MY_VERSION} but found ${MODULE_VERSION}")
             else()
@@ -51,6 +53,7 @@ function(find_python_module module)
         else()
             if(CHECK_RESULT EQUAL 0)
                 message(STATUS "Found ${module}: ${MODULE_VERSION}")
+                set(${module}_FOUND TRUE PARENT_SCOPE)
             else()
                 message(FATAL_ERROR "${module} was not found.")
             endif()
@@ -62,10 +65,13 @@ function(find_python_module module)
         if(DEFINED MY_VERSION)
             if(CHECK_RESULT EQUAL 0 AND MODULE_VERSION VERSION_GREATER_EQUAL MY_VERSION)
                 message(STATUS "Found ${module}: ${MODULE_VERSION}")
+                set(${module}_FOUND TRUE PARENT_SCOPE)
             elseif(CHECK_RESULT EQUAL 0 AND NOT MODULE_VERSION VERSION_GREATER_EQUAL MY_VERSION)
                 message(WARNING "${module} version is not sufficient. Require ${MY_VERSION} but found ${MODULE_VERSION}")
+                set(${module}_FOUND FALSE PARENT_SCOPE)
             else()
                 message(WARNING "${module} was not found.")
+                set(${module}_FOUND FALSE PARENT_SCOPE)
             endif()
 
         # No restrictions on version
@@ -73,8 +79,10 @@ function(find_python_module module)
             # Module is installed. No restrictions on version
             if(CHECK_RESULT EQUAL 0)
                 message(STATUS "Found ${module}: ${MODULE_VERSION}")
+                set(${module}_FOUND TRUE PARENT_SCOPE)
             else()
                 message(WARNING "${module} was not found.")
+                set(${module}_FOUND FALSE PARENT_SCOPE)
             endif()
         endif()
     endif()
