@@ -66,7 +66,7 @@ add_subdirectory(GX-common)
 add_subdirectory(GX-TimeFrequency)
 
 # Documentation
-option(ENABLE_DOCS "Enable documentation" OFF)
+option(ENABLE_DOCS "Enable documentation" ON)
 if (${ENABLE_DOCS})
     find_program(DOXYGEN doxygen REQUIRED)
     message("-- Doxygen documentation support enabled.")
