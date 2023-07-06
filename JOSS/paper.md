@@ -184,7 +184,7 @@ The Green-X library [@GitHub;@azizi_minimax] will eventually provide a variety o
 │   │   └── gx_minimax.f90
 │   ├── CITATION.cff
 │   ├── CMakeLists.txt
-│   ├── LICENSE-2.0.txt
+│   ├── LICENSE.txt
 │   ├── README.md
 │   ├── src
 │   │   ├── gx_common.h
@@ -199,7 +199,7 @@ The Green-X library [@GitHub;@azizi_minimax] will eventually provide a variety o
 │   │   └── test_gx_tabulate_minimax.py
 │   └── utilities
 │       └── gx_tabulate_minimax.F90
-├── LICENSE-2.0.txt
+├── LICENSE.txt
 └── README.md
 ```
 

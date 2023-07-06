@@ -1,7 +1,7 @@
 # GreenX Library 
 
 The Green X library is developed under Work Package 2 of the NOMAD Center of Excellence. 
-It is available under the APACHE2 license, see [LICENSE-2.0.txt](LICENSE-2.0.txt).
+It is available under the APACHE2 [license](LICENSE.txt).
 
 ## Installation
 
