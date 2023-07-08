@@ -187,7 +187,19 @@
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
 
-   Copyright [yyyy] [name of copyright owner]
+   Copyright 2023
+   Author Names:
+    - Maryam Azizi
+    - Jan Wilhelm
+    - Dorothea Golze
+    - Matteo Giantomassi
+    - Ramón L. Panadés-Barrueta
+    - Francisco A. Delesma
+    - Alexander Buccheri
+    - Andris Gulans
+    - Patrick Rinke
+    - Claudia Draxl
+    - Xavier Gonze
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
