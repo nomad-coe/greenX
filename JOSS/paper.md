@@ -43,7 +43,7 @@ authors:
 affiliations:
  - name: Institute of Condensed Matter and Nanoscience, UCLouvain, B-1348 \ Louvain-la-Neuve,\ Belgium\newline
    index: 1
- - name: Institute of Theoretical Physics, University of Regensburg, D-93053 \ Regensburg,\ Germany\newline
+ - name: Institute of Theoretical Physics and Regensburg Center for Ultrafast Nanoscopy (RUN), University of Regensburg, D-93053 \ Regensburg,\ Germany\newline
    index: 2
  - name: Faculty of Chemistry and Food Chemistry, Technische Universität Dresden, 01062 \ Dresden,\ Germany\newline
    index: 3
