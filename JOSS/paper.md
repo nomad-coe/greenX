@@ -171,34 +171,34 @@ The Green-X library [@GitHub;@azizi_minimax] will eventually provide a variety o
 ├── developers.md
 ├── Doxyfile
 ├── GX-common
-│   ├── CMakeLists.txt
-│   └── src
-│       ├── constants.f90
-│       ├── error_handling.f90
-│       ├── kinds.f90
-│       ├── lapack_interfaces.f90
-│       └── unit_conversion.f90
+│         ├── CMakeLists.txt
+│         └── src
+│             ├── constants.f90
+│             ├── error_handling.f90
+│             ├── kinds.f90
+│             ├── lapack_interfaces.f90
+│             └── unit_conversion.f90
 ├── GX-TimeFrequency
-│   ├── api
-│   │   ├── api_utilities.f90
-│   │   └── gx_minimax.f90
-│   ├── CITATION.cff
-│   ├── CMakeLists.txt
-│   ├── LICENSE.txt
-│   ├── README.md
-│   ├── src
-│   │   ├── gx_common.h
-│   │   ├── minimax_grids.F90
-│   │   ├── minimax_omega.F90
-│   │   ├── minimax_tau.F90
-│   │   └── minimax_utils.F90
-│   ├── test
-│   │   ├── conftest.py
-│   │   ├── test_gx_minimax_grid.f90
-│   │   ├── test_gx_minimax_grid.py
-│   │   └── test_gx_tabulate_minimax.py
-│   └── utilities
-│       └── gx_tabulate_minimax.F90
+│         ├── api
+│         │         ├── api_utilities.f90
+│         │         └── gx_minimax.f90
+│         ├── CITATION.cff
+│         ├── CMakeLists.txt
+│         ├── LICENSE.txt
+│         ├── README.md
+│         ├── src
+│         │         ├── gx_common.h
+│         │         ├── minimax_grids.F90
+│         │         ├── minimax_omega.F90
+│         │         ├── minimax_tau.F90
+│         │         └── minimax_utils.F90
+│         ├── test
+│         │         ├── conftest.py
+│         │         ├── test_gx_minimax_grid.f90
+│         │         ├── test_gx_minimax_grid.py
+│         │         └── test_gx_tabulate_minimax.py
+│         └── utilities
+│             └── gx_tabulate_minimax.F90
 ├── LICENSE.txt
 └── README.md
 ```
