@@ -1,6 +1,6 @@
 ---
 layout: page
-title: simple site
+title: GreenX Library
 tagline: GreenX
 description: Library for Many-body Greens Functions on HPC
 ---
@@ -19,12 +19,11 @@ convert Markdown files to html, and this part is done
 automatically when you push the materials to the `gh-pages` branch
 of a GitHub repository.
 
-## Overview
+## Components
 
-- [Minimax Time-Frequency](pages/gx_time_frequency.html)
+- [Minimax Time-Frequency](gx_time_frequency.md)
 
-## Benchmarks
+## Installation (?)
 
-[CH4](bench.md)
 
 ---
