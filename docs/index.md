@@ -23,4 +23,8 @@ of a GitHub repository.
 
 - [Minimax Time-Frequency](pages/gx_time_frequency.html)
 
+## Benchmarks
+
+[CH4](bench.md)
+
 ---
