@@ -23,7 +23,4 @@ of a GitHub repository.
 
 - [Minimax Time-Frequency](gx_time_frequency.md)
 
-## Installation (?)
-
-
 ---
