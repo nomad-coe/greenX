@@ -1,5 +1,13 @@
 # GreenX Library - TimeFrequency
 
+This library provides optimal quadrature grid points and weights for imaginary time-frequency transforms, commonly 
+occurring in MP2, RPA and Green's function methods. Optimisation is performed with the Minimax procedure, minimising the
+maximum error of the quadrature. This typically results in an error that is more evenly distributed across the interval 
+of interest. Grids are provided with n-points ranging from 6 to 34, and for different values of the transition energy 
+ratios Rm (on average 15 R-values for each grid point).
+
+For additional details, please refer to the corresponding JOSS paper, included [here](../JOSS).
+
 ## Building
 
 With CMake, change to the GreenX root, then type:
@@ -14,7 +22,7 @@ make install
 ## Running the Tests
 
 Application tests are run with the pytest framework. Having installed `pygreenx`
-(see the top-level README) change to `<GX_ROOT>/<BUILD_DIR>` and type `ctest`. 
+(see the top-level [README](../README.md)) change to `<GX_ROOT>/<BUILD_DIR>` and type `ctest`. 
 Additionally, one can change to the test folder and explicitly run the pytest 
 command from there:
 
