@@ -3,6 +3,12 @@
 The Green X library is developed under Work Package 2 of the NOMAD Center of Excellence. 
 It is available under the APACHE2 [license](LICENSE.txt).
 
+## Libraries
+
+* [GX Time-frequency](GX-TimeFrequency/README.md): Optimised quadrature grids and weights for 
+  RPA and GW imaginary time-frequency transforms.
+
+
 ## Installation
 
 Green X has been designed as a collection of libraries, which can be built relatively 

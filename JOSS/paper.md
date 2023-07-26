@@ -149,58 +149,57 @@ Our library requires as input the grid size $n$, the minimal eigenvalue differen
 \end{align} 
 with $\mathbb{I}$ being the identity matrix. Inputs and outputs are in atomic units.
 
-| Output| Description|Methods using the output|Computation|
-|---|--------|---------|-------|
-|$\{\tau_j^\text{mat}\}_{j=1}^n$&nbsp; &nbsp;  | time points | LT-dMP2, ls RPA, ls \textit{GW} | tabulated + rescaling |     
-|$\{\sigma_j^\text{mat}\}_{j=1}^n$ | time integration weights | LT-dMP2  | tabulated + rescaling      
-|$\{\omega_k^\text{mat}\}_{k=1}^n$ | frequency points | ls & canonical RPA, ls \textit{GW}  | tabulated + rescaling |     
-|$\{\gamma_k^\text{mat}\}_{k=1}^n$ | freq. integration weights | ls & canonical RPA | tabulated + rescaling  |    
-|$\{\delta_{kj}\}_{k,j=1}^n$ | Fourier weights | ls RPA, ls \textit{GW} | on-the-fly L2 opt  
-|  $\{\eta_{jk}\}_{k,j=1}^n$ | Fourier weights | ls \textit{GW} | on-the-fly L2 opt|
-|$\{\lambda_{kj}\}_{k,j=1}^n$ | Fourier weights | ls \textit{GW} | on-the-fly L2 opt  
-|  $\Delta_\text{CT}$ | duality error cosine transforms | ls \textit{GW} | on-the-fly  |
+| Output                                       | Description                     | Methods using the output           | Computation           |
+|----------------------------------------------|---------------------------------|------------------------------------|-----------------------|
+| $\{\tau_j^\text{mat}\}_{j=1}^n$&nbsp; &nbsp; | time points                     | LT-dMP2, ls RPA, ls \textit{GW}    | tabulated + rescaling |     
+| $\{\sigma_j^\text{mat}\}_{j=1}^n$            | time integration weights        | LT-dMP2                            | tabulated + rescaling |
+| $\{\omega_k^\text{mat}\}_{k=1}^n$            | frequency points                | ls & canonical RPA, ls \textit{GW} | tabulated + rescaling |     
+| $\{\gamma_k^\text{mat}\}_{k=1}^n$            | freq. integration weights       | ls & canonical RPA                 | tabulated + rescaling |    
+| $\{\delta_{kj}\}_{k,j=1}^n$                  | Fourier weights                 | ls RPA, ls \textit{GW}             | on-the-fly L2 opt     |
+| $\{\eta_{jk}\}_{k,j=1}^n$                    | Fourier weights                 | ls \textit{GW}                     | on-the-fly L2 opt     |
+| $\{\lambda_{kj}\}_{k,j=1}^n$                 | Fourier weights                 | ls \textit{GW}                     | on-the-fly L2 opt     |
+| $\Delta_\text{CT}$                           | duality error cosine transforms | ls \textit{GW}                     | on-the-fly            |
 : Output returned by the Green-X library. We abbreviate low-scaling as ls, and least-squares optimization as L2 opt.\label{tab:output}
 
 # Structure of the library
 
 The Green-X library [@GitHub;@azizi_minimax] will eventually provide a variety of tools for advanced electronic structure calculations. In this work, we focus on the 'GX-common' and 'GX-TimeFrequency' components. 'GX-common' provides functionality for all library components, such as error handling and unit conversion utilities. 'GX-TimeFrequency' provides an API directory for the time-frequency transformations, a source directory, and a test directory with scripts for verifying the implementation. The relevant directory tree section is:
 
-```bash
-.
-├── CMakeLists.txt
-├── developers.md
-├── Doxyfile
-├── GX-common
-│   ├── CMakeLists.txt
-│   └── src
-│       ├── constants.f90
-│       ├── error_handling.f90
-│       ├── kinds.f90
-│       ├── lapack_interfaces.f90
-│       └── unit_conversion.f90
-├── GX-TimeFrequency
-│   ├── api
-│   │   ├── api_utilities.f90
-│   │   └── gx_minimax.f90
-│   ├── CITATION.cff
-│   ├── CMakeLists.txt
-│   ├── LICENSE.txt
-│   ├── README.md
-│   ├── src
-│   │   ├── gx_common.h
-│   │   ├── minimax_grids.F90
-│   │   ├── minimax_omega.F90
-│   │   ├── minimax_tau.F90
-│   │   └── minimax_utils.F90
-│   ├── test
-│   │   ├── conftest.py
-│   │   ├── test_gx_minimax_grid.f90
-│   │   ├── test_gx_minimax_grid.py
-│   │   └── test_gx_tabulate_minimax.py
-│   └── utilities
-│       └── gx_tabulate_minimax.F90
-├── LICENSE.txt
-└── README.md
+```plaintext
+  |- CMakeLists.txt
+  |- developers.md
+  |- Doxyfile
+  |- GX-common
+  |  |- CMakeLists.txt
+  |  |- src
+  |  |  |- constants.f90
+  |  |  |- error_handling.f90
+  |  |  |- kinds.f90
+  |  |  |- lapack_interfaces.f90
+  |  |  |- unit_conversion.f90
+  |- GX-TimeFrequency
+  |  |- api
+  |  |  |- api_utilities.f90
+  |  |  |- gx_minimax.f90
+  |  |- CITATION.cff
+  |  |- CMakeLists.txt
+  |  |- LICENSE.txt
+  |  |- README.md
+  |  |- src
+  |  |  |- gx_common.h
+  |  |  |- minimax_grids.F90
+  |  |  |- minimax_omega.F90
+  |  |  |- minimax_tau.F90
+  |  |  |- minimax_utils.F90
+  |  |- test
+  |  |  |- conftest.py
+  |  |  |- test_gx_minimax_grid.f90
+  |  |  |- test_gx_minimax_grid.py
+  |  |  |- test_gx_tabulate_minimax.py
+  |  |- utilities
+  |  |  |- gx_tabulate_minimax.F90
+  |- LICENSE.txt
+  |- README.md
 ```
 
 Green-X is written in Fortran 2008. Functionality needed for testing and error handling is written in C and Python. We utilize modern Fortran features such as object-oriented programming and intrinsic procedures that are available in Fortran 2008. We have developed a clear interface between the module code (our library) and the client code (MBPT code), promoting better modularity and reusability. Additionally, we use allocatable arrays and automatic deallocation to simplify the code and avoid memory-related issues, such as leaks and dangling pointers. The implementation is robust and reliable, as we use error handling techniques to highlight and recover from exceptions.
