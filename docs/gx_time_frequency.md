@@ -27,4 +27,8 @@ Some minimax grids published in GreenX were used in previous work, e.g., DOI:[11
 
 A paper with comprehensive tests on molecules and periodic systems is in preparation. 
 
+## Usage
+
+You can learn more about the usage of this component of the library [here](../GX-TimeFrequency/README.md).
+
 ---
