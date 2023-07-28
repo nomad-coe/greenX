@@ -1,3 +1,10 @@
+---
+layout: page
+title: Time-Frequency component usage
+tagline: GreenX Time-Frequency usage
+description: Time-Frequency component usage
+---
+
 # GreenX Library - TimeFrequency
 
 This library provides optimal quadrature grid points and weights for imaginary time-frequency transforms, commonly 
