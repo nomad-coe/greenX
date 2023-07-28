@@ -29,6 +29,39 @@ A paper with comprehensive tests on molecules and periodic systems is in prepara
 
 ## Usage
 
-You can learn more about the usage of this component of the library [here](../GX-TimeFrequency/README.md).
+The minimax grid generation is called like so:
 
+```fortran
+use gx_minimax, only: gx_minimax_grid
+
+! Declarations
+integer :: n_mesh_points
+real(dp) :: e_transition_min, e_transition_max
+real(dp), allocatable :: tau_mesh(:), tau_weights(:)
+real(dp), allocatable :: freq_mesh(:), freq_weights(:)
+real(dp), allocatable :: cos_tau_to_freq_weights(:, :)
+real(dp), allocatable :: cos_freq_to_tau_weights(:, :)
+real(dp), allocatable :: sinft_tau_to_freq_weights(:, :)
+real(dp) :: max_errors(3)
+real(dp) :: cosft_duality_error
+integer :: ierr
+
+call gx_minimax_grid(n_mesh_points, e_transition_min, e_transition_max, &
+                     tau_mesh, tau_weights, &
+                     freq_mesh, freq_weights, &
+                     cos_tau_to_freq_weights, cos_freq_to_tau_weights, &
+                     sinft_tau_to_freq_weights, &
+                     max_errors, cosft_duality_error, ierr)
+```
+
+For a description of the variables, please consult `src/minimax_grids.F90`.
+For an example of how to call `gx_minimax_grid`, please consult `test/test_gx_minimax_grid.f90`.
+
+Additionally, one can also call a utility routine to query whether the 
+number of imaginary-time points has a corresponding grid tabulation:
+
+```fortran
+use api_utilites, only: gx_check_ntau, gx_get_error_message
+
+call gx_check_ntau(ntau, msg, ierr)
 ---
