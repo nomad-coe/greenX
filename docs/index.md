@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: default
 title: GreenX Library
 tagline: GreenX
 description: Library for Many-body Greens Functions on HPC

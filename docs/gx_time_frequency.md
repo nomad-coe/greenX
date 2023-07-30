@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: default
 title: Time-Frequency component
 tagline: GreenX Time-Frequency
 description: Time-Frequency component
