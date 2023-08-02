@@ -14,5 +14,4 @@ numerical routines, common to all code families.
 # Components
 
 - [Minimax Time-Frequency](gx_time_frequency.md)
-
----
+- [Analytic Continuation](gx_ac.md)

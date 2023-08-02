@@ -2,7 +2,7 @@
 layout: default
 title: Time-Frequency Component
 tagline: GreenX Time-Frequency
-description: Time-Frequency component
+description: Minimax time and frequency grids for low-scaling RPA and GW
 ---
 # General
 
@@ -56,11 +56,23 @@ call gx_minimax_grid(n_mesh_points, e_transition_min, e_transition_max, &
                      max_errors, cosft_duality_error, ierr)
 ```
 
-For a description of the variables, please consult `src/minimax_grids.F90`.
-For an example of how to call `gx_minimax_grid`, please consult `test/test_gx_minimax_grid.f90`.
+A detailed description of the quantities involved in the computation can be found on the [JOSS manuscript](https://raw.githubusercontent.com/openjournals/joss-papers/joss.05570/joss.05570/10.21105.joss.05570.pdf) of the library. Here we focus on mapping them with the variables used in the subroutine's interface:
 
-Additionally, one can also call a utility routine to query whether the 
-number of imaginary-time points has a corresponding grid tabulation:
+| Output                                  |Variable  |Description                     |
+|-----------------------------------------|-----------------------------|--------------------------------|
+| \\(n\\)                                 | `n_mesh_points`             |grid size                       |
+| \\(\\Delta_{\\text{min}}\\)             | `e_transition_min`          |minimum eigenvalue difference   |
+| \\(\\Delta_{\\text{max}}\\)             | `e_transition_max`          |maximum eigenvalue difference   |
+| \\(\\{\tau_j^\text{mat}\\}_{j=1}^n\\)   | `tau_mesh`                  |time points                     |
+| \\(\\{\sigma_j^\text{mat}\\}_{j=1}^n\\) | `tau_weights`               |time integration weights        |
+| \\(\\{\omega_k^\text{mat}\\}_{k=1}^n\\) | `freq_mesh`                 |frequency points                |
+| \\(\\{\gamma_k^\text{mat}\\}_{k=1}^n\\) | `freq_weights`              |freq. integration weights       |
+| \\(\\{\delta_{kj}\\}_{k,j=1}^n\\)       | `cos_tau_to_freq_weights`   |Fourier weights                 |
+| \\(\\{\eta_{jk}\\}_{k,j=1}^n\\)         | `cos_freq_to_tau_weights`   |Fourier weights                 |
+| \\(\\{\lambda_{kj}\\}_{k,j=1}^n\\)      | `sinft_tau_to_freq_weights` |Fourier weights                 |
+| \\(\Delta_\text{CT}\\)                  | `cosft_duality_error`       |duality error cosine transforms |
+
+We invite the reader to read the code in `src/minimax_grids.F90` for additional insight. For an example of how to call `gx_minimax_grid`, please consult `test/test_gx_minimax_grid.f90`. Additionally, one can also call a utility routine to query whether the number of imaginary-time points has a corresponding grid tabulation:
 
 ```fortran
 use api_utilites, only: gx_check_ntau, gx_get_error_message
@@ -68,4 +80,10 @@ use api_utilites, only: gx_check_ntau, gx_get_error_message
 call gx_check_ntau(ntau, msg, ierr)
 ```
 
----
+<button onclick="goBack()">Go Back</button>
+
+<script>
+function goBack() {
+  window.history.back();
+}
+</script>
