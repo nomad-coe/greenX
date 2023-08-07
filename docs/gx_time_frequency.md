@@ -12,14 +12,16 @@ The time-frequency component of GreenX provides minimax time and frequency grids
 
 ## Correlation energy from conventional RPA for CH<sub>4</sub>
 
-In this test, we evaluate the RPA total energy of CH4 using a Gauss-Legendre grid, a modified Gauss-Legendre grid (so far the standard in FHI-aims and abinit), and minimax grids. An accuracy of 10^-6 eV is reached with 10 minimax grid points while the modified Gauss-Legendre grids requires 36 points for this accuracy.
+In this test, we evaluate the RPA total energy of a single CH<sub>4</sub> molecule using a regular Gauss-Legendre grid, a modified Gauss-Legendre grid (so far the standard in FHI-aims and abinit), and the minimax grids from the Green-X library. The plot is generated with the canonical RPA implementation in FHI-aims using the PBE functional for the preceding DFT calculation and numeric atom-centered orbitals (NAOs) of Tier2 quality. The conventional RPA implementation in FHI-aims is based on the global resolution-of-the-identity technique with the Coulomb metric (RI-V). The auxiliary basis functions for the RI-V method were generated automatically on the fly.
+
+The plot shows that the minimax RPA energies converge significantly faster with respect to grid size than the ones from regular and modified Gauss-Legendre grids. An accuracy of $10^{-6}$ eV is reached with 10 minimax grid points, while the modified Gauss-Legendre grids requires 36 points to reach the same accuracy.
 
 <p align="center">
   <img src="./img/ch4_bench.png" alt="CH4 benchmark" width="500"/>
 </p>
 
-Error differences of the total RPA energy [eV] of methane calculated using the Gauss-Legendre, modified Gauss-Legendre and minimax imaginary frequency grid points. These differences were calculated with respect to the lowest RPA energy obtained with 34 minimax grid points. The ground state energy was calculated using the PBE exchange correlation functional in combination of the Tier2 basis set. The global resolution of identity (RI-V) approach was used for the 
-calculation of the exact exchange and RPA correlation energy. The auxiliary basis functions for the RI-V method were generated automatically on the fly.
+<em>
+Difference of the RPA total energy of an isolated methane molecule comparing regular and modified Gauss-Legendre grids and minimax grids. The differences are computed with respect to the lowest RPA energy obtained with 34 minimax grid points.</em>
 
 ## GW100
 
