@@ -97,6 +97,7 @@ Documentation is built in `documentation` and can be viewed by opening
 When adding new files with documentation, please ensure the directory is listed 
 in the `INPUT` tag of Doxyfile.
 
+For more information and benchmark examples see also the [GreenX website](nomad-coe.github.io/greenX/).
 
 ## Unit Testing
 
