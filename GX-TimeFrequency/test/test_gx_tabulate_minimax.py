@@ -1,5 +1,5 @@
 """Testing minimax grid calculation
-   Copyright (C) 2020-2023 Green-X library
+   Copyright (C) 2020-2023 GreenX library
    This file is distributed under the terms of the APACHE2 License.
 """
 import enum

@@ -1,4 +1,4 @@
-!  Copyright (C) 2020-2022 Green-X library
+!  Copyright (C) 2020-2022 GreenX library
 !  This file is distributed under the terms of the APACHE2 License.
 
 !>   The Pade approximants are a particular type of rational fraction
