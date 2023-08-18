@@ -160,6 +160,7 @@ with $\mathbb{I}$ being the identity matrix. Inputs and outputs are in atomic un
 |$\{\lambda_{kj}\}_{k,j=1}^n$ | Fourier weights | ls \textit{GW} | on-the-fly L2 opt  
 |  $\Delta_\text{CT}$ | duality error cosine transforms | ls \textit{GW} | on-the-fly  |
 : Output returned by the GX-TimeFrequency component of GreenX. We abbreviate low-scaling as ls, and least-squares optimization as L2 opt.\label{tab:output}
+
 To ensure the reproducibility of our results, we have implemented regression tests using the pytest infrastructure, combined with CMake and CTest. The regression tests rigorously verify the accuracy of the frequency grids and integration weights and the forward-backward cosine error. Further details on the library structure, contents, build system, and testing are available in the various README.md files at the top level of the [@GitHub] repository and the individual component directories. Further benchmarks will be provided elsewhere [@azizi_minimax].
 
 # Acknowledgements
