@@ -5,9 +5,9 @@ tagline: Structure
 description: Structure of the library
 ---
 
-# Structure of the library
+# Structure of GX-common and GX-TimeFrequency
 
-In this section, we focus on the GX-common and GX-TimeFrequency components. GX-common provides functionality for all library components, such as error handling and unit conversion utilities. GX-TimeFrequency provides an API directory for the time-frequency transformations, a source directory, and a test directory with scripts for verifying the implementation. The relevant directory tree section is:
+In this section, we focus on the components of the library which are ready to use, i.e., the  GX-common and GX-TimeFrequency components. GX-common provides functionality for all library components, such as error handling and unit conversion utilities. GX-TimeFrequency provides an API directory for the time-frequency transformations, a source directory, and a test directory with scripts for verifying the implementation. The relevant directory tree section is:
 
 ```plaintext
   |- CMakeLists.txt
