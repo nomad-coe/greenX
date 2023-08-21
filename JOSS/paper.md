@@ -91,7 +91,7 @@ To convert between imaginary time and frequency grids, we introduce a nonuniform
 
 \begin{align}
 \hat{F}(i\tau) = \hat{F}^\text{even}(i\tau) + \hat{F}^\text{odd}(i\tau) \hspace{1.9em} &\text{and} \hspace{1.9em} 
-{F}(i\omega) =  {F}^\text{even}(i\omega) +  {F}^\text{odd}(i\omega)\,,
+{F}(i\omega) =  {F}^\text{even}(i\omega) +  {F}^\text{odd}(i\omega)\,,\label{Fw_split}
 \end{align}
 with
 \begin{align}
