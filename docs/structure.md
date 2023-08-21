@@ -46,10 +46,7 @@ In this section, we focus on the GX-common and GX-TimeFrequency components. GX-c
   |- README.md
 ```
 
-GreenX is written in Fortran 2008. Functionality needed for testing and error handling is written in C and Python. We utilize modern Fortran features such as object-oriented programming and intrinsic procedures that are available in Fortran 2008. We have developed a clear interface between the module code (our library) and the client code (MBPT code), promoting better modularity and reusability. Additionally, we use allocatable arrays and automatic deallocation to simplify the code and avoid memory-related issues, such as leaks and dangling pointers. The implementation is robust and reliable, as we use error handling techniques to highlight and recover from exceptions.
-
-The time and frequency grids \\(\\{\tau_k(R)\\}_{k=1}^n\\), \\(\\{\omega_j(R)\\}_{j=1}^n\\) and the integration weights \\(\\{\gamma_k(R)\\}_{k=1}^n\\), \\(\\{\sigma_j(R)\\}_{j=1}^n\\) are tabulated (hard coded) in the module 'minimax\_tau.f90' and 'minimax\_omega.f90' for various ranges \\(R\\) of interest for solids and molecules. The module 'minimax\_grids.f90' calculates the weights \\(\\{\delta_{kj}\\}_{k,j=1}^n\\), \\(\\{\eta_{jk}\\}_{k,j=1}^n\\), \\(\\{\lambda_{kj}\\}_{k,j=1}^n\\) of cosine and sine transforms during the runtime of the program. 'minimax\_grids.f90' also provides the duality error \\(\Delta_{\text{CT}}\\). 'minimax\_utils.f90' contains auxiliary procedures and data structures for the main minimax routines.
-
+The time and frequency grids $$\{\tau_k(R)\}_{k=1}^n$$, $$\{\omega_j(R)\}_{j=1}^n$$ and the integration weights $$\{\gamma_k(R)\}_{k=1}^n$$, $$\{\sigma_j(R)\}_{j=1}^n$$ are tabulated (hard coded) in the module 'minimax_tau.f90' and 'minimax_omega.f90' for various ranges $$R$$ of interest for solids and molecules. The module 'minimax_grids.f90' calculates the weights $$\{\delta_{kj}\}_{k,j=1}^n$$, $$\{\eta_{jk}\}_{k,j=1}^n$$, $$\{\lambda_{kj}\}_{k,j=1}^n$$ of cosine and sine transforms during the runtime of the program. 'minimax_grids.f90' also provides the duality error $$\Delta_{\text{CT}}$$. 'minimax_utils.f90' contains auxiliary procedures and data structures for the main minimax routines.
 <button onclick="goBack()">Go Back</button>
 
 <script>
