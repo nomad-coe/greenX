@@ -96,6 +96,15 @@ To convert between imaginary time and frequency grids, we introduce a nonuniform
 with $\hat{F}^\text{even}(x)=\hat{F}^\text{even}(-x)$ and $\hat{F}^\text{odd}(x)=-\hat{F}^\text{odd}(-x)$.
 
 The corresponding discrete Fourier transforms read [@liu2016cubic]
+\begin{multicols}{2}
+  \begin{equation}
+    F^\text{even}(i\omega_k) &= \sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\,,
+  \end{equation}\break
+  \begin{equation}
+    \hat{F}^\text{even}(i\tau_j)& = \sum_{k=1}^{n} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\,,
+  \end{equation}
+\end{multicols}
+
 \begin{align}\label{ct_st_even}
     F^\text{even}(i\omega_k) &= \sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\,,
     \\
