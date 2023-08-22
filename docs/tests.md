@@ -2,7 +2,7 @@
 layout: default
 title: Coding conventions and regression testing
 tagline: GreeX Testing
-description: Coding conventions and regression testing for the GreenX library
+description: ' '
 ---
 # Coding conventions
 
