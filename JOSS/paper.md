@@ -95,7 +95,6 @@ To convert between imaginary time and frequency grids, we introduce a nonuniform
 \end{align}
 with $F^\text{even}(x)=F^\text{even}(-x)$ and $F^\text{odd}(x)=-F^\text{odd}(-x)$ and the same parity rules hold for quantities with a hat. The corresponding discrete Fourier transforms read [@liu2016cubic]
 \noindent\begin{minipage}{.5\textwidth}
-  \fontsize{8}{10}\selectfont
   \begin{align}
     F^\text{even}(i\omega_k) &= \sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\label{ct_st_even}
     \\
@@ -103,7 +102,6 @@ with $F^\text{even}(x)=F^\text{even}(-x)$ and $F^\text{odd}(x)=-F^\text{odd}(-x)
   \end{align}
 \end{minipage}
 \begin{minipage}{.5\textwidth}
-  \fontsize{8}{10}\selectfont
   \begin{align}
     F^\text{odd}(i\omega_k) &= i\sum_{j=1}^{n} \lambda_{kj} \mathrm{sin}(\omega_k\tau_j)\hat{F}^\text{odd}(i\tau_j)\label{st_odd_t_to_w}
     \\
