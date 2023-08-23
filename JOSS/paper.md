@@ -101,7 +101,7 @@ with $F^\text{even}(x)=F^\text{even}(-x)$ and $F^\text{odd}(x)=-F^\text{odd}(-x)
     \\
     \hat{F}^\text{even}(i\tau_j) &= \sum_{k=1}^{n} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\label{ct_even_w_to_t}
   \end{align}
-\end{minipage}% 
+\end{minipage}
 \begin{minipage}{.5\textwidth}
   \fontsize{8}{10}\selectfont
   \begin{align}
