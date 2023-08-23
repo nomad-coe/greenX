@@ -2,7 +2,7 @@
 layout: default
 title: Structure of the library
 tagline: Structure
-description: Structure of the library
+description: ' '
 ---
 
 # Structure of GX-common and GX-TimeFrequency
