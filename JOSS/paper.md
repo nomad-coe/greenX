@@ -67,7 +67,7 @@ The package comprises minimax time and frequency grids [@Takatsuka2008; @kaltak2
 
 RPA is an accurate approach to compute the electronic correlation energy. It is non-local, includes long-range dispersion interactions and dynamic electronic screening, and is applicable to a wide range of systems from 0 to 3 dimensions [@eshuis2012electron; @ren2012random]. The \textit{GW} method [@hedin1965new] is based on the RPA susceptibility and has become the method of choice for the calculation of direct and inverse photoemission spectra of molecules and solids [@golze2019gw;@reining2018gw]. Furthermore, \textit{GW} forms the basis for Bethe-Salpeter Equation (BSE) calculations of optical spectra [@onida2002electronic].
 
-Despite their wide adoption, RPA and \textit{GW} face computational challenges, especially for large systems. Conventional RPA and \textit{GW} implementations scale with the fourth power of the system size $N$ and are therefore usually limited to systems of a few tens to at most a hundred atoms [@panadesbarrueta2023; @stuke2020atomic]. To tackle larger and more realistic systems, scaling reductions present a promising strategy to decrease the computational cost. Such low-scaling algorithms utilize real-space representations and time-frequency transformations, such as the real-space/imaginary-time approach [@rojas1995space] that reduces the complexity to $\mathcal{O}(N^3)$. Several such cubic-scaling \textit{GW} algorithms have recently been implemented, e.g. in a plane-wave/projector-augmented-wave \textit{GW} code [@kaltak2014low;@liu2016cubic;@kutepov2017linearized] or with localized basis sets using Gaussian [@wilhelm2018toward;@wilhelm2021low;@duchemin2021cubic;@Graml2023] or Slater-type orbitals [@forster2020low;@foerster2021GW100;@foerster2021loworder;@foerster2023twocomponent]. Similarly, low-scaling RPA algorithms were implemented with different basis sets [@kaltak2014cubic;@kaltak2014low;@wilhelm2016rpa;@graf2018accurate;@duchemin2019separable;@drontschenko2022efficient;@Shi2023].
+Despite their wide adoption, RPA and \textit{GW} face computational challenges, especially for large systems. Conventional RPA and \textit{GW} implementations scale with the fourth power of the system size $N$ and are therefore usually limited to systems up to one hundred atoms [@panadesbarrueta2023; @stuke2020atomic]. To tackle larger and more realistic systems, scaling reductions present a promising strategy to decrease the computational cost. Such low-scaling algorithms utilize real-space representations and time-frequency transformations, such as the real-space/imaginary-time approach [@rojas1995space] that reduces the complexity to $\mathcal{O}(N^3)$. Several such cubic-scaling \textit{GW} algorithms have recently been implemented, e.g. in a plane-wave/projector-augmented-wave \textit{GW} code [@kaltak2014low;@liu2016cubic;@kutepov2017linearized] or with localized basis sets using Gaussian [@wilhelm2018toward;@wilhelm2021low;@duchemin2021cubic;@Graml2023] or Slater-type orbitals [@forster2020low;@foerster2021GW100;@foerster2021loworder;@foerster2023twocomponent]. Similarly, low-scaling RPA algorithms were implemented with different basis sets [@kaltak2014cubic;@kaltak2014low;@wilhelm2016rpa;@graf2018accurate;@duchemin2019separable;@drontschenko2022efficient;@Shi2023].
 
 An important consideration for low-scaling algorithms is the crossover point. Due to their larger pre-factor, low-scaling algorithms are typically more expensive for smaller systems and only become more cost-effective than canonical implementations for larger systems due to their reduced scaling [@wilhelm2018toward]. Furthermore, the numerical precision of low-scaling \textit{GW} algorithms is strongly coupled to the time-frequency treatment [@wilhelm2021low]. Early low-scaling \textit{GW} algorithms did not reach the same precision as canonical implementations [@vlcek2017stochastic; @wilhelm2018toward; @forster2020low]. Although appropriate Fourier transforms and corresponding time-frequency grids have been implemented [@liu2016cubic;@wilhelm2021low; @duchemin2021cubic; @foerster2021GW100], these implementations and grids are tied to particular codes and are often buried deeply inside the code. Furthermore, reuse of such implementations elsewhere is often restricted by license requirements or dependencies on definitions made in the host code.
 
@@ -123,20 +123,21 @@ $\gamma_k$, $\delta_{kj}$, $\eta_{jk}$, $\lambda_{kj}$ depend on the energy gap 
 \fontsize{8}{10}\selectfont
 \begin{align}
   \omega_k^\text{mat} = \Delta_\text{min}\,\omega_k(R)\,,
- \hspace{1em}
+ \hspace{3em}
  \gamma_k^\text{mat} = \Delta_\text{min}\,\gamma_k(R)\,,
- \hspace{1em}
+ \hspace{3em}
 \tau_j^\text{mat} = \frac{\tau_j(R)}{2\Delta_\text{min}}\,,
- \hspace{1em}
+ \hspace{3em}
 \sigma_j^\text{mat} = \frac{\sigma_j(R)}{2\Delta_\text{min}}\,.\label{eq:rescaling}
 \end{align}\normalsize
 
 # Required input and output
 
 GX-TimeFrequency requires as input the grid size $n$, the minimal eigenvalue difference $\Delta_{\text{min}}$, and the maximal eigenvalue difference $\Delta_{\text{max}}$. The output parameters are summarized in Table \ref{tab:output}. The library component retrieves the tabulated minimax parameters $\{\tau_j(R)\}_{j=1}^n$, $\{\sigma_j(R)\}_{j=1}^n$, $\{\omega_k(R)\}_{k=1}^n$, $\{\gamma_k(R)\}_{k=1}^n$ of the requested grid size $n$ for the smallest range $R$ that satisfies $R \ge \Delta_\text{max}/\Delta_\text{min}$. GX-TimeFrequency then rescales the retrieved minimax parameters according to Eq. \eqref{eq:rescaling} with $\Delta_\text{min}$ and prints the results $\{\tau_j^\text{mat}\}_{j=1}^n$, $\{\sigma_j^\text{mat}\}_{j=1}^n$, $\{\omega_k^\text{mat}\}_{k=1}^n$, $\{\gamma_k^\text{mat}\}_{k=1}^n$. Fourier integration weights are computed on-the-fly via least-squares optimization. To evaluate the precision of a global forward cosine transformation followed by backward cosine transformations, we provide a measure of such error as 
+\fontsize{8}{10}\selectfont
 \begin{align}
 \Delta_\text{CT}=\max_{j,j'\in\{1,2,\ldots,n\}} \left| \sum_{k=1}^n \eta_{j'k} \cos(\tau_{j'}\omega_k) \cdot \delta_{kj} \cos(\omega_k\tau_j) - (\mathbb{I})_{j'j}\right|
-\end{align} 
+\end{align}\normalsize
 with $\mathbb{I}$ being the identity matrix. Inputs and outputs are in atomic units.
 
 | Output| Description|Methods using the output|Computation|
