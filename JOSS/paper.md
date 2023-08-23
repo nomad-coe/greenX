@@ -94,15 +94,15 @@ To convert between imaginary time and frequency grids, we introduce a nonuniform
 {F}(i\omega) =  {F}^\text{even}(i\omega) +  {F}^\text{odd}(i\omega)\,\label{Fw_split}
 \end{align}\normalsize
 with $F^\text{even}(x)=F^\text{even}(-x)$ and $F^\text{odd}(x)=-F^\text{odd}(-x)$ and the same parity rules hold for quantities with a hat. The corresponding discrete Fourier transforms read [@liu2016cubic]
-\noindent\begin{minipage}{.5\textwidth}
+\noindent\begin{minipage}{.47\textwidth}
   \fontsize{8}{10}\selectfont
   \begin{align}
-    F^\text{even}(i\omega_k) &= \sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\label{ct_st_even}
+    \hspace{-3em}F^\text{even}(i\omega_k) &= \sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\label{ct_st_even}
     \\
-    \hat{F}^\text{even}(i\tau_j) &= \sum_{k=1}^{n} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\label{ct_even_w_to_t}
+    \hspace{-3em}\hat{F}^\text{even}(i\tau_j) &= \sum_{k=1}^{n} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\label{ct_even_w_to_t}
   \end{align}
 \end{minipage}
-\begin{minipage}{.5\textwidth}
+\begin{minipage}{.53\textwidth}
   \fontsize{8}{10}\selectfont
   \begin{align}
     F^\text{odd}(i\omega_k) &= i\sum_{j=1}^{n} \lambda_{kj} \mathrm{sin}(\omega_k\tau_j)\hat{F}^\text{odd}(i\tau_j)\label{st_odd_t_to_w}
