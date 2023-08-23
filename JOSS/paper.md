@@ -67,7 +67,7 @@ The package comprises minimax time and frequency grids [@Takatsuka2008; @kaltak2
 
 RPA is an accurate approach to compute the electronic correlation energy. It is non-local, includes long-range dispersion interactions and dynamic electronic screening, and is applicable to a wide range of systems from 0 to 3 dimensions [@eshuis2012electron; @ren2012random]. The \textit{GW} method [@hedin1965new] is based on the RPA susceptibility and has become the method of choice for the calculation of direct and inverse photoemission spectra of molecules and solids [@golze2019gw;@reining2018gw]. Furthermore, \textit{GW} forms the basis for Bethe-Salpeter Equation (BSE) calculations of optical spectra [@onida2002electronic].
 
-Despite their wide adoption, RPA and \textit{GW} face computational challenges, especially for large systems. Conventional RPA and \textit{GW} implementations scale with the fourth power of the system size $N$ and are therefore usually limited to systems of a few tens to at most a hundred atoms [@panadesbarrueta2023; @stuke2020atomic]. To tackle larger and more realistic systems, scaling reductions present a promising strategy to decrease the computational cost. Such low-scaling algorithms utilize real-space representations and time-frequency transformations, such as the real-space/imaginary-time approach [@rojas1995space] that reduces the complexity to $\mathcal{O}(N^3)$. Several such cubic-scaling \textit{GW} algorithms have recently been implemented, e.g. in a plane-wave/projector-augmented-wave (PAW) \textit{GW} code [@kaltak2014low;@liu2016cubic;@kutepov2017linearized] or with localized basis sets using Gaussian [@wilhelm2018toward;@wilhelm2021low;@duchemin2021cubic;@Graml2023] or Slater-type orbitals [@forster2020low;@foerster2021GW100;@foerster2021loworder;@foerster2023twocomponent]. Similarly, low-scaling RPA algorithms were implemented with different basis sets [@kaltak2014cubic;@kaltak2014low;@wilhelm2016rpa;@graf2018accurate;@duchemin2019separable;@drontschenko2022efficient].
+Despite their wide adoption, RPA and \textit{GW} face computational challenges, especially for large systems. Conventional RPA and \textit{GW} implementations scale with the fourth power of the system size $N$ and are therefore usually limited to systems of a few tens to at most a hundred atoms [@panadesbarrueta2023; @stuke2020atomic]. To tackle larger and more realistic systems, scaling reductions present a promising strategy to decrease the computational cost. Such low-scaling algorithms utilize real-space representations and time-frequency transformations, such as the real-space/imaginary-time approach [@rojas1995space] that reduces the complexity to $\mathcal{O}(N^3)$. Several such cubic-scaling \textit{GW} algorithms have recently been implemented, e.g. in a plane-wave/projector-augmented-wave \textit{GW} code [@kaltak2014low;@liu2016cubic;@kutepov2017linearized] or with localized basis sets using Gaussian [@wilhelm2018toward;@wilhelm2021low;@duchemin2021cubic;@Graml2023] or Slater-type orbitals [@forster2020low;@foerster2021GW100;@foerster2021loworder;@foerster2023twocomponent]. Similarly, low-scaling RPA algorithms were implemented with different basis sets [@kaltak2014cubic;@kaltak2014low;@wilhelm2016rpa;@graf2018accurate;@duchemin2019separable;@drontschenko2022efficient].
 
 An important consideration for low-scaling algorithms is the crossover point. Due to their larger pre-factor, low-scaling algorithms are typically more expensive for smaller systems and only become more cost-effective than canonical implementations for larger systems due to their reduced scaling [@wilhelm2018toward]. Furthermore, the numerical precision of low-scaling \textit{GW} algorithms is strongly coupled to the time-frequency treatment [@wilhelm2021low]. Early low-scaling \textit{GW} algorithms did not reach the same precision as canonical implementations [@vlcek2017stochastic; @wilhelm2018toward; @forster2020low]. Although appropriate Fourier transforms and corresponding time-frequency grids have been implemented [@liu2016cubic;@wilhelm2021low; @duchemin2021cubic; @foerster2021GW100], these implementations and grids are tied to particular codes and are often buried deeply inside the code. Furthermore, reuse of such implementations elsewhere is often restricted by license requirements or dependencies on definitions made in the host code.
 
@@ -93,18 +93,23 @@ To convert between imaginary time and frequency grids, we introduce a nonuniform
 \hat{F}(i\tau) = \hat{F}^\text{even}(i\tau) + \hat{F}^\text{odd}(i\tau) \hspace{1.9em} &\text{and} \hspace{1.9em} 
 {F}(i\omega) =  {F}^\text{even}(i\omega) +  {F}^\text{odd}(i\omega)\,\label{Fw_split}
 \end{align}
-with $\hat{F}^\text{even}(x)=\hat{F}^\text{even}(-x)$ and $\hat{F}^\text{odd}(x)=-\hat{F}^\text{odd}(-x)$.
-
-The corresponding discrete Fourier transforms read [@liu2016cubic]
-\begin{align}\label{ct_st_even}
-    F^\text{even}(i\omega_k) &= \sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\,,
+with $F^\text{even}(x)=F^\text{even}(-x)$ and $F^\text{odd}(x)=-F^\text{odd}(-x)$ and the same parity rules hold for quantities with a hat. The corresponding discrete Fourier transforms read [@liu2016cubic]
+\noindent\begin{minipage}{.5\textwidth}
+  \fontsize{8}{10}\selectfont
+  \begin{align}
+    F^\text{even}(i\omega_k) &= \sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\label{ct_st_even}
     \\
-    \hat{F}^\text{even}(i\tau_j)& = \sum_{k=1}^{n} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\,,\label{ct_even_w_to_t}
- \\
-    F^\text{odd}(i\omega_k)& = i\sum_{j=1}^{n} \lambda_{kj} \mathrm{sin}(\omega_k\tau_j)\hat{F}^\text{odd}(i\tau_j)\,,\label{st_odd_t_to_w}
+    \hat{F}^\text{even}(i\tau_j) &= \sum_{k=1}^{n} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\label{ct_even_w_to_t}
+  \end{align}
+\end{minipage}% 
+\begin{minipage}{.5\textwidth}
+  \fontsize{8}{10}\selectfont
+  \begin{align}
+    F^\text{odd}(i\omega_k) &= i\sum_{j=1}^{n} \lambda_{kj} \mathrm{sin}(\omega_k\tau_j)\hat{F}^\text{odd}(i\tau_j)\label{st_odd_t_to_w}
     \\
-    \hat{F}^\text{odd}(i\tau_j)&= -i \sum_{k=1}^{n} \zeta_{jk} \mathrm{sin}(\tau_j\omega_k)F^\text{odd}(i\omega_k),\label{ct_st_odd}
-\end{align}
+    \hat{F}^\text{odd}(i\tau_j) &= -i \sum_{k=1}^{n} \zeta_{jk} \mathrm{sin}(\tau_j\omega_k)F^\text{odd}(i\omega_k)\label{ct_st_odd}
+  \end{align}
+\end{minipage}
 where $\{\tau_j\}_{j=1}^n, \tau_j\,{>}\,0$ are again the time grid points, $\{\omega_k\}_{k=1}^n,\omega_k\,{>}\,0$ frequency grid points and $\{\delta_{kj}\}_{k,j=1}^n$, $\{\eta_{jk}\}_{k,j=1}^n$,$\{\lambda_{kj}\}_{k,j=1}^n$, $\{\zeta_{jk}\}_{k,j=1}^n$ the corresponding Fourier integration weights. $\hat{\chi}^0(i\tau)$ is an even function and we need thus the transform defined in Eq. \eqref{ct_st_even} to obtain $\chi^0(i\omega)$. The screened Coulomb interaction is also even and we use expression \eqref{ct_even_w_to_t} to convert $W(i\omega)$ to $\widehat{W}(i\tau)$. The self-energy is neither odd nor even and we use Eq. \eqref{Fw_split} in combination with Eqs. \eqref{ct_st_even} and  \eqref{st_odd_t_to_w} to transform $\widehat{\Sigma}(i\tau)$ to $\Sigma(i\omega)$ [@liu2016cubic]. The transformation defined in Eq. \eqref{ct_st_odd} is not required for the methods summarized in Fig. \ref{fig:flowchart}, but is added for the sake of completeness and clarity.
 
 Ideal grid parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$, $\delta_{kj}$, $\eta_{jk}$, $\lambda_{kj}$ feature a vanishing error for the LT-dMP2 and RPA correlation energy integrations and Fourier transforms of $\chi^0,W$ and $\Sigma$ (Fig. \ref{fig:flowchart}). We compute minimax grid parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$ that minimize the maximum error of the LT-dMP2 and RPA correlation energy integration (Fig. \ref{fig:flowchart}) over all possible functions $\hat{\chi}^0( \mathbf{r}, \mathbf{r'}, i\tau )$ and $\chi^0( \mathbf{r}, \mathbf{r'}, i\omega )$
