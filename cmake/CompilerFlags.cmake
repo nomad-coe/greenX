@@ -27,7 +27,7 @@ set(INTEL_BASE
 set(INTEL_DEBUG 
     -g           # Generate symbols
     -traceback   # symbolic stack traceback
-    -fp          # Disables the ebp register in optimizations and sets the ebp register to be used as the frame pointer.
+    # -fp          # Disables the ebp register in optimizations and sets the ebp register to be used as the frame pointer.
     -check all    # Checks for all runtime failures.
     -check bounds # Generates code to perform runtime checks on array subscript and character substring expressions. 
     -check-uninit #  Enables runtime checking for uninitialized variables.
