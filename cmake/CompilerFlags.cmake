@@ -19,15 +19,14 @@ set(GCC_RELEASE -O3)  # Level 3 optimisation. Could also consider -fpack-derived
 
 # Intel 
 set(INTEL_BASE
-    -stand f08          # Fortran standard set to 2008
-    -implicitnone       # Give warning when undeclared variable is used
+    -stand f08          # Set standard to Fortran 2008 and warn for non-standard language elements
+    -implicitnone       # Set the default type of a variable to undefined
     -diag-disable=5268  # Remove warning: Extension to standard: The text exceeds right hand column allowed on the line.
     -free               # Specify free-fortmat
    )
 set(INTEL_DEBUG 
     -g           # Generate symbols
     -traceback   # symbolic stack traceback
-    # -fp          # Disables the ebp register in optimizations and sets the ebp register to be used as the frame pointer.
     -check all    # Checks for all runtime failures.
     -check bounds # Generates code to perform runtime checks on array subscript and character substring expressions. 
     -check-uninit #  Enables runtime checking for uninitialized variables.
