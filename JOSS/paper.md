@@ -90,7 +90,7 @@ Low-scaling RPA and \textit{GW} algorithms include the Fourier transform of $\ha
 The conversion between imaginary time and frequency grids relies on nonuniform discrete cosine and sine transformations for even and odd functions $F^\text{even/odd}$, respectively [@liu2016cubic]. If the function $F$ is neither odd nor even, the computation of functions $\hat{F}(i\tau)$ and $F(i\omega)$ is split into even and an odd parts [@liu2016cubic]
 \fontsize{8}{10}\selectfont
 \begin{align}
-\hat{F}(i\tau) = \hat{F}^\text{even}(i\tau) + \hat{F}^\text{odd}(i\tau) \hspace{1.9em} &\text{and} \hspace{1.9em} 
+\hat{F}(i\tau) = \hat{F}^\text{even}(i\tau) + \hat{F}^\text{odd}(i\tau) \hspace{2em} \text{and} \hspace{2em} 
 {F}(i\omega) =  {F}^\text{even}(i\omega) +  {F}^\text{odd}(i\omega)\,\label{Fw_split}
 \end{align}\normalsize
 with $F^\text{even}(x)=F^\text{even}(-x)$ and $F^\text{odd}(x)=-F^\text{odd}(-x)$. The same parity rules hold for quantities with a hat. The corresponding discrete Fourier transforms read [@liu2016cubic]
