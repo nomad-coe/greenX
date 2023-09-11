@@ -97,9 +97,9 @@ with $F^\text{even}(x)=F^\text{even}(-x)$ and $F^\text{odd}(x)=-F^\text{odd}(-x)
 \noindent\begin{minipage}{.47\textwidth}
   \fontsize{8}{10}\selectfont
   \begin{align}
-    \hspace{-3em}F^\text{even}(i\omega_k) &= \sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\label{ct_st_even}
+    {\color{white}.}\hspace{-3em}F^\text{even}(i\omega_k) &= \sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\label{ct_st_even}
     \\
-    \hspace{-3em}\hat{F}^\text{even}(i\tau_j) &= \sum_{k=1}^{n} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\label{ct_even_w_to_t}
+     {\color{white}.}\hspace{-3em}\hat{F}^\text{even}(i\tau_j) &= \sum_{k=1}^{n} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\label{ct_even_w_to_t}
   \end{align}
 \end{minipage}
 \begin{minipage}{.53\textwidth}
