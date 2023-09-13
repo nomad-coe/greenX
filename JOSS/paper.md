@@ -96,19 +96,19 @@ The conversion between imaginary time and frequency grids relies on nonuniform d
 with $F^\text{even}(x)=F^\text{even}(-x)$ and $F^\text{odd}(x)=-F^\text{odd}(-x)$. The same parity rules hold for quantities with a hat. The corresponding discrete Fourier transforms read [@liu2016cubic]
 \noindent\begin{minipage}{.47\textwidth}
   \fontsize{8}{10}\selectfont
-  \begin{align}
-    {\color{white}.}\hspace{-3em}F^\text{even}(i\omega_k) &= \sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\label{ctsteven}
+  \begin{eqnarray}
+    \hspace{-2em}F^\text{even}(i\omega_k)\hspace{-1em} &=& \hspace{-1em}\sum_{j=1}^{n} \delta_{kj} \mathrm{cos}(\omega_k\tau_j)\hat{F}^\text{even}(i\tau_j)\label{ctsteven}
     \\
-    {\color{white}.}\hspace{-3em}\hat{F}^\text{even}(i\tau_j) &= \sum_{k=1}^{n} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\label{ct_even_w_to_t}
-  \end{align}
+    \hspace{-2em}\hat{F}^\text{even}(i\tau_j) \hspace{-1em}&=&\hspace{-1em} \sum_{k=1}^{n} \eta_{jk} \mathrm{cos}(\tau_j\omega_k)F^\text{even}(i\omega_k)\label{ct_even_w_to_t}
+  \end{eqnarray}
 \end{minipage}
-\begin{minipage}{.53\textwidth}
+\begin{minipage}{.52\textwidth}
   \fontsize{8}{10}\selectfont
-  \begin{align}
-    F^\text{odd}(i\omega_k) &= i\sum_{j=1}^{n} \lambda_{kj} \mathrm{sin}(\omega_k\tau_j)\hat{F}^\text{odd}(i\tau_j)\label{stoddttow}
+  \begin{eqnarray}
+   F^\text{odd}(i\omega_k) \hspace{-1em}&=&\hspace{-1em} i\sum_{j=1}^{n} \lambda_{kj} \mathrm{sin}(\omega_k\tau_j)\hat{F}^\text{odd}(i\tau_j)\label{stoddttow}
     \\
-    \hat{F}^\text{odd}(i\tau_j) &= -i \sum_{k=1}^{n} \zeta_{jk} \mathrm{sin}(\tau_j\omega_k)F^\text{odd}(i\omega_k)\label{ct_st_odd}
-  \end{align}
+    \hat{F}^\text{odd}(i\tau_j) \hspace{-1em}&=&\hspace{-1em} -i \sum_{k=1}^{n} \zeta_{jk} \mathrm{sin}(\tau_j\omega_k)F^\text{odd}(i\omega_k)\label{ct_st_odd}
+  \end{eqnarray}
 \end{minipage}
 where $\{\tau_j\}_{j=1}^n, \tau_j\,{>}\,0$ are again the time grid points, $\{\omega_k\}_{k=1}^n,\omega_k\,{>}\,0$ frequency grid points and $\{\delta_{kj}\}_{k,j=1}^n$, $\{\eta_{jk}\}_{k,j=1}^n$,$\{\lambda_{kj}\}_{k,j=1}^n$, $\{\zeta_{jk}\}_{k,j=1}^n$ the corresponding Fourier integration weights. $\hat{\chi}^0(i\tau)$ is an even function: the transform defined in Eq. \eqref{ctsteven} yields $\chi^0(i\omega)$. The screened Coulomb interaction is also even and Eq. \eqref{ct_even_w_to_t} converts $W(i\omega)$ to $\widehat{W}(i\tau)$. The self-energy, neither odd nor even, is treated with Eq. \eqref{Fw_split} in combination with Eqs. \eqref{ctsteven} and  \eqref{stoddttow} to transform $\widehat{\Sigma}(i\tau)$ to $\Sigma(i\omega)$ [@liu2016cubic]. The transformation defined in Eq. \eqref{ct_st_odd}, not required for the methods summarized in Fig. \ref{fig:flowchart}, is added for completeness.
 
