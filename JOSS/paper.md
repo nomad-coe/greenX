@@ -1,5 +1,5 @@
 ---
-title: ' Time-frequency component of the GreenX library: minimax grids for efficient RPA and \textit{GW} calculations.'
+title: ' Time-frequency component of the GreenX library: minimax grids for efficient RPA and \textit{GW} calculations'
 tags:
   - FORTRAN
   - Low scaling \textit{GW} calculations
