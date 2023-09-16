@@ -63,3 +63,58 @@ jobs:
         # propagate env vars between steps in Github Actions
         env:
           GX_BUILD_DIR: "/home/runner/work/greenX/greenX/build"
+
+  intel-oneapi:
+    runs-on: ubuntu-latest
+    env:
+      CC: icx
+      CXX: icpx
+      FC: ifort
+
+    steps:
+      - name: Intel Apt repository
+        timeout-minutes: 1
+        run: |
+          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+          sudo apt-get update
+
+      - name: Install Intel oneAPI
+        timeout-minutes: 5
+        run: sudo apt-get install intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl ninja-build
+
+      - name: checkout project code
+        uses: actions/checkout@v2
+
+      - name: Setup Intel oneAPI environment
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+          printenv >> $GITHUB_ENV
+
+      - name: Install Cmake
+        run: pip3 install cmake
+
+      - name: Install python dependencies
+        run: pip3 install numpy pytest
+
+      - name: Install Zofu Test Framework
+        run: |
+          mkdir -p external && cd external
+          git clone https://github.com/acroucher/zofu.git
+          mkdir zofu/build && cd zofu/build
+          cmake \
+             -DCMAKE_BUILD_TYPE=release \
+             -DCMAKE_INSTALL_PREFIX=/home/runner/work/greenX/greenX/external/zofu/install \
+             -DZOFU_FORTRAN_MODULE_INSTALL_DIR:PATH=include \
+             ..
+          make -j 4
+          make install
+
+      - name: Build
+        run: |
+          mkdir -p build
+          cd build
+          cmake -DENABLE_UNITTESTS=ON -DZOFU_PATH=/home/runner/work/greenX/greenX/external/zofu/install ../
+          make -j$(nproc) VERBOSE=1
