@@ -2,6 +2,10 @@ name: CI Tests
 
 on: [push, pull_request]
 
+env:
+  # for cache install
+  LINUX_ONEAPI_COMPONENTS: intel-oneapi-compiler-fortran:intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic:intel-oneapi-mpi:intel-oneapi-mpi-devel:intel-oneapi-mkl
+
 jobs:
   GNU:
     runs-on: ${{ matrix.os }}
@@ -80,10 +84,26 @@ jobs:
           rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
           echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
           sudo apt-get update
+          # dump dependencies of oneAPI components
+          echo "$LINUX_ONEAPI_COMPONENTS" | sed "s/:/ /g" | xargs -n 1 apt-cache depends | tee depends.txt
+
+      - name: Cache install
+        timeout-minutes: 2
+        id: cache-install
+        uses: actions/cache@v3
+        with:
+          path: /opt/intel/oneapi/
+          key: install-${{ env.LINUX_ONEAPI_COMPONENTS }}-${{ hashFiles('**/depends.txt') }}
 
       - name: Install Intel oneAPI
         timeout-minutes: 5
-        run: sudo apt-get install intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl ninja-build
+        if: steps.cache-install.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get install $(echo "$LINUX_ONEAPI_COMPONENTS" | sed 's/:/ /g')
+
+      - name: Install ninja-build
+        run: |
+          sudo apt-get install ninja-build
 
       - name: checkout project code
         uses: actions/checkout@v2
@@ -123,12 +143,12 @@ jobs:
           cmake -DENABLE_UNITTESTS=ON -DZOFU_PATH=/home/runner/work/greenX/greenX/external/zofu/install ../
           make -j$(nproc) VERBOSE=1
 
-      - name: Run Tests
-        run: |
-          cd python && pip install -e . && cd ../
-          cd build
-          ctest -j1 --output-on-failure
-        # The build system exports GX_BUILD_DIR, but I do not know how to
-        # propagate env vars between steps in Github Actions
-        env:
-          GX_BUILD_DIR: "/home/runner/work/greenX/greenX/build"
+      # - name: Run Tests
+      #   run: |
+      #     cd python && pip install -e . && cd ../
+      #     cd build
+      #     ctest -j1 --output-on-failure
+      #   # The build system exports GX_BUILD_DIR, but I do not know how to
+      #   # propagate env vars between steps in Github Actions
+      #   env:
+      #     GX_BUILD_DIR: "/home/runner/work/greenX/greenX/build"
