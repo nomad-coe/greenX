@@ -70,10 +70,14 @@ jobs:
 
   intel-oneapi:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [{cc: icx, cxx: icpx, fc: ifx}, {cc: icc, cxx: icpc, fc: ifort}]
     env:
-      CC: icx
-      CXX: icpx
-      FC: ifort
+      CC: ${{ matrix.compiler.cc }}
+      CXX: ${{ matrix.compiler.cxx }}
+      FC: ${{ matrix.compiler.fc }}
 
     steps:
       - name: Intel Apt repository
@@ -143,12 +147,12 @@ jobs:
           cmake -DENABLE_UNITTESTS=ON -DZOFU_PATH=/home/runner/work/greenX/greenX/external/zofu/install ../
           make -j$(nproc) VERBOSE=1
 
-      # - name: Run Tests
-      #   run: |
-      #     cd python && pip install -e . && cd ../
-      #     cd build
-      #     ctest -j1 --output-on-failure
-      #   # The build system exports GX_BUILD_DIR, but I do not know how to
-      #   # propagate env vars between steps in Github Actions
-      #   env:
-      #     GX_BUILD_DIR: "/home/runner/work/greenX/greenX/build"
+      - name: Run Tests
+        run: |
+          cd python && pip install -e . && cd ../
+          cd build
+          ctest -j1 --output-on-failure
+        # The build system exports GX_BUILD_DIR, but I do not know how to
+        # propagate env vars between steps in Github Actions
+        env:
+          GX_BUILD_DIR: "/home/runner/work/greenX/greenX/build"
