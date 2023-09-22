@@ -93,6 +93,10 @@ jobs:
           source /opt/intel/oneapi/setvars.sh
           printenv >> $GITHUB_ENV
 
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.7'
+
       - name: Install Cmake
         run: pip3 install cmake
 
