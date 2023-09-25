@@ -79,7 +79,7 @@ While not being the main target of the library, the minimax time grids can also 
 
 The single-particle Green's function $G$ and the non-interacting susceptibility $\chi^0$ are starting points for several many-body perturbation theory methods. In canonical implementations, $\chi^0(\mathbf{r},\mathbf{r'},i\omega)$ is often expressed in the Adler-Wiser form [@Adler1962;@Wiser1963], where the sums over occupied (index $j$) and unoccupied (index $a$) single-particle states $\psi$ are coupled via their corresponding energies $\varepsilon$.
 
-![Sketch of the methods supported by GX-TimeFrequency which start from $\hat{\chi}^0(i\tau)$. In addition to the discrete time and frequency grids $\{\tau_{j}\}$ and $\{\omega_{k}\}$, the library provides the corresponding weights $\{\sigma_{j}\}$ and $\{\gamma_{k}\}$ for the integration of the correlation energy $E_c$ as well as the Fourier weights $\delta_{kj}$, $\eta_{jk}$ and $\lambda_{kj}$ defined in Eqs. \eqref{ctsteven}-\eqref{stoddttow}. The bare and screened Coulomb interactions are indicated by $v(\mathbf{r},\mathbf{r}')=1/|\mathbf{r}-\mathbf{r}|'$ and $W(i\omega)$, respectively. $\epsilon(i\omega)$ is the dynamical dielectric function, $\Sigma$ the \textit{GW} self-energy, and AC stands for analytic continuation.\label{fig:flowchart}](flowchart.png)
+![Sketch of the methods supported by GX-TimeFrequency which start from $\hat{\chi}^0(i\tau)$. In addition to the discrete time and frequency grids $\{\tau_{j}\}$ and $\{\omega_{k}\}$, the library provides the corresponding weights $\{\sigma_{j}\}$ and $\{\gamma_{k}\}$ for the integration of the correlation energy $E_c$ as well as the Fourier weights $\delta_{kj}$, $\eta_{jk}$ and $\lambda_{kj}$ defined in \autoref{ctsteven}-\autoref{stoddttow}. The bare and screened Coulomb interactions are indicated by $v(\mathbf{r},\mathbf{r}')=1/|\mathbf{r}-\mathbf{r}|'$ and $W(i\omega)$, respectively. $\epsilon(i\omega)$ is the dynamical dielectric function, $\Sigma$ the \textit{GW} self-energy, and AC stands for analytic continuation.\label{fig:flowchart}](flowchart.png)
 
 The Adler-Wiser expression of $\chi^0(i\omega)$ can be transformed into the imaginary time domain, $\hat{\chi}^0(\mathbf{r},\mathbf{r'},i\tau)=-i G(\mathbf{r},\mathbf{r'},i\tau)G(\mathbf{r'},\mathbf{r},-i\tau)$, yielding the equation in the yellow box in Fig. \ref{fig:flowchart}, where the two sums are separated, leading to a favorable $\mathcal{O}(N^3)$ scaling. The polarizability $\hat{\chi}^0(i\tau)$ is the starting point for LT-dMP2 and low-scaling RPA and \textit{GW}. The low-scaling \textit{GW} procedure shown in Fig. \ref{fig:flowchart} is known as the space-time method and given here in its original formulation for planewave codes [@rojas1995space].
 
@@ -89,10 +89,10 @@ Low-scaling RPA and \textit{GW} algorithms include the Fourier transform of $\ha
 
 The conversion between imaginary time and frequency grids relies on nonuniform discrete cosine and sine transformations for even and odd functions $F^\text{even/odd}$, respectively [@liu2016cubic]. If the function $F$ is neither odd nor even, the computation of functions $\hat{F}(i\tau)$ and $F(i\omega)$ is split into even and an odd parts [@liu2016cubic]
 \fontsize{8}{10}\selectfont
-\begin{align}
+\begin{eqnarray}
 \hat{F}(i\tau) = \hat{F}^\text{even}(i\tau) + \hat{F}^\text{odd}(i\tau) \hspace{2em} \text{and} \hspace{2em} 
 {F}(i\omega) =  {F}^\text{even}(i\omega) +  {F}^\text{odd}(i\omega)\,\label{Fw_split}
-\end{align}\normalsize
+\end{eqnarray}\normalsize
 with $F^\text{even}(x)=F^\text{even}(-x)$ and $F^\text{odd}(x)=-F^\text{odd}(-x)$. The same parity rules hold for quantities with a hat. The corresponding discrete Fourier transforms read [@liu2016cubic]
 \noindent\begin{minipage}{.47\textwidth}
   \fontsize{8}{10}\selectfont
@@ -110,7 +110,7 @@ with $F^\text{even}(x)=F^\text{even}(-x)$ and $F^\text{odd}(x)=-F^\text{odd}(-x)
     \hat{F}^\text{odd}(i\tau_j) \hspace{-1em}&=&\hspace{-1em} -i \sum_{k=1}^{n} \zeta_{jk} \mathrm{sin}(\tau_j\omega_k)F^\text{odd}(i\omega_k)\label{ct_st_odd}
   \end{eqnarray}
 \end{minipage}
-where $\{\tau_j\}_{j=1}^n, \tau_j\,{>}\,0$ are again the time grid points, $\{\omega_k\}_{k=1}^n,\omega_k\,{>}\,0$ frequency grid points and $\{\delta_{kj}\}_{k,j=1}^n$, $\{\eta_{jk}\}_{k,j=1}^n$,$\{\lambda_{kj}\}_{k,j=1}^n$, $\{\zeta_{jk}\}_{k,j=1}^n$ the corresponding Fourier integration weights. $\hat{\chi}^0(i\tau)$ is an even function: the transform defined in Eq. \eqref{ctsteven} yields $\chi^0(i\omega)$. The screened Coulomb interaction is also even and Eq. \eqref{ct_even_w_to_t} converts $W(i\omega)$ to $\widehat{W}(i\tau)$. The self-energy, neither odd nor even, is treated with Eq. \eqref{Fw_split} in combination with Eqs. \eqref{ctsteven} and  \eqref{stoddttow} to transform $\widehat{\Sigma}(i\tau)$ to $\Sigma(i\omega)$ [@liu2016cubic]. The transformation defined in Eq. \eqref{ct_st_odd}, not required for the methods summarized in Fig. \ref{fig:flowchart}, is added for completeness.
+where $\{\tau_j\}_{j=1}^n, \tau_j\,{>}\,0$ are again the time grid points, $\{\omega_k\}_{k=1}^n,\omega_k\,{>}\,0$ frequency grid points and $\{\delta_{kj}\}_{k,j=1}^n$, $\{\eta_{jk}\}_{k,j=1}^n$,$\{\lambda_{kj}\}_{k,j=1}^n$, $\{\zeta_{jk}\}_{k,j=1}^n$ the corresponding Fourier integration weights. $\hat{\chi}^0(i\tau)$ is an even function: the transform defined in \autoref{ctsteven} yields $\chi^0(i\omega)$. The screened Coulomb interaction is also even and \autoref{ct_even_w_to_t} converts $W(i\omega)$ to $\widehat{W}(i\tau)$. The self-energy, neither odd nor even, is treated with \autoref{Fw_split} in combination with Eqs. \autoref{ctsteven} and  \autoref{stoddttow} to transform $\widehat{\Sigma}(i\tau)$ to $\Sigma(i\omega)$ [@liu2016cubic]. The transformation defined in \autoref{ct_st_odd}, not required for the methods summarized in Fig. \ref{fig:flowchart}, is added for completeness.
 
 Ideal grid parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$, $\delta_{kj}$, $\eta_{jk}$, $\lambda_{kj}$ feature a vanishing error for the LT-dMP2 and RPA correlation energy integrations and Fourier transforms of $\chi^0,W$ and $\Sigma$ (Fig. \ref{fig:flowchart}). We compute minimax grid parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$ that minimize the maximum error of the LT-dMP2 and RPA correlation energy integration (Fig. \ref{fig:flowchart}) over all possible functions $\hat{\chi}^0( \mathbf{r}, \mathbf{r'}, i\tau )$ and $\chi^0( \mathbf{r}, \mathbf{r'}, i\omega )$
 [@Takatsuka2008;@kaltak2014low;@liu2016cubic]. This minimax grid optimization relies on the Remez algorithm [@kaltak2014low], an iterative, numerically ill-conditioned procedure requiring high numerical precision. As the generation of the minimax parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$ is tedious, the computed minimax parameters $\{\tau_j\}_{j=1}^n$, $\{\sigma_j\}_{j=1}^n$, $\{\omega_k\}_{k=1}^n$, $\{\gamma_k\}_{k=1}^n$ are tabulated for their later use in LT-dMP2, RPA, and \textit{GW} calculations.
@@ -120,7 +120,7 @@ It has been shown that minimax time and frequency grids $\{\tau_j\}_{j=1}^n$, $\
 The optimal grid parameters $\tau_j$, $\sigma_j$, $\omega_k$,
 $\gamma_k$, $\delta_{kj}$, $\eta_{jk}$, $\lambda_{kj}$ depend on the energy gap $\text{min}(\varepsilon_{a}-\varepsilon_{j})$ and the maximum eigenvalue difference $\text{max}(\varepsilon_{a}-\varepsilon_{j})$ of the material. We generated minimax grid parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$ assuming energy differences $\varepsilon_a-\varepsilon_j\in [1,R]$, see details in Refs. [@kaltak2014low;@hackbusch2019computation]. Our library stores minimax grid parameters $\{\tau_j(R)\}_{j=1}^n$, $\{\sigma_j(R)\}_{j=1}^n$, $\{\omega_k(R)\}_{k=1}^n$, $\{\gamma_k(R)\}_{k=1}^n$ for $n\in[6, 34]$ and for different values of the range $R$ (on average 15 $R$-values for each $n$). For a material with energy gap $\Delta_\text{min}:=\text{min}(\varepsilon_{a}-\varepsilon_{j})$ and maximum eigenvalue difference $\Delta_\text{max}:=\text{max}(\varepsilon_{a}-\varepsilon_{j})$, one easily obtains the material-targeted minimax parameters $\{\tau_j^\text{mat}\}_{j=1}^n$, $\{\sigma_j^\text{mat}\}_{j=1}^n$, $\{\omega_k^\text{mat}\}_{k=1}^n$, $\{\gamma_k^\text{mat}\}_{k=1}^n$ from rescaling stored parameters with a range $R\ge\Delta_\text{max}/\Delta_\text{min}$ [@kaltak2014low;@hackbusch2019computation],
 \fontsize{8}{10}\selectfont
-\begin{align}
+\begin{eqnarray}
   \omega_k^\text{mat} = \Delta_\text{min}\,\omega_k(R)\,,
  \hspace{3em}
  \gamma_k^\text{mat} = \Delta_\text{min}\,\gamma_k(R)\,,
@@ -128,15 +128,15 @@ $\gamma_k$, $\delta_{kj}$, $\eta_{jk}$, $\lambda_{kj}$ depend on the energy gap 
 \tau_j^\text{mat} = \frac{\tau_j(R)}{2\Delta_\text{min}}\,,
  \hspace{3em}
 \sigma_j^\text{mat} = \frac{\sigma_j(R)}{2\Delta_\text{min}}\,.\label{eq:rescaling}
-\end{align}\normalsize
+\end{eqnarray}\normalsize
 
 # Required input and output
 
-GX-TimeFrequency requires as input the grid size $n$, the minimal eigenvalue difference $\Delta_{\text{min}}$, and the maximal eigenvalue difference $\Delta_{\text{max}}$. For the output parameters, see Table \ref{tab:output}. The library component retrieves tabulated minimax parameters $\{\tau_j(R)\}_{j=1}^n$, $\{\sigma_j(R)\}_{j=1}^n$, $\{\omega_k(R)\}_{k=1}^n$, $\{\gamma_k(R)\}_{k=1}^n$ of the requested grid size $n$ for the smallest range $R$ that satisfies $R \ge \Delta_\text{max}/\Delta_\text{min}$. GX-TimeFrequency then rescales the retrieved minimax parameters according to Eq. \eqref{eq:rescaling} with $\Delta_\text{min}$ and prints the results $\{\tau_j^\text{mat}\}_{j=1}^n$, $\{\sigma_j^\text{mat}\}_{j=1}^n$, $\{\omega_k^\text{mat}\}_{k=1}^n$, $\{\gamma_k^\text{mat}\}_{k=1}^n$. Fourier integration weights are computed on-the-fly via least-squares optimization. The precision of a global forward cosine transformation followed by backward cosine transformations, is measured from
+GX-TimeFrequency requires as input the grid size $n$, the minimal eigenvalue difference $\Delta_{\text{min}}$, and the maximal eigenvalue difference $\Delta_{\text{max}}$. For the output parameters, see Table \ref{tab:output}. The library component retrieves tabulated minimax parameters $\{\tau_j(R)\}_{j=1}^n$, $\{\sigma_j(R)\}_{j=1}^n$, $\{\omega_k(R)\}_{k=1}^n$, $\{\gamma_k(R)\}_{k=1}^n$ of the requested grid size $n$ for the smallest range $R$ that satisfies $R \ge \Delta_\text{max}/\Delta_\text{min}$. GX-TimeFrequency then rescales the retrieved minimax parameters according to \autoref{eq:rescaling} with $\Delta_\text{min}$ and prints the results $\{\tau_j^\text{mat}\}_{j=1}^n$, $\{\sigma_j^\text{mat}\}_{j=1}^n$, $\{\omega_k^\text{mat}\}_{k=1}^n$, $\{\gamma_k^\text{mat}\}_{k=1}^n$. Fourier integration weights are computed on-the-fly via least-squares optimization. The precision of a global forward cosine transformation followed by backward cosine transformations, is measured from
 \fontsize{8}{10}\selectfont
-\begin{align}
+\begin{eqnarray}
 \Delta_\text{CT}=\max_{j,j'\in\{1,2,\ldots,n\}} \left| \sum_{k=1}^n \eta_{j'k} \cos(\tau_{j'}\omega_k) \cdot \delta_{kj} \cos(\omega_k\tau_j) - (\mathbb{I})_{j'j}\right|
-\end{align}\normalsize
+\end{eqnarray}\normalsize
 with $\mathbb{I}$ being the identity matrix. Inputs and outputs are in atomic units.
 
 | Output| Description|Methods using the output|Computation|
