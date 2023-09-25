@@ -89,10 +89,10 @@ Low-scaling RPA and \textit{GW} algorithms include the Fourier transform of $\ha
 
 The conversion between imaginary time and frequency grids relies on nonuniform discrete cosine and sine transformations for even and odd functions $F^\text{even/odd}$, respectively [@liu2016cubic]. If the function $F$ is neither odd nor even, the computation of functions $\hat{F}(i\tau)$ and $F(i\omega)$ is split into even and an odd parts [@liu2016cubic]
 \fontsize{8}{10}\selectfont
-\begin{align}
+\begin{eqnarray}
 \hat{F}(i\tau) = \hat{F}^\text{even}(i\tau) + \hat{F}^\text{odd}(i\tau) \hspace{2em} \text{and} \hspace{2em} 
 {F}(i\omega) =  {F}^\text{even}(i\omega) +  {F}^\text{odd}(i\omega)\,\label{Fw_split}
-\end{align}\normalsize
+\end{eqnarray}\normalsize
 with $F^\text{even}(x)=F^\text{even}(-x)$ and $F^\text{odd}(x)=-F^\text{odd}(-x)$. The same parity rules hold for quantities with a hat. The corresponding discrete Fourier transforms read [@liu2016cubic]
 \noindent\begin{minipage}{.47\textwidth}
   \fontsize{8}{10}\selectfont
@@ -120,7 +120,7 @@ It has been shown that minimax time and frequency grids $\{\tau_j\}_{j=1}^n$, $\
 The optimal grid parameters $\tau_j$, $\sigma_j$, $\omega_k$,
 $\gamma_k$, $\delta_{kj}$, $\eta_{jk}$, $\lambda_{kj}$ depend on the energy gap $\text{min}(\varepsilon_{a}-\varepsilon_{j})$ and the maximum eigenvalue difference $\text{max}(\varepsilon_{a}-\varepsilon_{j})$ of the material. We generated minimax grid parameters $\tau_j$, $\sigma_j$, $\omega_k$, $\gamma_k$ assuming energy differences $\varepsilon_a-\varepsilon_j\in [1,R]$, see details in Refs. [@kaltak2014low;@hackbusch2019computation]. Our library stores minimax grid parameters $\{\tau_j(R)\}_{j=1}^n$, $\{\sigma_j(R)\}_{j=1}^n$, $\{\omega_k(R)\}_{k=1}^n$, $\{\gamma_k(R)\}_{k=1}^n$ for $n\in[6, 34]$ and for different values of the range $R$ (on average 15 $R$-values for each $n$). For a material with energy gap $\Delta_\text{min}:=\text{min}(\varepsilon_{a}-\varepsilon_{j})$ and maximum eigenvalue difference $\Delta_\text{max}:=\text{max}(\varepsilon_{a}-\varepsilon_{j})$, one easily obtains the material-targeted minimax parameters $\{\tau_j^\text{mat}\}_{j=1}^n$, $\{\sigma_j^\text{mat}\}_{j=1}^n$, $\{\omega_k^\text{mat}\}_{k=1}^n$, $\{\gamma_k^\text{mat}\}_{k=1}^n$ from rescaling stored parameters with a range $R\ge\Delta_\text{max}/\Delta_\text{min}$ [@kaltak2014low;@hackbusch2019computation],
 \fontsize{8}{10}\selectfont
-\begin{align}
+\begin{eqnarray}
   \omega_k^\text{mat} = \Delta_\text{min}\,\omega_k(R)\,,
  \hspace{3em}
  \gamma_k^\text{mat} = \Delta_\text{min}\,\gamma_k(R)\,,
@@ -128,15 +128,15 @@ $\gamma_k$, $\delta_{kj}$, $\eta_{jk}$, $\lambda_{kj}$ depend on the energy gap 
 \tau_j^\text{mat} = \frac{\tau_j(R)}{2\Delta_\text{min}}\,,
  \hspace{3em}
 \sigma_j^\text{mat} = \frac{\sigma_j(R)}{2\Delta_\text{min}}\,.\label{eq:rescaling}
-\end{align}\normalsize
+\end{eqnarray}\normalsize
 
 # Required input and output
 
 GX-TimeFrequency requires as input the grid size $n$, the minimal eigenvalue difference $\Delta_{\text{min}}$, and the maximal eigenvalue difference $\Delta_{\text{max}}$. For the output parameters, see Table \ref{tab:output}. The library component retrieves tabulated minimax parameters $\{\tau_j(R)\}_{j=1}^n$, $\{\sigma_j(R)\}_{j=1}^n$, $\{\omega_k(R)\}_{k=1}^n$, $\{\gamma_k(R)\}_{k=1}^n$ of the requested grid size $n$ for the smallest range $R$ that satisfies $R \ge \Delta_\text{max}/\Delta_\text{min}$. GX-TimeFrequency then rescales the retrieved minimax parameters according to Eq. \eqref{eq:rescaling} with $\Delta_\text{min}$ and prints the results $\{\tau_j^\text{mat}\}_{j=1}^n$, $\{\sigma_j^\text{mat}\}_{j=1}^n$, $\{\omega_k^\text{mat}\}_{k=1}^n$, $\{\gamma_k^\text{mat}\}_{k=1}^n$. Fourier integration weights are computed on-the-fly via least-squares optimization. The precision of a global forward cosine transformation followed by backward cosine transformations, is measured from
 \fontsize{8}{10}\selectfont
-\begin{align}
+\begin{eqnarray}
 \Delta_\text{CT}=\max_{j,j'\in\{1,2,\ldots,n\}} \left| \sum_{k=1}^n \eta_{j'k} \cos(\tau_{j'}\omega_k) \cdot \delta_{kj} \cos(\omega_k\tau_j) - (\mathbb{I})_{j'j}\right|
-\end{align}\normalsize
+\end{eqnarray}\normalsize
 with $\mathbb{I}$ being the identity matrix. Inputs and outputs are in atomic units.
 
 | Output| Description|Methods using the output|Computation|
