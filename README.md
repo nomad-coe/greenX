@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="docs/logo/greenx_logo.png" alt="GreenX">
+  <img src="docs/logo/greenx_logo.png" alt="GreenX" width="200" height="200">
 </h1>
 
 # GreenX Library 
