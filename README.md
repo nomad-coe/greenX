@@ -1,3 +1,7 @@
+<h1 align="center">
+  <img src="docs/logo/greenx_logo.png" alt="GreenX" width="300">
+</h1>
+
 # GreenX Library 
 
 The Green X library is developed under Work Package 2 of the NOMAD Center of Excellence. 
