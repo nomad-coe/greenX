@@ -107,7 +107,7 @@ with $F^\text{even}(x)=F^\text{even}(-x)$ and $F^\text{odd}(x)=-F^\text{odd}(-x)
   \begin{eqnarray}
    F^\text{odd}(i\omega_k) &=& i\sum_{j=1}^{n} \lambda_{kj} \mathrm{sin}(\omega_k\tau_j)\hat{F}^\text{odd}(i\tau_j)
     \\
-    \hat{F}^\text{odd}(i\tau_j) &=& -i \sum_{k=1}^{n} \zeta_{jk} \mathrm{sin}(\tau_j\omega_k)F^\text{odd}(i\omega_k)
+    \hat{F}^\text{odd}(i\tau_j) &=& -i\sum_{k=1}^{n} \zeta_{jk} \mathrm{sin}(\tau_j\omega_k)F^\text{odd}(i\omega_k)
   \end{eqnarray}
 \end{minipage}
 where $\{\tau_j\}_{j=1}^n, \tau_j\,{>}\,0$ are again the time grid points, $\{\omega_k\}_{k=1}^n,\omega_k\,{>}\,0$ frequency grid points and $\{\delta_{kj}\}_{k,j=1}^n$, $\{\eta_{jk}\}_{k,j=1}^n$,$\{\lambda_{kj}\}_{k,j=1}^n$, $\{\zeta_{jk}\}_{k,j=1}^n$ the corresponding Fourier integration weights. $\hat{\chi}^0(i\tau)$ is an even function: the transform defined in Equation 2 yields $\chi^0(i\omega)$. The screened Coulomb interaction is also even and Equation 3 converts $W(i\omega)$ to $\widehat{W}(i\tau)$. The self-energy, neither odd nor even, is treated with Equation 1 in combination with Equations 2 and 4 to transform $\widehat{\Sigma}(i\tau)$ to $\Sigma(i\omega)$ [@liu2016cubic]. The transformation defined in Equation 5, not required for the methods summarized in Fig. \ref{fig:flowchart}, is added for completeness.
