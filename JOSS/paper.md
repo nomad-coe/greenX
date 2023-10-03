@@ -148,7 +148,7 @@ with $\mathbb{I}$ being the identity matrix. Inputs and outputs are in atomic un
 |$\{\delta_{kj}\}_{k,j=1}^n$ | Fourier weights | ls RPA, ls \textit{GW} | on-the-fly L2 opt  
 |  $\{\eta_{jk}\}_{k,j=1}^n$ | Fourier weights | ls \textit{GW} | on-the-fly L2 opt|
 |$\{\lambda_{kj}\}_{k,j=1}^n$ | Fourier weights | ls \textit{GW} | on-the-fly L2 opt  
-|  $\Delta_\text{FB}$ | duality error | ls \textit{GW} | on-the-fly  |
+|  $\Delta_\text{FB}$ | forward-backward error | ls \textit{GW} | on-the-fly  |
 : Output returned by the GX-TimeFrequency component of GreenX. We abbreviate low-scaling as ls, and least-squares optimization as L2 opt.\label{tab:output}
 
 # Acknowledgements
