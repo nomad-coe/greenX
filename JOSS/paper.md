@@ -135,7 +135,7 @@ $\gamma_k$, $\delta_{kj}$, $\eta_{jk}$, $\lambda_{kj}$ depend on the energy gap 
 GX-TimeFrequency requires as input the grid size $n$, the minimal eigenvalue difference $\Delta_{\text{min}}$, and the maximal eigenvalue difference $\Delta_{\text{max}}$. For the output parameters, see Table \ref{tab:output}. The library component retrieves tabulated minimax parameters $\{\tau_j(R)\}_{j=1}^n$, $\{\sigma_j(R)\}_{j=1}^n$, $\{\omega_k(R)\}_{k=1}^n$, $\{\gamma_k(R)\}_{k=1}^n$ of the requested grid size $n$ for the smallest range $R$ that satisfies $R \ge \Delta_\text{max}/\Delta_\text{min}$. GX-TimeFrequency then rescales the retrieved minimax parameters according to Equation 6 with $\Delta_\text{min}$ and prints the results $\{\tau_j^\text{mat}\}_{j=1}^n$, $\{\sigma_j^\text{mat}\}_{j=1}^n$, $\{\omega_k^\text{mat}\}_{k=1}^n$, $\{\gamma_k^\text{mat}\}_{k=1}^n$. Fourier integration weights are computed on-the-fly via least-squares optimization. The precision of a global forward cosine transformation followed by backward cosine transformations, is measured from
 \fontsize{8}{10}\selectfont
 \begin{eqnarray}
-\Delta_\text{CT}=\max_{j,j'\in\{1,2,\ldots,n\}} \left| \sum_{k=1}^n \eta_{j'k} \cos(\tau_{j'}\omega_k) \cdot \delta_{kj} \cos(\omega_k\tau_j) - (\mathbb{I})_{j'j}\right|
+\Delta_\text{FB}=\max_{j,j'\in\{1,2,\ldots,n\}} \left| \sum_{k=1}^n \eta_{j'k} \cos(\tau_{j'}\omega_k) \cdot \delta_{kj} \cos(\omega_k\tau_j) - (\mathbb{I})_{j'j}\right|
 \end{eqnarray}\normalsize
 with $\mathbb{I}$ being the identity matrix. Inputs and outputs are in atomic units.
 
@@ -148,7 +148,7 @@ with $\mathbb{I}$ being the identity matrix. Inputs and outputs are in atomic un
 |$\{\delta_{kj}\}_{k,j=1}^n$ | Fourier weights | ls RPA, ls \textit{GW} | on-the-fly L2 opt  
 |  $\{\eta_{jk}\}_{k,j=1}^n$ | Fourier weights | ls \textit{GW} | on-the-fly L2 opt|
 |$\{\lambda_{kj}\}_{k,j=1}^n$ | Fourier weights | ls \textit{GW} | on-the-fly L2 opt  
-|  $\Delta_\text{CT}$ | duality error | ls \textit{GW} | on-the-fly  |
+|  $\Delta_\text{FB}$ | duality error | ls \textit{GW} | on-the-fly  |
 : Output returned by the GX-TimeFrequency component of GreenX. We abbreviate low-scaling as ls, and least-squares optimization as L2 opt.\label{tab:output}
 
 # Acknowledgements
