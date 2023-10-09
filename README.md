@@ -3,6 +3,7 @@
 </h1>
 
 # GreenX Library 
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.05570/status.svg)](https://doi.org/10.21105/joss.05570)
 
 The Green X library is developed under Work Package 2 of the NOMAD Center of Excellence. 
 It is available under the APACHE2 [license](LICENSE.txt).
