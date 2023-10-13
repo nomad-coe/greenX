@@ -1,5 +1,8 @@
-!  Copyright (C) 2020-2022 GreenX library
+! ***************************************************************************************************
+!  Copyright (C) 2020-2023 GreenX library
 !  This file is distributed under the terms of the APACHE2 License.
+!
+! ***************************************************************************************************
 
 !>   The Pade approximants are a particular type of rational fraction
 !>   approximation to the value of a function. The idea is to match the Taylor
@@ -29,13 +32,15 @@
 !>   $$
 !>
 !>   Expressions are taken from G. A. J. Baker, Essentials of Padé Approximants (Academic,New York, 1975).
-!>   See also PHYSICAL REVIEW B 94, 165109 (2016).
+!>   See also:
+!>   PHYSICAL REVIEW B 94, 165109 (2016).
+!>   J. CHEM. THEORY COMPUT. 19, 16, 5450–5464 (2023)
 module pade_approximant
    use kinds, only: dp
    implicit none
 
    private
-   public :: pade, pade_derivative
+   public :: pade, pade_derivative, thiele_pade, evaluate_thiele_pade
 
    !> Complex zero
    complex(dp) :: c_zero = cmplx(0._dp, 0._dp, kind=dp)
@@ -143,5 +148,160 @@ contains
       end do
 
    end subroutine pade_coefficient_derivative
+
+   !> brief Gets the Pade approximant of a meromorphic function F
+   !>       This routine implements a modified version of the Thiele's reciprocal differences
+   !>       interpolation algorithm using a greedy strategy, ensuring that the ordering of the
+   !>       included points minimizes the value of |P_n(x_{1+1}) - F(x_{i+1})|
+   !>       The default Thiele interpolation is also included for conveniency
+   !!  @param[in]  n_par - order of the interpolant
+   !!  @param[inout] x_ref - array of the reference points
+   !!  @param[in]  y_ref - array of the reference function values
+   !!  @param[in]  do_greedy - whether to use the default greedy algorithm or the naive one
+   !!  @param[out] par - array of the interpolant parameters
+   subroutine thiele_pade(n_par, x_ref, y_ref, a_par, do_greedy)
+      integer, intent(in)                            :: n_par
+      complex(kind=dp), dimension(:), intent(inout)  :: x_ref
+      complex(kind=dp), dimension(:), intent(in)     :: y_ref
+      complex(kind=dp), dimension(:), intent(inout)  :: a_par
+      logical, optional, intent(in)                  :: do_greedy
+
+      ! Internal variables
+      logical                                        :: local_do_greedy = .True.
+      integer                                        :: i, i_par, idx, jdx, kdx, n_rem
+      integer, dimension(n_par)                      :: n_rem_idx
+      real(kind=dp)                                  :: deltap, pval
+      complex(kind=dp)                               :: pval_in, x_in, y_in
+      complex(kind=dp), dimension(n_par, n_par)      :: g_func
+      complex(kind=dp), dimension(n_par)             :: x, xtmp, ytmp
+
+      ! Whether to perform the refined Thiele's interpolation (default)
+      if (present(do_greedy)) local_do_greedy = do_greedy
+
+      ! Initialize arrays
+      n_rem_idx = (/(i, i = 1, n_par)/)
+      g_func = cmplx(0.0_dp, 0.0_dp, kind=dp)
+      x_in = cmplx(0.0_dp, 0.0_dp, kind=dp)
+      y_in = cmplx(0.0_dp, 0.0_dp, kind=dp)
+
+      if (local_do_greedy) then
+         ! Unpack initial reference arguments, as they will be overwritten
+         x = x_ref
+         x_ref = cmplx(0.0d0, 0.0d0, kind=dp)
+
+         ! Select first point as to maximize |Wmn|
+         kdx = minloc(abs(x),dim=1)
+         xtmp(1) = x(kdx)
+         ytmp(1) = y_ref(kdx)
+         x_ref(1) = x(kdx)
+
+         n_rem = n_par - 1
+         do i = kdx, n_rem
+            n_rem_idx(i) = n_rem_idx(i + 1)
+         end do
+
+         ! Compute the generating function for the first time
+         call thiele_pade_gcoeff(xtmp, ytmp, g_func, 1)
+         a_par(1) = g_func(1, 1)
+
+         ! Add remaining points ensuring min |P_i(x_{1+1}) - Wmn(x_{i+1})|
+         do idx = 2, n_par
+            pval = huge(0.0_dp)
+            do jdx = 1, n_rem
+               ! Compute next convergent P_i(x_{i+1})
+               call evaluate_thiele_pade(idx - 1, xtmp(1:idx-1), x(n_rem_idx(jdx)), a_par, pval_in)
+
+               ! Select the point that minimizes difference's absolute value
+               deltap = abs(pval_in - y_ref(n_rem_idx(jdx)))
+               if (deltap .lt. pval) then
+                  pval = deltap
+                  x_in = x(n_rem_idx(jdx))
+                  y_in = y_ref(n_rem_idx(jdx))
+                  kdx = jdx
+               end if
+            end do
+
+            ! Update indexes of non-visited points
+            n_rem = n_rem - 1
+            do i = kdx, n_rem
+               n_rem_idx(i) = n_rem_idx(i+1)
+            end do
+
+            ! Add the winning point and recompute generating function
+            x_ref(idx) = x_in
+            xtmp(idx) = x_in
+            ytmp(idx) = y_in
+            call thiele_pade_gcoeff(xtmp,ytmp,g_func,idx)
+
+            ! Unpack parameters a_i = g_i(w_i)
+            do i_par = 1, idx
+               a_par(i_par) = g_func(i_par, i_par)
+            enddo
+         end do
+      else
+         ! Interpolate
+         call thiele_pade_gcoeff(x_ref, y_ref, g_func, 1)
+         a_par(1) = g_func(1, 1)
+         do i_par = 2, n_par
+            call thiele_pade_gcoeff(x_ref, y_ref, g_func, i_par)
+            a_par(i_par) = g_func(i_par, i_par)
+         enddo
+      end if
+
+   end subroutine thiele_pade
+
+   !> brief Computes the recurrence coefficients from Thiele's continued fraction
+   !>       This routine uses tabulation in order to efficienly compute the matrix elements g_func(:,:)
+   !! @param[in] n - number of parameters
+   !! @param[in] x - array of the frequencies
+   !! @param[in] y - array of the Wmn matrix elements
+   !! @param[inout] g_func - recurrence matrix used to compute the parameters a_n
+   subroutine thiele_pade_gcoeff(x, y, g_func, n)
+      integer, intent(in)                             :: n
+      complex(kind=dp), dimension(:), intent(in)      :: x, y
+      complex(kind=dp), dimension(:,:), intent(inout) :: g_func
+
+      ! Internal variables
+      integer :: idx
+
+      ! Begin work (leveraging tabulation of the g_func)
+      g_func(n,1) = y(n)
+      if (n==1) return
+
+      do idx = 2, n
+         g_func(n, idx) = (g_func(idx - 1, idx - 1) - g_func(n, idx - 1)) / &
+            ((x(n) - x(idx - 1)) * (x(n) + x(idx - 1)) * g_func(n, idx - 1))
+      enddo
+   end subroutine thiele_pade_gcoeff
+
+   !> brief Gets the value of the Wmn matrices using the previously computed Pade approximant
+   !>       Here we only implement the Pade approximant evaluation
+   !! @param[in] n_par - number of parameters
+   !! @param[in] x_ref - array of the reference points
+   !! @param[in] x - the point to evaluate
+   !! @param[in] a_par -  array of the input parameters
+   !! @param[out] y -  the value of the interpolant at x
+   subroutine  evaluate_thiele_pade(n_par, x_ref , x, a_par, y)
+      integer, intent(in)                        :: n_par
+      complex(kind=dp), dimension(:), intent(in) :: x_ref
+      complex(kind=dp), intent(in)               :: x
+      complex(kind=dp), dimension(:), intent(in) :: a_par
+      complex(kind=dp), intent(inout)            :: y
+
+      ! Internal variables
+      integer                                    :: i_par
+      complex(kind=dp)                           :: gtmp
+
+      ! Begin work
+      gtmp = cmplx(1.0_dp, 0.0_dp, kind=dp)
+
+      do i_par = n_par, 2, -1
+         gtmp = 1.0_dp + a_par(i_par) * (x - x_ref(i_par - 1)) * (x + x_ref(i_par - 1)) / gtmp
+      enddo
+
+      ! Compute out value
+      y = a_par(1) / gtmp
+
+   end subroutine evaluate_thiele_pade
 
 end module pade_approximant
