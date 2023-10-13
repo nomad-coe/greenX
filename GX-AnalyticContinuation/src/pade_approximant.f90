@@ -180,14 +180,14 @@ contains
 
       ! Initialize arrays
       n_rem_idx = (/(i, i = 1, n_par)/)
-      g_func = cmplx(0.0_dp, 0.0_dp, kind=dp)
-      x_in = cmplx(0.0_dp, 0.0_dp, kind=dp)
-      y_in = cmplx(0.0_dp, 0.0_dp, kind=dp)
+      g_func = c_zero
+      x_in = c_zero
+      y_in = c_zero
 
       if (local_do_greedy) then
          ! Unpack initial reference arguments, as they will be overwritten
          x = x_ref
-         x_ref = cmplx(0.0d0, 0.0d0, kind=dp)
+         x_ref = c_zero
 
          ! Select first point as to maximize |Wmn|
          kdx = minloc(abs(x),dim=1)
@@ -265,7 +265,7 @@ contains
       integer :: idx
 
       ! Begin work (leveraging tabulation of the g_func)
-      g_func(n,1) = y(n)
+      g_func(n, 1) = y(n)
       if (n==1) return
 
       do idx = 2, n
@@ -293,7 +293,7 @@ contains
       complex(kind=dp)                           :: gtmp
 
       ! Begin work
-      gtmp = cmplx(1.0_dp, 0.0_dp, kind=dp)
+      gtmp = c_one
 
       do i_par = n_par, 2, -1
          gtmp = 1.0_dp + a_par(i_par) * (x - x_ref(i_par - 1)) * (x + x_ref(i_par - 1)) / gtmp
