@@ -64,7 +64,7 @@ if (NOT pygreenx_FOUND)
 endif ()
 
 # Optional unit testing lib
-option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" OFF)
+option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" ON)
 if (${ENABLE_UNITTESTS})
     # Function for generating unit test executables (assumes Zofu)
     include(cmake/unit_test_functions.cmake)
