@@ -253,8 +253,8 @@ contains
    !> brief Computes the recurrence coefficients from Thiele's continued fraction
    !>       This routine uses tabulation in order to efficienly compute the matrix elements g_func(:,:)
    !! @param[in] n - number of parameters
-   !! @param[in] x - array of the frequencies
-   !! @param[in] y - array of the Wmn matrix elements
+   !! @param[in] x - array of the reference points
+   !! @param[in] y - array of the reference function values
    !! @param[inout] g_func - recurrence matrix used to compute the parameters a_n
    subroutine thiele_pade_gcoeff(x, y, g_func, n)
       integer, intent(in)                             :: n
@@ -274,8 +274,7 @@ contains
       enddo
    end subroutine thiele_pade_gcoeff
 
-   !> brief Gets the value of the Wmn matrices using the previously computed Pade approximant
-   !>       Here we only implement the Pade approximant evaluation
+   !> brief Evaluates a Pade approximant constructed with Thiele's reciprocal differences
    !! @param[in] n_par - number of parameters
    !! @param[in] x_ref - array of the reference points
    !! @param[in] x - the point to evaluate
