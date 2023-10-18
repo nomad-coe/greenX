@@ -43,9 +43,9 @@ module pade_approximant
    public :: pade, pade_derivative, thiele_pade, evaluate_thiele_pade
 
    !> Complex zero
-   complex(dp) :: c_zero = cmplx(0._dp, 0._dp, kind=dp)
+   complex(dp) :: c_zero = cmplx(0.0_dp, 0.0_dp, kind=dp)
    !> Complex one
-   complex(dp) :: c_one = cmplx(1._dp, 0._dp, kind=dp)
+   complex(dp) :: c_one = cmplx(1.0_dp, 0.0_dp, kind=dp)
 
 contains
 
@@ -180,6 +180,7 @@ contains
 
       ! Initialize arrays
       n_rem_idx = (/(i, i = 1, n_par)/)
+      a_par = c_zero
       g_func = c_zero
       x_in = c_zero
       y_in = c_zero
@@ -189,8 +190,8 @@ contains
          x = x_ref
          x_ref = c_zero
 
-         ! Select first point as to maximize |Wmn|
-         kdx = minloc(abs(x),dim=1)
+         ! Select first point as to maximize |F|
+         kdx = maxloc(abs(y_ref), dim=1)
          xtmp(1) = x(kdx)
          ytmp(1) = y_ref(kdx)
          x_ref(1) = x(kdx)
@@ -204,7 +205,7 @@ contains
          call thiele_pade_gcoeff(xtmp, ytmp, g_func, 1)
          a_par(1) = g_func(1, 1)
 
-         ! Add remaining points ensuring min |P_i(x_{1+1}) - Wmn(x_{i+1})|
+         ! Add remaining points ensuring min |P_i(x_{1+1}) - F(x_{i+1})|
          do idx = 2, n_par
             pval = huge(0.0_dp)
             do jdx = 1, n_rem
@@ -224,14 +225,14 @@ contains
             ! Update indexes of non-visited points
             n_rem = n_rem - 1
             do i = kdx, n_rem
-               n_rem_idx(i) = n_rem_idx(i+1)
+               n_rem_idx(i) = n_rem_idx(i + 1)
             end do
 
             ! Add the winning point and recompute generating function
             x_ref(idx) = x_in
             xtmp(idx) = x_in
             ytmp(idx) = y_in
-            call thiele_pade_gcoeff(xtmp,ytmp,g_func,idx)
+            call thiele_pade_gcoeff(xtmp, ytmp, g_func, idx)
 
             ! Unpack parameters a_i = g_i(w_i)
             do i_par = 1, idx
@@ -270,8 +271,9 @@ contains
 
       do idx = 2, n
          g_func(n, idx) = (g_func(idx - 1, idx - 1) - g_func(n, idx - 1)) / &
-            ((x(n) - x(idx - 1)) * (x(n) + x(idx - 1)) * g_func(n, idx - 1))
+            ((x(n) - x(idx - 1)) * g_func(n, idx - 1))
       enddo
+
    end subroutine thiele_pade_gcoeff
 
    !> brief Evaluates a Pade approximant constructed with Thiele's reciprocal differences
@@ -295,7 +297,7 @@ contains
       gtmp = c_one
 
       do i_par = n_par, 2, -1
-         gtmp = 1.0_dp + a_par(i_par) * (x - x_ref(i_par - 1)) * (x + x_ref(i_par - 1)) / gtmp
+         gtmp = c_one + a_par(i_par) * (x - x_ref(i_par - 1)) / gtmp
       enddo
 
       ! Compute out value

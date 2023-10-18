@@ -10,11 +10,11 @@ module test_pade_approximant
   use kinds, only: dp
 
   ! Module being tested
-  use pade_approximant, only: pade
+  use pade_approximant, only: pade, thiele_pade, evaluate_thiele_pade
 
   implicit none
   private
-  public :: test_pade
+  public :: test_pade, test_thiele_pade_poles, test_thiele_pade_abs
 
   ! Helper function
   interface is_close
@@ -37,7 +37,7 @@ contains
     is_close_complex_dp = abs(a - b) <= tolerance
   end function is_close_complex_dp
 
-  !> Test pade against the function -1 / (x - x0)
+  !> Test the Pade interpolant against the function -1 / (x - x0)
   subroutine test_pade(test)
     !> Test object
     class(unit_test_type), intent(inout) :: test
@@ -55,6 +55,7 @@ contains
     real(dp) :: tol = 1.e-7_dp
     integer :: i
 
+    !> Test setup
     allocate(x(n), f(n))
     do i = 1, n
        x(i) = cmplx(i, 0, kind=dp)
@@ -64,8 +65,99 @@ contains
     ref = cmplx(0.5, -0.5, dp)
     f_approx = pade(n, x, f, xx)
 
-    call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test pade ~ -1 / (x - x0)')
+    !> Test execution
+    call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test Pade ~ -1 / (x - x0)')
+
+    !> Clean-up
+    deallocate(x)
+    deallocate(f)
 
   end subroutine test_pade
+
+  !> Test the Thiele-Pade interpolant against the function 1 / (x^2 + 1) which has poles
+  subroutine test_thiele_pade_poles(test)
+    class(unit_test_type), intent(inout) :: test
+
+    !> N sampling points
+    integer, parameter :: n = 100
+    !> Variable, function, and parameters, respectively
+    complex(dp), allocatable :: x(:), f(:), acoeff(:)
+    !> Pade approximant of f, and its reference value
+    complex(dp) :: f_approx, ref
+    !> Test point
+    complex(dp), parameter :: xx = cmplx(1.0_dp, 1.0_dp, kind=dp)
+    !> Tolerance
+    real(dp) :: tol = 1.e-7_dp
+    integer :: i
+
+    !> Test setup
+    allocate(x(n), f(n), acoeff(n))
+    do i = 1, n
+       x(i) = cmplx(i, 0, kind=dp)
+       f(i) = 1.0_dp / (x(i) * x(i) + 1.0_dp)
+    end do
+    ref = 1.0_dp / (xx * xx + 1.0_dp)
+
+    call thiele_pade(n, x, f, acoeff, do_greedy=.True.)
+    call evaluate_thiele_pade(n, x, xx, acoeff, f_approx)
+
+    !> Test execution
+    call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test Thiele-Pade ~ 1 / (x^2 + 1)')
+
+    !> Clean-up
+    deallocate(x)
+    deallocate(f)
+    deallocate(acoeff)
+
+  end subroutine test_thiele_pade_poles
+
+  !> Test the Thiele-Pade interpolant against the function |x| which has discontinuos derivatives
+  subroutine test_thiele_pade_abs(test)
+    class(unit_test_type), intent(inout) :: test
+
+    !> N sampling points
+    integer, parameter :: n = 50
+    !> Newman grid constant
+    real(dp), parameter :: eta = exp(-1.0_dp / sqrt(dble(n)))
+    real(dp), parameter :: delta_eta = 0.0005_dp
+    !> Variable, function, and parameters, respectively
+    complex(dp), allocatable :: x(:), f(:), acoeff(:)
+    !> Pade approximant of f, and its reference value
+    complex(dp) :: f_approx, ref
+    !> Test point
+    complex(dp), parameter :: xx = cmplx(1.0_dp, 0.0_dp, kind=dp)
+    !> Tolerance
+    real(dp) :: tol = 1.e-7_dp
+    integer :: i, npar
+
+    !> Test setup
+    npar = 2 * n + 1
+    allocate(x(npar), f(npar), acoeff(npar))
+
+    !> Here we use a Newman grid with 2n+1 points
+    do i = 1, n
+       x(i) = cmplx(-eta**(i - 1) - delta_eta, 0.0_dp, kind=dp)
+    end do
+    x(n + 1) = cmplx(0.0_dp, 0.0_dp, kind=dp)
+    do i = 1, n
+       x(n + 1 + i) = cmplx(eta**(n - i) + delta_eta, 0.0_dp, kind=dp)
+    end do
+
+    f(:) = abs(x(:))
+    ref = abs(xx)
+
+    call thiele_pade(npar, x, f, acoeff, do_greedy=.True.)
+    call evaluate_thiele_pade(npar, x, xx, acoeff, f_approx)
+
+    !> Test execution
+    print *, f_approx, ref
+    call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test Thiele-Pade ~ |x|')
+
+    !> Clean-up
+    deallocate(x)
+    deallocate(f)
+    deallocate(acoeff)
+
+  end subroutine test_thiele_pade_abs
 
 end module test_pade_approximant
