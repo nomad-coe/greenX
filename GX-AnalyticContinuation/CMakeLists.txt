@@ -14,6 +14,7 @@ set_target_properties(LibGXAC
 target_include_directories(LibGXAC PUBLIC src/)
 target_sources(LibGXAC PRIVATE src/pade_approximant.f90 api/gx_ac.f90)
 target_link_libraries(LibGXAC GXCommon)
+target_link_libraries(LibGXAC GMP::GMPXX)
 
 # -----------------------------------------------
 # Library Installation
