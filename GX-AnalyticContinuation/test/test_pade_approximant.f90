@@ -49,8 +49,8 @@ contains
     !> Pade approximant of f, and the its reference value
     complex(dp) :: f_approx, ref
     !> Some function center
-    complex(dp), parameter :: x0 = (2.0, 2.0)
-    complex(dp), parameter :: xx = (1.0, 1.0)
+    complex(dp), parameter :: x0 = cmplx(2.0_dp, 2.0_dp, kind=dp)
+    complex(dp), parameter :: xx = cmplx(1.0_dp, 1.0_dp, kind=dp)
     !> Tolerance
     real(dp) :: tol = 1.e-7_dp
     integer :: i
@@ -58,8 +58,8 @@ contains
     !> Test setup
     allocate(x(n), f(n))
     do i = 1, n
-       x(i) = cmplx(i, 0, kind=dp)
-       f(i) = -1._dp / (x(i) - x0)
+       x(i) = cmplx(i, 0.0_dp, kind=dp)
+       f(i) = -1.0_dp / (x(i) - x0)
     end do
 
     ref = cmplx(0.5, -0.5, dp)
@@ -111,12 +111,12 @@ contains
 
   end subroutine test_thiele_pade_poles
 
-  !> Test the Thiele-Pade interpolant against the function |x| which has discontinuos derivatives
+  !> Test the Thiele-Pade interpolant against the function |x| which has a branch point
   subroutine test_thiele_pade_abs(test)
     class(unit_test_type), intent(inout) :: test
 
     !> N sampling points
-    integer, parameter :: n = 50
+    integer, parameter :: n = 100
     !> Newman grid constant
     real(dp), parameter :: eta = exp(-1.0_dp / sqrt(dble(n)))
     real(dp), parameter :: delta_eta = 0.0005_dp
@@ -125,22 +125,19 @@ contains
     !> Pade approximant of f, and its reference value
     complex(dp) :: f_approx, ref
     !> Test point
-    complex(dp), parameter :: xx = cmplx(1.0_dp, 0.0_dp, kind=dp)
+    complex(dp), parameter :: xx = cmplx(0.7_dp, 0.0_dp, kind=dp)
     !> Tolerance
     real(dp) :: tol = 1.e-7_dp
     integer :: i, npar
 
     !> Test setup
-    npar = 2 * n + 1
+    npar = 2 * n
     allocate(x(npar), f(npar), acoeff(npar))
 
-    !> Here we use a Newman grid with 2n+1 points
+    !> Here we use a Newman grid with 2n points
     do i = 1, n
-       x(i) = cmplx(-eta**(i - 1) - delta_eta, 0.0_dp, kind=dp)
-    end do
-    x(n + 1) = cmplx(0.0_dp, 0.0_dp, kind=dp)
-    do i = 1, n
-       x(n + 1 + i) = cmplx(eta**(n - i) + delta_eta, 0.0_dp, kind=dp)
+       x(i) = cmplx(-eta**(i - 1), 0.0_dp, kind=dp)
+       x(n + i) = cmplx(eta**(n - i) + delta_eta, 0.0_dp, kind=dp)
     end do
 
     f(:) = abs(x(:))
@@ -150,7 +147,6 @@ contains
     call evaluate_thiele_pade(npar, x, xx, acoeff, f_approx)
 
     !> Test execution
-    print *, f_approx, ref
     call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test Thiele-Pade ~ |x|')
 
     !> Clean-up
