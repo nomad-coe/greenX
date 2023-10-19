@@ -40,12 +40,29 @@ module pade_approximant
    implicit none
 
    private
-   public :: pade, pade_derivative, thiele_pade, evaluate_thiele_pade
+   public :: pade, pade_derivative, thiele_pade, thiele_pade_mp, evaluate_thiele_pade
 
    !> Complex zero
    complex(dp) :: c_zero = cmplx(0.0_dp, 0.0_dp, kind=dp)
    !> Complex one
    complex(dp) :: c_one = cmplx(1.0_dp, 0.0_dp, kind=dp)
+
+   interface 
+
+      !> brief Gets the Pade approximant using arbitrary precision numbers
+      !!  @param[in]  n_par - order of the interpolant
+      !!  @param[inout] x_ref - array of the reference points
+      !!  @param[in]  y_ref - array of the reference function values
+      !!  @param[out] par - array of the interpolant parameters
+      subroutine thiele_pade_mp(n_par, x_ref, y_ref, a_par) bind(C, name="thiele_pade_mp")
+         use iso_c_binding, only: c_int, c_double_complex
+         integer(c_int), value, intent(in) :: n_par 
+         complex(c_double_complex), dimension(*), intent(inout) :: x_ref 
+         complex(c_double_complex), dimension(*), intent(in)    :: y_ref 
+         complex(c_double_complex), dimension(*), intent(out)   :: a_par 
+      end subroutine
+      
+   end interface
 
 contains
 
