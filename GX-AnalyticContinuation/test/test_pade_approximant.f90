@@ -74,7 +74,7 @@ contains
 
   end subroutine test_pade
 
-  !> Test the Thiele-Pade interpolant against the function 1 / (x^2 + 1) which has poles
+  !> Test the Thiele-Pade interpolant against the function 1 / (-x^2 + 1) which has poles
   subroutine test_thiele_pade_poles(test)
     class(unit_test_type), intent(inout) :: test
 
@@ -85,7 +85,7 @@ contains
     !> Pade approximant of f, and its reference value
     complex(dp) :: f_approx, ref
     !> Test point
-    complex(dp), parameter :: xx = cmplx(1.0_dp, 1.0_dp, kind=dp)
+    complex(dp), parameter :: xx = cmplx(1.0_dp, 3.0_dp, kind=dp)
     !> Tolerance
     real(dp) :: tol = 1.e-7_dp
     integer :: i
@@ -93,16 +93,17 @@ contains
     !> Test setup
     allocate(x(n), f(n), acoeff(n))
     do i = 1, n
-       x(i) = cmplx(i, 0, kind=dp)
-       f(i) = 1.0_dp / (x(i) * x(i) + 1.0_dp)
+       x(i) = cmplx(i, 0.05_dp, kind=dp)
+       f(i) = 1.0_dp / (-x(i) * x(i) + 1.0_dp)
     end do
-    ref = 1.0_dp / (xx * xx + 1.0_dp)
+    ref = 1.0_dp / (-xx * xx + 1.0_dp)
 
     call thiele_pade(n, x, f, acoeff, do_greedy=.True.)
     call evaluate_thiele_pade(n, x, xx, acoeff, f_approx)
 
     !> Test execution
-    call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test Thiele-Pade ~ 1 / (x^2 + 1)')
+    print *, ref, f_approx
+    call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test Thiele-Pade ~ 1 / (-x^2 + 1)')
 
     !> Clean-up
     deallocate(x)

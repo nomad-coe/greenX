@@ -163,7 +163,7 @@ contains
       integer, intent(in)                            :: n_par
       complex(kind=dp), dimension(:), intent(inout)  :: x_ref
       complex(kind=dp), dimension(:), intent(in)     :: y_ref
-      complex(kind=dp), dimension(:), intent(out)  :: a_par
+      complex(kind=dp), dimension(:), intent(out)    :: a_par
       logical, optional, intent(in)                  :: do_greedy
 
       ! Internal variables

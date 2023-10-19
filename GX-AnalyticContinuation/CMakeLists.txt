@@ -12,7 +12,7 @@ set_target_properties(LibGXAC
   LIBRARY_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY})
 
 target_include_directories(LibGXAC PUBLIC src/)
-target_sources(LibGXAC PRIVATE src/pade_approximant.f90)
+target_sources(LibGXAC PRIVATE src/pade_approximant.f90 api/gx_ac.f90)
 target_link_libraries(LibGXAC GXCommon)
 
 # -----------------------------------------------
