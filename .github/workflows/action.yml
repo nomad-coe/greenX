@@ -51,7 +51,9 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -DENABLE_UNITTESTS=ON -DZOFU_PATH=/home/runner/work/greenX/greenX/external/zofu/install ../
+          cmake -DENABLE_UNITTESTS=ON \
+                -DZOFU_PATH=/home/runner/work/greenX/greenX/external/zofu/install \
+                -I/usr/include/ -L/usr/lib/x86_64-linux-gnu/ ../
           make -j$(nproc) VERBOSE=1
 
       - name: Run Tests
