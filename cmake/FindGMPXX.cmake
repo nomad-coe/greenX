@@ -4,6 +4,8 @@
 #  GMPXX_INCLUDE_DIR
 #  GMPXX_LIBRARIES
 
+find_package(GMP REQUIRED)
+
 find_path(GMPXX_INCLUDE_DIR NAMES gmpxx.h)
 find_library(GMPXX_LIBRARY NAMES gmpxx)
 
