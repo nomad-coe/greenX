@@ -32,7 +32,7 @@ jobs:
         run: pip3 install numpy pytest
 
       - name: Install blas, lapack and other dependencies
-        run: sudo apt-get install libblas-dev liblapack-dev doxygen
+        run: sudo apt-get install libblas-dev liblapack-dev doxygen libgmp10 libgmpxx4ldbl
 
       - name: Install Zofu Test Framework
         run: |
