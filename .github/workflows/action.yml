@@ -51,11 +51,10 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          find /usr/ -name libgmpxx.so*
           cmake -DENABLE_UNITTESTS=ON \
                 -DZOFU_PATH=/home/runner/work/greenX/greenX/external/zofu/install \
                 -DGMPXX_INCLUDE_DIR=/usr/include/ \
-                -DGMPXX_LIBRARY=/usr/lib/x86_64-linux-gnu/libgmpxx.so ../
+                -DGMPXX_LIBRARY=/usr/lib/x86_64-linux-gnu/libgmpxx.so.4.6.0 ../
           make -j$(nproc) VERBOSE=1
 
       - name: Run Tests
