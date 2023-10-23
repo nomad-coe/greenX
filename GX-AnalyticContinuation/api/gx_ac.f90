@@ -9,7 +9,7 @@ module gx_ac
   use pade_approximant, only: evaluate_thiele_pade, thiele_pade
   implicit none
 
-  public :: thiele_pade_api
+  public :: thiele_pade_api, thiele_pade_mp_api
 
   interface 
 
@@ -20,7 +20,7 @@ module gx_ac
     !! @param[in] x_query - array of points where the function needs to be evaluated
     !! @param[out] y_query - array of the interpolated values at x_query
     !! @param[in]  num_query - number of query points
-    subroutine thiele_pade_mp_mpi(n_par, x_ref, y_ref, x_query, y_query, num_query) bind(C, name="thiele_pade_mp_api")
+    subroutine thiele_pade_mp_api(n_par, x_ref, y_ref, x_query, y_query, num_query) bind(C, name="thiele_pade_mp_api")
        use iso_c_binding, only: c_int, c_double_complex
        integer(c_int), value, intent(in)                      :: n_par 
        complex(c_double_complex), dimension(*), intent(in)    :: x_ref 

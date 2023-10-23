@@ -92,7 +92,7 @@ void thiele_pade_gcoeff_mp(const std::vector<ComplexGMP> &x,
     for (int idx = 1; idx <= n; idx++) {
         g_func[n][idx] =
             (g_func[idx - 1][idx - 1] - g_func[n][idx - 1]) /
-            ((x[n] - x[idx - 1]) * (x[n] + x[idx - 1]) * g_func[n][idx - 1]);
+            ((x[n] - x[idx - 1]) * g_func[n][idx - 1]);
     }
 }
 
@@ -112,7 +112,7 @@ any_complex evaluate_thiele_pade(int n_par,
     any_complex gtmp(c_one);
 
     for (int i_par = n_par - 1; i_par > 0; i_par--) {
-        gtmp = c_one + a_par[i_par] * (x - x_ref[i_par - 1]) * (x + x_ref[i_par - 1]) / gtmp;
+        gtmp = c_one + a_par[i_par] * (x - x_ref[i_par - 1]) / gtmp;
     }
 
     return a_par[0] / gtmp;
@@ -169,8 +169,10 @@ void thiele_pade_mp_api(int n_par,
     for (int i_par = 0; i_par < n_par; i_par++) {
         x_ref_mp.push_back(x_ref[i_par]);
         y_ref_mp.push_back(y_ref[i_par]);
-        x_query_mp.push_back(x_query[i_par]);
         a_par_mp.push_back(ComplexGMP());
+    }
+    for (int i_query = 0; i_query < num_query; i_query++){
+        x_query_mp.push_back(x_query[i_query]);
     }
 
     // Compute the coefficients a_par_mp
