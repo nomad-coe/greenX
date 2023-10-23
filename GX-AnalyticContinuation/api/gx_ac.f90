@@ -11,6 +11,27 @@ module gx_ac
 
   public :: thiele_pade_api
 
+  interface 
+
+    !> brief compute Thiele-Pade approximations using arbitrary precision numbers
+    !! @param[in]  n_par - order of the interpolant
+    !! @param[in] x_ref - array of the reference points
+    !! @param[in] y_ref - array of the reference function values
+    !! @param[in] x_query - array of points where the function needs to be evaluated
+    !! @param[out] y_query - array of the interpolated values at x_query
+    !! @param[in]  num_query - number of query points
+    subroutine thiele_pade_mp_mpi(n_par, x_ref, y_ref, x_query, y_query, num_query) bind(C, name="thiele_pade_mp_api")
+       use iso_c_binding, only: c_int, c_double_complex
+       integer(c_int), value, intent(in)                      :: n_par 
+       complex(c_double_complex), dimension(*), intent(in)    :: x_ref 
+       complex(c_double_complex), dimension(*), intent(in)    :: y_ref 
+       complex(c_double_complex), dimension(*), intent(in)    :: x_query
+       complex(c_double_complex), dimension(*), intent(out)   :: y_query 
+       integer(c_int), value, intent(in)                      :: num_query
+    end subroutine
+  
+  end interface
+
 contains
 
   !> API function to compute Thiele-Pade approximations of a meromorphic function

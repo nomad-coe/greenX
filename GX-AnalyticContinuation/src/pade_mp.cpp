@@ -6,6 +6,16 @@
 
 const int PREC = 1024;
 
+// function prototype for fortran interface
+extern "C" {
+void thiele_pade_mp_api(int n_par,
+                        const std::complex<double> *x_ref,
+                        const std::complex<double> *y_ref,
+                        const std::complex<double> *x_query,
+                        std::complex<double> *y_query,
+                        int num_query);
+}
+
 /// @brief  datatype of a complex number using arbitrary precision numbers for real and imaginary part
 class ComplexGMP {
    public:
@@ -109,35 +119,26 @@ any_complex evaluate_thiele_pade(int n_par,
 }
 
 /// @brief Gets the Pade approximant of a meromorphic function F
-///        This routine implements a modified version of the Thiele's reciprocal differences
-///        interpolation algorithm using a greedy strategy, ensuring that the ordering of the
-///        included points minimizes the value of |P_n(x_{1+1}) - F(x_{i+1})|
-///        The default Thiele interpolation is also included for conveniency
 /// @param n_par order of the interpolant
 /// @param x_ref array of the reference points
 /// @param y_ref array of the reference function values
 /// @param a_par array of the interpolant parameters
 void thiele_pade_mp(int n_par,
-                    std::complex<double> *x_ref,
-                    const std::complex<double> *y_ref,
-                    std::complex<double> *a_par) {
+                    std::vector<ComplexGMP> &x_ref_mp,
+                    const std::vector<ComplexGMP> &y_ref_mp,
+                    std::vector<ComplexGMP> &a_par_mp) {
     // set floating point precision of GMP lib
     mpf_set_default_prec(PREC);
 
-    // initialize arrays
-    std::vector<ComplexGMP> x_ref_mp;
-    std::vector<ComplexGMP> y_ref_mp;
-    std::vector<ComplexGMP> a_par_mp(n_par, ComplexGMP());  // all to 0 + 0i
+    // initialize array
     std::vector<std::vector<ComplexGMP>> g_func;
-
     for (int i_par = 0; i_par < n_par; i_par++) {
-        x_ref_mp.push_back(ComplexGMP(x_ref[i_par]));
-        y_ref_mp.push_back(ComplexGMP(y_ref[i_par]));
         g_func.push_back(std::vector<ComplexGMP>());
         for (int j_par = 0; j_par < n_par; j_par++) {
             g_func[i_par].push_back(ComplexGMP());  // init to 0 + 0i
         }
     }
+
     // interpolate
     thiele_pade_gcoeff_mp(x_ref_mp, y_ref_mp, g_func, 0);
     a_par_mp[0] = g_func[0][0];
@@ -145,9 +146,39 @@ void thiele_pade_mp(int n_par,
         thiele_pade_gcoeff_mp(x_ref_mp, y_ref_mp, g_func, i_par);
         a_par_mp[i_par] = g_func[i_par][i_par];
     }
+}
 
-    // type cast back to double complex
+/// @brief function to compute Thiele-Pade approximations of a meromorphic function
+/// @param n_par order of the interpolant
+/// @param x_ref array of the reference points
+/// @param y_ref  array of the reference function values
+/// @param x_query array of points where the function needs to be evaluated
+/// @param y_query[out] array of the interpolated values at x_query
+/// @param num_query number of query points
+void thiele_pade_mp_api(int n_par,
+                        const std::complex<double> *x_ref,
+                        const std::complex<double> *y_ref,
+                        const std::complex<double> *x_query,
+                        std::complex<double> *y_query,
+                        int num_query) {
+    // set floating point precision of GMP lib
+    mpf_set_default_prec(PREC);
+
+    // initialize arbitrary precision arrays
+    std::vector<ComplexGMP> x_ref_mp, y_ref_mp, x_query_mp, a_par_mp;
     for (int i_par = 0; i_par < n_par; i_par++) {
-        a_par[i_par] = (std::complex<double>)a_par_mp[i_par];
+        x_ref_mp.push_back(x_ref[i_par]);
+        y_ref_mp.push_back(y_ref[i_par]);
+        x_query_mp.push_back(x_query[i_par]);
+        a_par_mp.push_back(ComplexGMP());
+    }
+
+    // Compute the coefficients a_par_mp
+    thiele_pade_mp(n_par, x_ref_mp, y_ref_mp, a_par_mp);
+
+    // Evaluate the Thiele-Pade approximation at the query points
+    for (int i_query = 0; i_query < num_query; i_query++) {
+        auto y = evaluate_thiele_pade<ComplexGMP>(n_par, x_ref_mp, x_query_mp[i_query], a_par_mp);
+        y_query[i_query] = (std::complex<double>)y;
     }
 }
