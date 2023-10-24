@@ -15,6 +15,9 @@ project(greenX
 # Need for Intel MKL and for GNU GMP
 enable_language(CXX)
 
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 17)
+
 # Set folder structure for build directory
 set(CMAKE_Fortran_BIN_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_Fortran_LIB_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
