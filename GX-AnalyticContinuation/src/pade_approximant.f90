@@ -235,15 +235,11 @@ contains
             call thiele_pade_gcoeff(xtmp, ytmp, g_func, idx)
 
             ! Unpack parameters a_i = g_i(w_i)
-            do i_par = 1, idx
-               a_par(i_par) = g_func(i_par, i_par)
-            enddo
+            a_par(idx) = g_func(idx, idx)
          end do
       else
-         ! Interpolate
-         call thiele_pade_gcoeff(x_ref, y_ref, g_func, 1)
-         a_par(1) = g_func(1, 1)
-         do i_par = 2, n_par
+         ! Directly interpolate
+         do i_par = 1, n_par
             call thiele_pade_gcoeff(x_ref, y_ref, g_func, i_par)
             a_par(i_par) = g_func(i_par, i_par)
          enddo

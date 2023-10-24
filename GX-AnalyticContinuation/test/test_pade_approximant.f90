@@ -162,7 +162,6 @@ contains
     call evaluate_thiele_pade(n, x, xx, acoeff, f_approx)
 
     !> Test execution
-    print *, ref, f_approx
     call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test Thiele-Pade ~ 1 / (-x^2 + 1)')
 
     !> Clean-up
@@ -280,8 +279,8 @@ contains
 
     !> Here we use a Newman grid with 2n points
     do i = 1, n
-       x(i) = cmplx(eta**(i - 1), 0.0_dp, kind=dp)
-       x(i+n) = cmplx(-eta**(n - i) + delta_eta, 0.0_dp, kind=dp)
+       x(i) = cmplx(-eta**(i - 1), 0.0_dp, kind=dp)
+       x(i+n) = cmplx(eta**(n - i) + delta_eta, 0.0_dp, kind=dp)
     end do
 
     f(:) = abs(x(:))
@@ -291,7 +290,6 @@ contains
     ref = abs(xx(1))
 
     call thiele_pade_mp_api(npar, x, f, xx, f_approx, 1)
-    !print *, xx(1), f_approx(1), ref
 
     !> Test execution
     call test%assert(is_close(f_approx(1), ref, tol=tol), name = 'Test GMP Thiele-Pade ~ |x|')
