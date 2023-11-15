@@ -128,14 +128,27 @@ any_complex evaluate_thiele_pade(int n_par,
                                  const std::vector<any_complex> &x_ref,
                                  const any_complex &x,
                                  const std::vector<any_complex> &a_par) {
-  any_complex c_one(std::complex<double>(1.0, 0.0));
-  any_complex gtmp(c_one);
 
-  for (int i_par = n_par - 1; i_par > 0; i_par--) {
-    gtmp = c_one + a_par[i_par] * (x - x_ref[i_par - 1]) / gtmp;
+  // Define constants
+  any_complex c_one(std::complex<double>(1.0, 0.0));
+  any_complex c_zero(std::complex<double>(0.0, 0.0));
+
+  // Wallis' method coefficients
+  std::vector<any_complex> acoef(n_par+1), bcoef(n_par+1);
+
+  // Compute continues fraction
+  acoef[0] = c_zero;
+  acoef[1] = a_par[0];
+  std::fill_n(bcoef.begin(), 2, c_one);
+
+  for (int i_par = 0; i_par < n_par - 1 ; i_par++) {
+    acoef[i_par + 2] =
+        acoef[i_par + 1] + (x - x_ref[i_par]) * a_par[i_par + 1] * acoef[i_par];
+    bcoef[i_par + 2] =
+        bcoef[i_par + 1] + (x - x_ref[i_par]) * a_par[i_par + 1] * bcoef[i_par];
   }
 
-  return a_par[0] / gtmp;
+  return acoef[n_par] / bcoef[n_par];
 }
 
 /// @brief Gets the Pade approximant of a meromorphic function F

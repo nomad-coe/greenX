@@ -64,22 +64,9 @@ contains
 
       !> Pade coefficients
       complex(dp) :: a(n)
-      !> Numerator and denominator in pade series
-      complex(dp) :: acoef(0:n), bcoef(0:n)
-      integer :: i
 
       call pade_coefficient_derivative(x, f, a)
-
-      acoef(0) = c_zero
-      acoef(1) = a(1)
-      bcoef(0:1) = c_one
-
-      do i = 1, n - 1
-         acoef(i + 1) = acoef(i) + (xx - x(i)) * a(i + 1) * acoef(i - 1)
-         bcoef(i + 1) = bcoef(i) + (xx - x(i)) * a(i + 1) * bcoef(i - 1)
-      end do
-
-      pade = acoef(n)/bcoef(n)
+      call evaluate_thiele_pade(n, x, xx, a, pade)
 
    end function pade
 
@@ -287,17 +274,19 @@ contains
 
       ! Internal variables
       integer                                    :: i_par
-      complex(kind=dp)                           :: gtmp
+      complex(dp)                                :: acoef(0:n_par), bcoef(0:n_par)
 
-      ! Begin work
-      gtmp = c_one
+      ! Evaluate using Wallis method
+      acoef(0) = c_zero
+      acoef(1) = a_par(1)
+      bcoef(0:1) = c_one
 
-      do i_par = n_par, 2, -1
-         gtmp = c_one + a_par(i_par) * (x - x_ref(i_par - 1)) / gtmp
-      enddo
+      do i_par = 1, n_par - 1
+         acoef(i_par + 1) = acoef(i_par) + (x - x_ref(i_par)) * a_par(i_par + 1) * acoef(i_par - 1)
+         bcoef(i_par + 1) = bcoef(i_par) + (x - x_ref(i_par)) * a_par(i_par + 1) * bcoef(i_par - 1)
+      end do
 
-      ! Compute out value
-      y = a_par(1) / gtmp
+      y = acoef(n_par) / bcoef(n_par)
 
    end subroutine evaluate_thiele_pade
 
