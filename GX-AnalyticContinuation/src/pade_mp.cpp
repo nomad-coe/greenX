@@ -5,7 +5,7 @@
 #include <optional>
 #include <vector>
 
-const int PREC = 1024;
+const int PREC = 32;
 
 // function prototype for fortran interface
 extern "C" {

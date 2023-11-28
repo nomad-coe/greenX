@@ -59,7 +59,32 @@
         };
       };
 
-      custom_python_env = pkgs.python3.withPackages (ps: [
+      color-vgrind = pkgs.python3Packages.buildPythonPackage rec {
+        pname = "colour-valgrind";
+        version = "0.3.9";
+
+        src = pkgs.python3.pkgs.fetchPypi {
+          inherit pname version;
+          sha256 = "34a7d92e3c82a63d80644a571d3df8e4d29dd7b14b263dee90307d5d6432619d";
+        };
+
+        propagatedBuildInputs = with pkgs.python3Packages; [
+          pip
+          wheel
+          six
+          regex
+          colorama
+          setuptools
+        ];
+
+        meta = {
+          homepage = "http://github.com/StarlitGhost/colour-valgrind";
+          description = "A colorful wrapper for Valgrind.";
+        };
+      };
+
+      custom-python-env = pkgs.python3.withPackages (ps: [
+        color-vgrind
         pygreenx
       ]);
     in
@@ -67,7 +92,7 @@
         devShell.x86_64-linux = pkgs.mkShell {
           buildInputs = with pkgs; [
             # Python packages
-            custom_python_env
+            custom-python-env
             # Additional libraries and utils
             zofu
             python310Packages.pytest
@@ -75,8 +100,13 @@
             lapack-reference
             cmake
             valgrind
+            linuxKernel.packages.linux_zen.perf
+            hotspot
             gmp
           ];
+          shellHook = ''
+            alias val=colour-valgrind;
+          '';
         };
       };
 }

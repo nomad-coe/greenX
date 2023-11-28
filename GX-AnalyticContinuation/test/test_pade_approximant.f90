@@ -10,7 +10,8 @@ module test_pade_approximant
   use kinds, only: dp
 
   ! Module being tested
-  use pade_approximant, only: pade, thiele_pade, evaluate_thiele_pade
+  use gx_ac, only: thiele_pade_api
+  use pade_approximant, only: pade
 
   implicit none
   private
@@ -141,33 +142,32 @@ contains
     !> N sampling points
     integer, parameter :: n = 100
     !> Variable, function, and parameters, respectively
-    complex(dp), allocatable :: x(:), f(:), acoeff(:)
+    complex(dp), allocatable :: x(:), f(:)
     !> Pade approximant of f, and its reference value
-    complex(dp) :: f_approx, ref
+    complex(dp) :: ref
+    complex(dp), dimension(1) :: f_approx
     !> Test point
-    complex(dp), parameter :: xx = cmplx(1.0_dp, 3.0_dp, kind=dp)
+    complex(dp), dimension(1), parameter :: xx = cmplx(1.0_dp, 3.0_dp, kind=dp)
     !> Tolerance
     real(dp) :: tol = 1.e-7_dp
     integer :: i
 
     !> Test setup
-    allocate(x(n), f(n), acoeff(n))
+    allocate(x(n), f(n))
     do i = 1, n
        x(i) = cmplx(i, 0.05_dp, kind=dp)
        f(i) = 1.0_dp / (-x(i) * x(i) + 1.0_dp)
     end do
-    ref = 1.0_dp / (-xx * xx + 1.0_dp)
+    ref = 1.0_dp / (-xx(1) * xx(1) + 1.0_dp)
 
-    call thiele_pade(n, x, f, acoeff, do_greedy=.True.)
-    call evaluate_thiele_pade(n, x, xx, acoeff, f_approx)
+    call thiele_pade_api(n, x, f, xx, f_approx, .true.)
 
     !> Test execution
-    call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test Thiele-Pade ~ 1 / (-x^2 + 1)')
+    call test%assert(is_close(f_approx(1), ref, tol=tol), name = 'Test Thiele-Pade ~ 1 / (-x^2 + 1)')
 
     !> Clean-up
     deallocate(x)
     deallocate(f)
-    deallocate(acoeff)
 
   end subroutine test_thiele_pade_poles
 
@@ -218,18 +218,19 @@ contains
     real(dp), parameter :: eta = exp(-1.0_dp / sqrt(dble(n)))
     real(dp), parameter :: delta_eta = 0.0005_dp
     !> Variable, function, and parameters, respectively
-    complex(dp), allocatable :: x(:), f(:), acoeff(:)
+    complex(dp), allocatable :: x(:), f(:)
     !> Pade approximant of f, and its reference value
-    complex(dp) :: f_approx, ref
+    complex(dp) :: ref
+    complex(dp), dimension(1) :: f_approx
     !> Test point
-    complex(dp), parameter :: xx = cmplx(0.7_dp, 0.0_dp, kind=dp)
+    complex(dp), dimension(1), parameter :: xx = cmplx(0.7_dp, 0.0_dp, kind=dp)
     !> Tolerance
     real(dp) :: tol = 1.e-7_dp
     integer :: i, npar
 
     !> Test setup
     npar = 2 * n
-    allocate(x(npar), f(npar), acoeff(npar))
+    allocate(x(npar), f(npar))
 
     !> Here we use a Newman grid with 2n points
     do i = 1, n
@@ -238,18 +239,16 @@ contains
     end do
 
     f(:) = abs(x(:))
-    ref = abs(xx)
+    ref = abs(xx(1))
 
-    call thiele_pade(npar, x, f, acoeff, do_greedy=.True.)
-    call evaluate_thiele_pade(npar, x, xx, acoeff, f_approx)
+    call thiele_pade_api(npar, x, f, xx, f_approx, .true.)
 
     !> Test execution
-    call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test Thiele-Pade ~ |x|')
+    call test%assert(is_close(f_approx(1), ref, tol=tol), name = 'Test Thiele-Pade ~ |x|')
 
     !> Clean-up
     deallocate(x)
     deallocate(f)
-    deallocate(acoeff)
 
   end subroutine test_thiele_pade_abs
 

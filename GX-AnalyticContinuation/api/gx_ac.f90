@@ -6,7 +6,7 @@
 
 module gx_ac
   use kinds, only: dp
-  use pade_approximant, only: evaluate_thiele_pade, thiele_pade
+  use pade_approximant, only: evaluate_thiele_pade, thiele_pade, c_zero, c_one
   implicit none
 
   public :: thiele_pade_api, thiele_pade_mp_api
@@ -51,18 +51,29 @@ contains
     integer                                        :: i, num_query
     complex(kind=dp), dimension(size(x_ref))       :: x_ref_local
     complex(kind=dp), dimension(n_par)             :: a_par
+    complex(kind=dp), dimension(:), allocatable    :: acoef, bcoef
+
+    ! Initialize Walli's coefficients
+    allocate(acoef(0:n_par))
+    allocate(bcoef(0:n_par))
+    acoef(0:n_par) = c_zero
+    bcoef(0:n_par) = c_zero
 
     ! Compute the coefficients a_par
-    x_ref_local = x_ref
-    call thiele_pade(n_par, x_ref_local, y_ref, a_par, do_greedy)
+    x_ref_local(:) = x_ref
+    call thiele_pade(n_par, x_ref_local, y_ref, a_par, acoef, bcoef, do_greedy)
 
     ! Compute the number of query points
     num_query = size(x_query)
 
     ! Evaluate the Thiele-Pade approximation at the query points
     do i = 1, num_query
-       call evaluate_thiele_pade(n_par, x_ref_local, x_query(i), a_par, y_query(i))
+       call evaluate_thiele_pade(n_par, x_ref_local, x_query(i), a_par, acoef, bcoef, y_query(i))
     end do
+
+    ! Clean-up
+    deallocate(acoef)
+    deallocate(bcoef)
 
   end subroutine thiele_pade_api
 

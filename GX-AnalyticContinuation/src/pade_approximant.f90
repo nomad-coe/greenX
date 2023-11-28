@@ -43,9 +43,9 @@ module pade_approximant
    public :: pade, pade_derivative, thiele_pade, evaluate_thiele_pade
 
    !> Complex zero
-   complex(dp) :: c_zero = cmplx(0.0_dp, 0.0_dp, kind=dp)
+   complex(dp), public :: c_zero = cmplx(0.0_dp, 0.0_dp, kind=dp)
    !> Complex one
-   complex(dp) :: c_one = cmplx(1.0_dp, 0.0_dp, kind=dp)
+   complex(dp), public :: c_one = cmplx(1.0_dp, 0.0_dp, kind=dp)
 
 contains
 
@@ -64,9 +64,13 @@ contains
 
       !> Pade coefficients
       complex(dp) :: a(n)
+      complex(dp) :: acoef(0:n), bcoef(0:n)
 
+      ! Generate parameters
       call pade_coefficient_derivative(x, f, a)
-      call evaluate_thiele_pade(n, x, xx, a, pade)
+
+      ! Evaluate using Wallis method
+      call evaluate_thiele_pade(n, x, xx, a, acoef, bcoef, pade)
 
    end function pade
 
@@ -146,21 +150,22 @@ contains
    !!  @param[in]  y_ref - array of the reference function values
    !!  @param[in]  do_greedy - whether to use the default greedy algorithm or the naive one
    !!  @param[out] par - array of the interpolant parameters
-   subroutine thiele_pade(n_par, x_ref, y_ref, a_par, do_greedy)
-      integer, intent(in)                            :: n_par
-      complex(kind=dp), dimension(:), intent(inout)  :: x_ref
-      complex(kind=dp), dimension(:), intent(in)     :: y_ref
-      complex(kind=dp), dimension(:), intent(out)    :: a_par
-      logical, optional, intent(in)                  :: do_greedy
+   subroutine thiele_pade(n_par, x_ref, y_ref, a_par, acoef, bcoef, do_greedy)
+      integer, intent(in)                                 :: n_par
+      complex(kind=dp), dimension(:), intent(inout)       :: x_ref
+      complex(kind=dp), dimension(:), intent(in)          :: y_ref
+      complex(kind=dp), dimension(:), intent(out)         :: a_par
+      complex(kind=dp), dimension(0:n_par), intent(inout) :: acoef, bcoef
+      logical, optional, intent(in)                       :: do_greedy
 
       ! Internal variables
-      logical                                        :: local_do_greedy = .True.
-      integer                                        :: i, i_par, idx, jdx, kdx, n_rem
-      integer, dimension(n_par)                      :: n_rem_idx
-      real(kind=dp)                                  :: deltap, pval
-      complex(kind=dp)                               :: pval_in, x_in, y_in
-      complex(kind=dp), dimension(n_par, n_par)      :: g_func
-      complex(kind=dp), dimension(n_par)             :: x, xtmp, ytmp
+      logical                                             :: local_do_greedy = .True.
+      integer                                             :: i, i_par, idx, jdx, kdx, n_rem
+      integer, dimension(n_par)                           :: n_rem_idx
+      real(kind=dp)                                       :: deltap, pval
+      complex(kind=dp)                                    :: pval_in, x_in, y_in, acoef_in, bcoef_in
+      complex(kind=dp), dimension(n_par, n_par)           :: g_func
+      complex(kind=dp), dimension(n_par)                  :: x, xtmp, ytmp
 
       ! Whether to perform the refined Thiele's interpolation (default)
       if (present(do_greedy)) local_do_greedy = do_greedy
@@ -171,10 +176,13 @@ contains
       g_func = c_zero
       x_in = c_zero
       y_in = c_zero
+      acoef_in = c_zero
+      bcoef_in = c_zero
+      x = c_zero
 
       if (local_do_greedy) then
          ! Unpack initial reference arguments, as they will be overwritten
-         x = x_ref
+         x(:) = x_ref
          x_ref = c_zero
 
          ! Select first point as to maximize |F|
@@ -192,12 +200,17 @@ contains
          call thiele_pade_gcoeff(xtmp, ytmp, g_func, 1)
          a_par(1) = g_func(1, 1)
 
+         ! Initialize Walli's coefficients
+         acoef(0) = c_zero
+         acoef(1) = a_par(1)
+         bcoef(0:1) = c_one
+
          ! Add remaining points ensuring min |P_i(x_{1+1}) - F(x_{i+1})|
          do idx = 2, n_par
             pval = huge(0.0_dp)
             do jdx = 1, n_rem
                ! Compute next convergent P_i(x_{i+1})
-               call evaluate_thiele_pade(idx - 1, xtmp(1:idx-1), x(n_rem_idx(jdx)), a_par, pval_in)
+               call evaluate_thiele_pade_tab(idx - 1, xtmp(1:idx-1), x(n_rem_idx(jdx)), a_par, acoef, bcoef, pval_in)
 
                ! Select the point that minimizes difference's absolute value
                deltap = abs(pval_in - y_ref(n_rem_idx(jdx)))
@@ -205,6 +218,8 @@ contains
                   pval = deltap
                   x_in = x(n_rem_idx(jdx))
                   y_in = y_ref(n_rem_idx(jdx))
+                  acoef_in = acoef(idx + 1)
+                  bcoef_in = bcoef(idx + 1)
                   kdx = jdx
                end if
             end do
@@ -219,6 +234,8 @@ contains
             x_ref(idx) = x_in
             xtmp(idx) = x_in
             ytmp(idx) = y_in
+            acoef(idx + 1) = acoef_in
+            bcoef(idx + 1) = bcoef_in
             call thiele_pade_gcoeff(xtmp, ytmp, g_func, idx)
 
             ! Unpack parameters a_i = g_i(w_i)
@@ -260,21 +277,44 @@ contains
    end subroutine thiele_pade_gcoeff
 
    !> brief Evaluates a Pade approximant constructed with Thiele's reciprocal differences
+   !>       This is the tabulated version of the procedure
    !! @param[in] n_par - number of parameters
    !! @param[in] x_ref - array of the reference points
    !! @param[in] x - the point to evaluate
    !! @param[in] a_par -  array of the input parameters
    !! @param[out] y -  the value of the interpolant at x
-   subroutine  evaluate_thiele_pade(n_par, x_ref , x, a_par, y)
+   subroutine  evaluate_thiele_pade_tab(n_par, x_ref , x, a_par, acoef, bcoef, y)
       integer, intent(in)                        :: n_par
       complex(kind=dp), dimension(:), intent(in) :: x_ref
       complex(kind=dp), intent(in)               :: x
       complex(kind=dp), dimension(:), intent(in) :: a_par
+      complex(dp), intent(inout)                 :: acoef(0:n_par), bcoef(0:n_par)
+      complex(kind=dp), intent(out)              :: y
+
+      acoef(n_par + 1) = acoef(n_par) + (x - x_ref(n_par)) * a_par(n_par) * acoef(n_par - 1)
+      bcoef(n_par + 1) = bcoef(n_par) + (x - x_ref(n_par)) * a_par(n_par) * bcoef(n_par - 1)
+
+      y = acoef(n_par + 1) / bcoef(n_par + 1)
+
+   end subroutine evaluate_thiele_pade_tab
+
+   !> brief Evaluates a Pade approximant constructed with Thiele's reciprocal differences
+   !>       This is the tabulated version of the procedure
+   !! @param[in] n_par - number of parameters
+   !! @param[in] x_ref - array of the reference points
+   !! @param[in] x - the point to evaluate
+   !! @param[in] a_par -  array of the input parameters
+   !! @param[out] y -  the value of the interpolant at x
+   subroutine  evaluate_thiele_pade(n_par, x_ref , x, a_par, acoef, bcoef, y)
+      integer, intent(in)                        :: n_par
+      complex(kind=dp), dimension(:), intent(in) :: x_ref
+      complex(kind=dp), intent(in)               :: x
+      complex(kind=dp), dimension(:), intent(in) :: a_par
+      complex(dp), intent(inout)                 :: acoef(0:n_par), bcoef(0:n_par)
       complex(kind=dp), intent(out)              :: y
 
       ! Internal variables
       integer                                    :: i_par
-      complex(dp)                                :: acoef(0:n_par), bcoef(0:n_par)
 
       ! Evaluate using Wallis method
       acoef(0) = c_zero
