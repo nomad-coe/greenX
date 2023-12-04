@@ -42,38 +42,27 @@ contains
   !! @param[in] do_greedy - whether to use the default greedy algorithm or the naive one
   !! @param[out] y_query - array of the interpolated values at x_query
   subroutine thiele_pade_api(n_par, x_ref, y_ref, x_query, y_query, do_greedy)
-    integer, intent(in)                            :: n_par
-    complex(kind=dp), dimension(:), intent(in)     :: x_ref, y_ref, x_query
-    complex(kind=dp), dimension(:), intent(out)    :: y_query
-    logical, optional, intent(in)                  :: do_greedy
+    integer, intent(in)                         :: n_par
+    complex(kind=dp), dimension(:), intent(in)  :: x_ref, y_ref, x_query
+    complex(kind=dp), dimension(:), intent(out) :: y_query
+    logical, optional, intent(in)               :: do_greedy
 
     ! Internal variables
-    integer                                        :: i, num_query
-    complex(kind=dp), dimension(size(x_ref))       :: x_ref_local
-    complex(kind=dp), dimension(n_par)             :: a_par
-    complex(kind=dp), dimension(:), allocatable    :: acoef, bcoef
-
-    ! Initialize Walli's coefficients
-    allocate(acoef(0:n_par))
-    allocate(bcoef(0:n_par))
-    acoef(0:n_par) = c_zero
-    bcoef(0:n_par) = c_zero
+    integer                                     :: i, num_query
+    complex(kind=dp), dimension(size(x_ref))    :: x_ref_local
+    complex(kind=dp), dimension(n_par)          :: a_par
 
     ! Compute the coefficients a_par
     x_ref_local(:) = x_ref
-    call thiele_pade(n_par, x_ref_local, y_ref, a_par, acoef, bcoef, do_greedy)
+    call thiele_pade(n_par, x_ref_local, y_ref, a_par, do_greedy)
 
     ! Compute the number of query points
     num_query = size(x_query)
 
     ! Evaluate the Thiele-Pade approximation at the query points
     do i = 1, num_query
-       call evaluate_thiele_pade(n_par, x_ref_local, x_query(i), a_par, acoef, bcoef, y_query(i))
+       call evaluate_thiele_pade(n_par, x_ref_local, x_query(i), a_par, y_query(i))
     end do
-
-    ! Clean-up
-    deallocate(acoef)
-    deallocate(bcoef)
 
   end subroutine thiele_pade_api
 

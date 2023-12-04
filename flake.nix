@@ -102,6 +102,7 @@
             valgrind
             linuxKernel.packages.linux_zen.perf
             hotspot
+            hyperfine
             gmp
           ];
           shellHook = ''
