@@ -6,29 +6,48 @@
 
 module gx_ac
   use kinds, only: dp
+  use, intrinsic :: iso_c_binding, only: c_int, c_double_complex, c_ptr
   use pade_approximant, only: evaluate_thiele_pade, thiele_pade, c_zero, c_one
   implicit none
 
-  public :: thiele_pade_api, thiele_pade_mp_api
+  public :: thiele_pade_api, &
+            params_mp, &
+            create_thiele_pade_mp, &
+            evaluate_thiele_pade_mp
+
+
+ !> brief store arbitrary precision parameters 
+  type :: params_mp
+    type(c_ptr) :: params_ptr 
+  end type params_mp
 
   interface 
 
-    !> brief compute Thiele-Pade approximations using arbitrary precision numbers
-    !! @param[in]  n_par - order of the interpolant
+    !> auxiliary function to compute Thiele-Pade parameters using arbitrary precision numbers
+    !! @param[in] n_par - order of the interpolant
     !! @param[in] x_ref - array of the reference points
     !! @param[in] y_ref - array of the reference function values
-    !! @param[in] x_query - array of points where the function needs to be evaluated
-    !! @param[out] y_query - array of the interpolated values at x_query
-    !! @param[in]  num_query - number of query points
-    subroutine thiele_pade_mp_api(n_par, x_ref, y_ref, x_query, y_query, num_query) bind(C, name="thiele_pade_mp_api")
-       use iso_c_binding, only: c_int, c_double_complex
-       integer(c_int), value, intent(in)                      :: n_par 
-       complex(c_double_complex), dimension(*), intent(in)    :: x_ref 
-       complex(c_double_complex), dimension(*), intent(in)    :: y_ref 
-       complex(c_double_complex), dimension(*), intent(in)    :: x_query
-       complex(c_double_complex), dimension(*), intent(out)   :: y_query 
-       integer(c_int), value, intent(in)                      :: num_query
-    end subroutine
+    !! @param[in] do_greedy - whether to use the default greedy algorithm or the naive one
+    !! @return - pointer to abstract type to store all parameters 
+    function thiele_pade_mp_aux(n_par, x_ref, y_ref, do_greedy) bind(C, name="thiele_pade_mp")
+       import :: c_double_complex, c_int, c_ptr
+       integer(c_int), value                    :: n_par
+       complex(c_double_complex), dimension(*)  :: x_ref
+       complex(c_double_complex), dimension(*)  :: y_ref
+       integer(c_int), value                    :: do_greedy
+       type(c_ptr)                              :: thiele_pade_mp_aux
+      end function thiele_pade_mp_aux
+
+    !> auxiliary function to evaluate the Thiele-Pade parameters using arbitrary precision numbers
+    !! @param[in] x - point where the function needs to be evaluated
+    !! @param[in] params_ptr - pointer to abstract type to store all parameters 
+    !! @return - interpolated function value
+    function evaluate_thiele_pade_mp_aux(x, params_ptr) bind(C, name="evaluate_thiele_pade_mp")
+       import :: c_ptr, c_double_complex
+       complex(c_double_complex), value    :: x
+       type(c_ptr), value                  :: params_ptr
+       complex(c_double_complex)           :: evaluate_thiele_pade_mp_aux
+      end function evaluate_thiele_pade_mp_aux
   
   end interface
 
@@ -65,5 +84,47 @@ contains
     end do
 
   end subroutine thiele_pade_api
+
+  !> API function to compute Thiele-Pade parameters using arbitrary precision numbers
+  !! @param[in] n_par - order of the interpolant
+  !! @param[in] x_ref - array of the reference points
+  !! @param[in] y_ref - array of the reference function values
+  !! @param[out] params - abstract type to store all parameters in arb. prec. representation
+  !! @param[in] do_greedy - whether to use the default greedy algorithm or the naive one
+  subroutine create_thiele_pade_mp(n_par, x_ref, y_ref, params, do_greedy)
+    integer, intent(in)                             :: n_par
+    complex(kind=dp), dimension(:), intent(in)      :: x_ref, y_ref 
+    type(params_mp), intent(out)                    :: params 
+    logical, optional, intent(in)                   :: do_greedy
+
+    ! Internal variables 
+    integer                                         :: local_do_greedy = 1
+
+    ! use integer bools for interoperability with C
+    if (present(do_greedy)) then 
+        if (do_greedy) then 
+            local_do_greedy = 1
+        else 
+            local_do_greedy = 0
+        end if 
+    end if 
+
+    ! compute coefficients
+    params%params_ptr = thiele_pade_mp_aux(n_par, x_ref, y_ref, local_do_greedy) 
+
+  end subroutine create_thiele_pade_mp
+
+  !> API function to evaluate the Thiele-Pade approximation using arbitrary precision numbers
+  !! @param[in] x - point where the function is evaluated
+  !! @param[out] y - interpolated function value at x
+  !! @param[in] params - abstract type to store all parameters in arb. prec. representation
+  subroutine evaluate_thiele_pade_mp(x, y, params)
+    complex(kind=dp), intent(in)     :: x
+    complex(kind=dp), intent(out)    :: y
+    type(params_mp), intent(in)      :: params
+
+    y = evaluate_thiele_pade_mp_aux(x, params%params_ptr)
+
+  end subroutine evaluate_thiele_pade_mp
 
 end module gx_ac

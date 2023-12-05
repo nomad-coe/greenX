@@ -10,7 +10,7 @@ module test_pade_approximant
   use kinds, only: dp
 
   ! Module being tested
-  use gx_ac, only: thiele_pade_api
+  use gx_ac, only: thiele_pade_api, create_thiele_pade_mp, evaluate_thiele_pade_mp, params_mp
   use pade_approximant, only: pade
 
   implicit none
@@ -22,25 +22,6 @@ module test_pade_approximant
   interface is_close
      module procedure is_close_complex_dp
   end interface is_close
-
-  interface  
-     !> brief compute Thiele-Pade approximations using arbitrary precision numbers
-     !! @param[in]  n_par - order of the interpolant
-     !! @param[in] x_ref - array of the reference points
-     !! @param[in] y_ref - array of the reference function values
-     !! @param[in] x_query - array of points where the function needs to be evaluated
-     !! @param[out] y_query - array of the interpolated values at x_query
-     !! @param[in]  num_query - number of query points
-     subroutine thiele_pade_mp_api(n_par, x_ref, y_ref, x_query, y_query, num_query) bind(C, name="thiele_pade_mp_api")
-       use iso_c_binding, only: c_int, c_double_complex
-       integer(c_int), value, intent(in)                      :: n_par 
-       complex(c_double_complex), dimension(*), intent(in)    :: x_ref 
-       complex(c_double_complex), dimension(*), intent(in)    :: y_ref 
-       complex(c_double_complex), dimension(*), intent(in)    :: x_query
-       complex(c_double_complex), dimension(*), intent(out)   :: y_query 
-       integer(c_int), value, intent(in)                      :: num_query
-     end subroutine
-  end interface 
 
 contains
 
@@ -102,11 +83,12 @@ contains
 
     !> N sampling points
     integer, parameter :: n = 100
+    type(params_mp) :: params
     !> Variable and function, respectively
     complex(dp), allocatable :: x(:), f(:)
     !> Pade approximant of f, and its reference value
-    complex(dp), allocatable :: xx(:)
-    complex(dp), allocatable :: f_approx(:)
+    complex(dp) :: xx
+    complex(dp) :: f_approx
     complex(dp) :: ref
     !> Some function center
     complex(dp), parameter :: x0 = cmplx(2.0_dp, 2.0_dp, kind=dp)
@@ -121,13 +103,15 @@ contains
        f(i) = -1.0_dp / (x(i) - x0)
     end do
 
-    allocate(xx(1), f_approx(1))
-    xx(1) = cmplx(1.0_dp, 1.0_dp, kind=dp)
-    ref = -1.0_dp / (xx(1) - x0)
-    call thiele_pade_mp_api(n, x, f, xx, f_approx, 1)
+    xx = cmplx(1.0_dp, 1.0_dp, kind=dp)
+    ref = -1.0_dp / (xx - x0)
+
+    call create_thiele_pade_mp(n, x, f, params)
+    call evaluate_thiele_pade_mp(xx, f_approx, params)
+
 
     !> Test execution
-    call test%assert(is_close(f_approx(1), ref, tol=tol), name = 'Test Pade GMP ~ -1 / (x - x0)')
+    call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test Pade GMP ~ -1 / (x - x0)')
 
     !> Clean-up
     deallocate(x)
@@ -179,9 +163,10 @@ contains
     integer, parameter :: n = 100
     !> Variable, function, and parameters, respectively
     complex(dp), allocatable :: x(:), f(:)
+    type(params_mp)          :: params
     !> Pade approximant of f, and its reference value
-    complex(dp), allocatable :: xx(:) 
-    complex(dp), allocatable :: f_approx(:)
+    complex(dp):: xx 
+    complex(dp) :: f_approx
     complex(dp) :: ref
     !> Tolerance
     real(dp) :: tol = 1.e-7_dp
@@ -194,13 +179,13 @@ contains
        f(i) = 1.0_dp / (-x(i) * x(i) + 1.0_dp)
     end do
 
-    allocate(xx(1), f_approx(1))
-    xx(1) = cmplx(1.0_dp, 3.0_dp, kind=dp) 
-    ref = 1.0_dp / (-xx(1) * xx(1) + 1.0_dp)
-    call thiele_pade_mp_api(n, x, f, xx, f_approx, 1)
+    xx = cmplx(1.0_dp, 3.0_dp, kind=dp) 
+    ref = 1.0_dp / (-xx * xx + 1.0_dp)
+    call create_thiele_pade_mp(n, x, f, params)
+    call evaluate_thiele_pade_mp(xx, f_approx, params)
 
     !> Test execution
-    call test%assert(is_close(f_approx(1), ref, tol=tol), name = 'Test GMP Thiele-Pade ~ 1 / (-x^2 + 1)')
+    call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test GMP Thiele-Pade ~ 1 / (-x^2 + 1)')
 
     !> Clean-up
     deallocate(x)
@@ -263,9 +248,10 @@ contains
     real(dp), parameter :: delta_eta = 0.0005_dp
     !> Variable, function, and parameters, respectively
     complex(dp), allocatable :: x(:), f(:)
+    type(params_mp)          :: params
     !> Pade approximant of f, and its reference value
-    complex(dp), allocatable :: xx(:) 
-    complex(dp), allocatable :: f_approx(:)
+    complex(dp) :: xx 
+    complex(dp) :: f_approx
     complex(dp) :: ref
     !> Test point
     !> Tolerance
@@ -284,14 +270,15 @@ contains
 
     f(:) = abs(x(:))
 
-    allocate(xx(1), f_approx(1))
-    xx(1) = cmplx(0.7_dp, 0.0_dp, kind=dp)
-    ref = abs(xx(1))
+    xx = cmplx(0.7_dp, 0.0_dp, kind=dp)
+    ref = abs(xx)
 
-    call thiele_pade_mp_api(npar, x, f, xx, f_approx, 1)
+    call create_thiele_pade_mp(npar, x, f, params)
+    call evaluate_thiele_pade_mp(xx, f_approx, params)
+
 
     !> Test execution
-    call test%assert(is_close(f_approx(1), ref, tol=tol), name = 'Test GMP Thiele-Pade ~ |x|')
+    call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test GMP Thiele-Pade ~ |x|')
 
     !> Clean-up
     deallocate(x)
