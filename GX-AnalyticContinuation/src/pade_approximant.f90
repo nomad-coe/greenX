@@ -58,7 +58,7 @@ contains
    !> @param[in]  xx  Pade will be computed for this value
    !> @return     pade   Pade approximant
    complex(dp) function pade(n, x, f, xx)
-      integer, intent(in) :: n
+      integer, intent(in)     :: n
       complex(dp), intent(in) :: xx
       complex(dp), intent(in) :: x(n), f(n)
 
@@ -82,7 +82,7 @@ contains
    !> @param[in]  xx  Pade will be computed for this value
    !> @return     pade   Derivative of the pade approximant
    complex(dp) function pade_derivative(n, x, f, xx)
-      integer, intent(in) :: n
+      integer, intent(in)     :: n
       complex(dp), intent(in) :: xx
       complex(dp), intent(in) :: x(n), f(n)
 
@@ -117,10 +117,11 @@ contains
    !> @param[in]  f  Function to approximate
    !> @return     a   Derivative of the pade approximant coefficients
    subroutine pade_coefficient_derivative(x, f, a)
-      complex(dp), intent(in) :: x(:), f(:)
+      complex(dp), intent(in)  :: x(:), f(:)
       complex(dp), intent(out) :: a(:)
 
-      integer :: i, j, n
+      ! Internal variables
+      integer                  :: i, j, n
       complex(dp), allocatable :: c(:, :)
 
       n = size(x)
@@ -150,42 +151,43 @@ contains
    !!  @param[in]  do_greedy - whether to use the default greedy algorithm or the naive one
    !!  @param[out] par - array of the interpolant parameters
    subroutine thiele_pade(n_par, x_ref, y_ref, a_par, do_greedy)
-      integer, intent(in)                                  :: n_par
-      complex(kind=dp), dimension(:), intent(inout)        :: x_ref
-      complex(kind=dp), dimension(:), intent(in)           :: y_ref
-      complex(kind=dp), dimension(:), intent(out)          :: a_par
-      logical, optional, intent(in)                        :: do_greedy
+      integer, intent(in)                           :: n_par
+      complex(kind=dp), dimension(:), intent(inout) :: x_ref
+      complex(kind=dp), dimension(:), intent(in)    :: y_ref
+      complex(kind=dp), dimension(:), intent(out)   :: a_par
+      logical, optional, intent(in)                 :: do_greedy
 
       ! Internal variables
-      logical                                              :: local_do_greedy = .True.
-      integer                                              :: i, i_par, idx, jdx, kdx, n_rem
-      integer, dimension(n_par)                            :: n_rem_idx
-      real(kind=dp), parameter                             :: tol = 1.0E-6_dp
-      real(kind=dp)                                        :: deltap, pval
-      complex(kind=dp)                                     :: pval_in, x_in, y_in, acoef_in, bcoef_in
-      complex(kind=dp), dimension(n_par, n_par)            :: g_func
-      complex(kind=dp), dimension(n_par)                   :: x, xtmp, ytmp
-      complex(kind=dp), dimension(-1:n_par)                :: acoef, bcoef
+      logical                                       :: local_do_greedy = .True.
+      integer                                       :: i, i_par, idx, jdx, kdx, n_rem
+      integer, dimension(n_par)                     :: n_rem_idx
+      real(kind=dp), parameter                      :: tol = 1.0E-6_dp
+      real(kind=dp)                                 :: deltap, pval
+      complex(kind=dp)                              :: pval_in, x_in, y_in, acoef_in, bcoef_in
+      complex(kind=dp), dimension(n_par, n_par)     :: g_func
+      complex(kind=dp), dimension(n_par)            :: x, xtmp, ytmp
+      complex(kind=dp), dimension(-1:n_par)         :: acoef, bcoef
 
       ! Whether to perform the refined Thiele's interpolation (default)
       if (present(do_greedy)) local_do_greedy = do_greedy
 
-      ! Initialize arrays
-      n_rem_idx = (/(i, i = 1, n_par)/)
-      a_par = c_zero
+      ! Initialize variables
       acoef_in = c_zero
       bcoef_in = c_zero
-      g_func = c_zero
       x_in = c_zero
       y_in = c_zero
-      x = c_zero
+
+      n_rem_idx(:) = (/(i, i = 1, n_par)/)
+      a_par(:) = c_zero
+      g_func(:, :) = c_zero
+      x(:) = c_zero
 
       if (local_do_greedy) then
          ! Unpack initial reference arguments, as they will be overwritten
          x(:) = x_ref
          x_ref = c_zero
 
-         ! Select first point as to maximize |F|
+         ! Select first point that maximizes |F|
          kdx = maxloc(abs(y_ref), dim=1)
          xtmp(1) = x(kdx)
          ytmp(1) = y_ref(kdx)
@@ -343,7 +345,7 @@ contains
       do i_par = 1, n_par
          call evaluate_thiele_pade_tab(i_par, x_ref , x, a_par, acoef, bcoef)
          if (abs(bcoef(i_par)) > tol) then
-            acoef(i_par) = acoef(i_par) / bcoef(i_par) 
+            acoef(i_par) = acoef(i_par) / bcoef(i_par)
             acoef(i_par - 1) = acoef(i_par - 1) / bcoef(i_par)
             bcoef(i_par - 1) = bcoef(i_par - 1) / bcoef(i_par)
             bcoef(i_par) = c_one
