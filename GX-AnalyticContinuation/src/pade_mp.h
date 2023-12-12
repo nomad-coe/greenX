@@ -66,7 +66,7 @@ public:
 
   /// @brief type casting to complex double
   /// @return complex double
-  operator std::complex<double>() {
+  operator std::complex<double>() const {
     return std::complex<double>(real_mp.get_d(), imag_mp.get_d());
   }
 

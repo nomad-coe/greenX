@@ -87,7 +87,8 @@ std::complex<double> evaluate_thiele_pade_mp(const std::complex<double> x,
     }
   }
 
-  return std::complex<double> (acoef[params->n_par - 1] / bcoef[params->n_par - 1]);
+  return std::complex<double>(acoef[params->n_par - 1] /
+                              bcoef[params->n_par - 1]);
 }
 
 /// @brief Gets the Pade approximant of a meromorphic function F
@@ -137,47 +138,86 @@ pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
       x_ref_mp[i_par] = ComplexGMP();
     }
 
+    /**********************************
+               a_0 coefficient
+    ***********************************/
+
     // Finding the index that maximizes |F|
-    auto it = std::max_element(y_ref_mp.begin(), y_ref_mp.end(),
-                               [](const ComplexGMP &a, const ComplexGMP &b) {
-                                 return a.abs() < b.abs();
-                               });
-    kdx = std::distance(y_ref_mp.begin(), it);
+    auto it_zero =
+        std::max_element(y_ref_mp.begin(), y_ref_mp.end(),
+                         [](const ComplexGMP &a, const ComplexGMP &b) {
+                           return a.abs() < b.abs();
+                         });
+    int kdx_zero = std::distance(y_ref_mp.begin(), it_zero);
 
-    // Update indexes of non-visited points
-    n_rem_idx.erase(n_rem_idx.begin() + kdx);
-    n_rem = n_par - 1;
+    // Add slected point
+    xtmp[0] = x[kdx_zero];
+    ytmp[0] = y_ref_mp[kdx_zero];
+    x_ref_mp[0] = x[kdx_zero];
 
-    // Add the winning point and compute generating function
-    xtmp[0] = x[kdx];
-    ytmp[0] = y_ref_mp[kdx];
-    x_ref_mp[0] = x[kdx];
-
-    // Compute the generating function for the first time
+    // Compute the generating function
     thiele_pade_gcoeff_mp(xtmp, ytmp, g_func, 0);
     a_par_mp[0] = g_func[0][0];
 
-    // Wallis' method coefficients
+    /**********************************
+               a_1 coefficient
+    ***********************************/
+
+    // Finding the index that maximizes abs(x-x_0) while excluding the first_kdx
+    int kdx_one = kdx_zero + 1;
+    ComplexGMP max_one;
+    for (int i = 0; i < x.size(); ++i) {
+      if (i == kdx_zero)
+        continue;
+
+      ComplexGMP current_diff = x[i] - x_ref_mp[0];
+      if (i == 0 || current_diff.abs() > max_one.abs()) {
+        kdx_one = i;
+        max_one = current_diff;
+      }
+    }
+
+    // Add selected point
+    xtmp[1] = x[kdx_one];
+    ytmp[1] = y_ref_mp[kdx_one];
+    x_ref_mp[1] = x[kdx_one];
+
+    // Compute the generating function
+    thiele_pade_gcoeff_mp(xtmp, ytmp, g_func, 1);
+    a_par_mp[1] = g_func[1][1];
+
+    /**********************************
+          Wallis' method coefficients
+    ***********************************/
+
     acoef[0] = a_par_mp[0];
     bcoef[0] = c_one;
 
+    // Update indexes of non-visited points
+    if (kdx_zero > kdx_one)
+      std::swap(kdx_zero, kdx_one);
+
+    n_rem_idx.erase(n_rem_idx.begin() + kdx_one);
+    n_rem_idx.erase(n_rem_idx.begin() + kdx_zero);
+    n_rem = n_par - 2;
+
     // Add remaining points ensuring min |P_i(x_{1+1}) - F(x_{i+1})|
-    for (int idx = 1; idx < n_par; ++idx) {
+    for (int idx = 2; idx < n_par; ++idx) {
       pval = mpf_class("1e9999", PREC); // Huge value
 
       for (int jdx = 0; jdx < n_rem; ++jdx) {
         // Compute next convergent P_i(x_{i+1})
         evaluate_thiele_pade_tab_mp<ComplexGMP>(
-            idx - 1, xtmp, x[n_rem_idx[jdx]], a_par_mp, acoef, bcoef);
-        pval_in = acoef[idx] / bcoef[idx];
+            idx - 2, xtmp, x[n_rem_idx[jdx]], a_par_mp, acoef, bcoef);
+        pval_in = acoef[idx - 1] / bcoef[idx - 1];
         deltap = (pval_in - y_ref_mp[n_rem_idx[jdx]]).abs();
 
         if (deltap < pval) {
           pval = deltap;
           x_in = x[n_rem_idx[jdx]];
           y_in = y_ref_mp[n_rem_idx[jdx]];
-          acoef_in = acoef[idx];
-          bcoef_in = bcoef[idx];
+          acoef_in = acoef[idx - 1];
+          bcoef_in = bcoef[idx - 1];
           kdx = jdx;
         }
       }
@@ -192,13 +232,13 @@ pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
       ytmp[idx] = y_in;
 
       // Rescale Wallis coefficients to avoid overflow
-      acoef[idx] = acoef_in;
-      bcoef[idx] = bcoef_in;
+      acoef[idx - 1] = acoef_in;
+      bcoef[idx - 1] = bcoef_in;
       if (bcoef_in.abs() > tol) {
-        acoef[idx] = acoef[idx] / bcoef_in;
         acoef[idx - 1] = acoef[idx - 1] / bcoef_in;
-        bcoef[idx - 1] = bcoef[idx - 1] / bcoef_in;
-        bcoef[idx] = c_one;
+        acoef[idx - 2] = acoef[idx - 2] / bcoef_in;
+        bcoef[idx - 2] = bcoef[idx - 2] / bcoef_in;
+        bcoef[idx - 1] = c_one;
       }
 
       thiele_pade_gcoeff_mp(xtmp, ytmp, g_func, idx);
