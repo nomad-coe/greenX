@@ -13,10 +13,12 @@ module gx_ac
    public :: thiele_pade_api, &
       params_mp, &
       create_thiele_pade_mp, &
-      evaluate_thiele_pade_mp
+      evaluate_thiele_pade_mp, &
+      free_pade_model
 
    !> brief store arbitrary precision parameters
    type :: params_mp
+      logical     :: initialized = .False.
       type(c_ptr) :: params_ptr
    end type params_mp
 
@@ -116,6 +118,7 @@ contains
       end if
 
       ! compute coefficients
+      params%initialized = .True.
       params%params_ptr = thiele_pade_mp_aux(n_par, x_ref, y_ref, local_do_greedy)
 
    end subroutine create_thiele_pade_mp
@@ -128,6 +131,9 @@ contains
       complex(kind=dp), intent(in)     :: x
       complex(kind=dp), intent(out)    :: y
       type(params_mp), intent(in)      :: params
+      
+      y = cmplx(0.0d0, 0.0d0, kind=8)
+      if (.not. params%initialized)  return
 
       y = evaluate_thiele_pade_mp_aux(x, params%params_ptr)
 
