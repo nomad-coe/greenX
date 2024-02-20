@@ -11,6 +11,9 @@ module gx_ac
    implicit none
 
    public :: thiele_pade_api, &
+      params, &
+      create_thiele_pade, &
+      evaluate_thiele_pade_at, &
       params_mp, &
       create_thiele_pade_mp, &
       evaluate_thiele_pade_mp, &
@@ -21,6 +24,14 @@ module gx_ac
       logical     :: initialized = .False.
       type(c_ptr) :: params_ptr
    end type params_mp
+
+   type :: params
+       logical    :: initialized = .false.
+       integer    :: n_par
+       complex(kind=dp), dimension(:), allocatable :: x_ref
+       complex(kind=dp), dimension(:), allocatable :: a_par
+   end type params
+
 
    interface
 
@@ -92,6 +103,62 @@ contains
       end do
 
    end subroutine thiele_pade_api
+
+   type(params) function create_thiele_pade(n_par, x, y, do_greedy) result(par)
+      integer, intent(in)                        :: n_par
+      complex(kind=dp), dimension(:), intent(in) :: x, y
+      logical, optional, intent(in)              :: do_greedy
+
+      ! initialize type
+      par%initialized = .true.
+      par%n_par = n_par
+      allocate(par%a_par(n_par))
+      allocate(par%x_ref(size(x)))
+
+      ! compute the coefficients 
+      par%x_ref(:) = x
+      call thiele_pade(n_par, par%x_ref, y, par%a_par, do_greedy)
+
+   end function create_thiele_pade 
+
+
+
+   function evaluate_thiele_pade_at(par, x) result(y)
+      type(params), intent(in) :: par
+      complex(kind=dp), dimension(:), intent(in) :: x
+      complex(kind=dp), dimension(size(x)) :: y
+
+      ! internal variables
+      integer :: num_query, i
+
+      ! initialized?
+      if (par%initialized .eqv. .false.) then 
+          print *, "WARNING: pade parameters not initialized"
+      end if 
+
+      ! Compute the number of query points
+      num_query = size(x)
+
+      ! Evaluate the Thiele-Pade approximation at the query points
+      do i = 1, num_query
+         call evaluate_thiele_pade(par%n_par, par%x_ref, x(i), par%a_par, y(i))
+      end do
+
+   end function evaluate_thiele_pade_at
+
+
+
+   subroutine free_params(par)
+       type(params), intent(inout) :: par 
+
+       if (allocated(par%a_par)) deallocate(par%a_par)
+       if (allocated(par%x_ref)) deallocate(par%x_ref)
+
+   end subroutine free_params
+
+
+
+
 
    !> API function to compute Thiele-Pade parameters using arbitrary precision numbers
    !! @param[in] n_par - order of the interpolant
