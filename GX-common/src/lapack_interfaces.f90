@@ -8,6 +8,7 @@
 module lapack_interfaces
   implicit none
 
+
   interface blas3
      subroutine dgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)
        use kinds, only: dp
@@ -35,5 +36,26 @@ module lapack_interfaces
      end subroutine dgesdd
   end interface
 
-end module lapack_interfaces
-  
+  !interface num_prec
+  !   real(kind=dp) function dlamch(cmach)
+  !     implicit none             
+  !     character(len=1), intent(in) :: cmach
+  !   end function dlamch 
+  !end interface
+
+  interface diag
+     subroutine dsyevx(jobz, range, uplo, n, a, lda, vl, vu, il, iu, abstol, &
+                            m, w, z, ldz, work, lwork, iwork, ifail, info) 
+       use kinds, only: dp     
+       implicit none
+       character(len=1), intent(in) :: jobz, range, uplo
+       integer, intent(in)          :: il, iu, lda, ldz, lwork, m, n
+       integer, intent(out)         :: info
+       real(kind=dp), intent(in)    :: abstol, vl, vu
+
+       integer, intent(in)          :: ifail(*), iwork(*)
+       real(kind=dp), intent(inout) :: a(lda, *), w(*), work(*), z(ldz,*)
+     end subroutine dsyevx
+  end interface
+
+end module lapack_interfaces 
