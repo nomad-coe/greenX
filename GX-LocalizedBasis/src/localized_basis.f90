@@ -1,8 +1,15 @@
+! **************************************************************************************************
+!  Copyright (C) 2020-2024 GreenX library
+!  This file is distributed under the terms of the APACHE2 License.
+!
+! **************************************************************************************************
+!> \brief This module contains the subroutines for the localized basis set component of the library
+! ***************************************************************************************************
 module localized_basis
 
    use kinds,                        only: dp
    use lapack_interfaces,            only: dgemm  
-   use localized_basis_types
+   use localized_basis_types,        only: separable_ri_types
    use localized_basis_environments, only: calculate_error, power_genmat, &
                                            initialization, deallocations
 
@@ -10,7 +17,16 @@ module localized_basis
    implicit none
 
    contains
-
+  !> brief Compute the the three-center overlap integral (O_mn^P) using 
+  !>        the separable resolution of the identity method 
+  !! @param[in] n_basis_pairs: Number of orbital basis pairs (dimension 1 of ovlpXfn array)
+  !! @param[in] n_basbas: Number of auxiliary basis fuctions (dimension 2 of ovlp3fn array)
+  !! @param[in] n_rk_points: Number of real-space grid points (dimension 2 of ovlp2fn array)
+  !! param[in] ovlp_2fn: real array, the product of two NAO basis functions
+  !! param[in] ovlp_3fn: real array, the three-center overlap integral over two
+  !!                       NAO basis functions and one auxiliary basis function.
+  !! param[out] error: real number, maximum error between Coulomb and real-space resolution of
+  !!                   the identity fitting coefficients.
    subroutine gx_rirs_coefficients(n_basbas,n_basis_pairs,n_rk_points, &
                                    ovlp2fn,ovlp3fn,error)
 
@@ -37,13 +53,13 @@ module localized_basis
 
    end subroutine gx_rirs_coefficients
 
-! **********************************************************************
-!> brief Compute the the three-center overlap integral (O_mn^P) using 
-!        the separable resulution of identity method  
-!  o ri_rs -- Separable resolution-of-the identity environment 
-!  o ovlp_3fn -- real array, the three-center overlap integral over two
-!                NAO basis functions and one auxiliary basis function.
-! ********************************************************************** 
+  !> brief Compute the the three-center overlap integral (O_mn^P) using 
+  !>        the separable resulution of identity method  
+  !! param[inout] ri_rs:  Separable resolution-of-the identity environment 
+  !! param[in] ovlp_3fn:  real array, the three-center overlap integral over two
+  !!                       NAO basis functions and one auxiliary basis function.
+  !! @param[in] n_basis_pairs: Number of orbital basis pairs (dimension 1 of ovlp3fn array)
+  !! @param[in] n_basbas: Number of auxiliary basis fuctions (dimension 2 of ovlp3fn array)
    subroutine compute_ovlp3fn(ri_rs, ovlp3fn, n_basbas, n_basis_pairs)
  
    type(separable_ri_types) :: ri_rs
@@ -61,13 +77,13 @@ module localized_basis
 
   end subroutine compute_ovlp3fn
 
-! **********************************************************************
-!> brief Compute the least-square coefficients of the separable RI method
-!  M_Pk^k=\sum_k[(\sum_ij M_ij^P * D_ij^k') (sum_ij D_ij^k * D_ij^k')^-1]
-!  o ri_rs -- Separable resolution-of-the identity environment 
-!  o ovlp_3fn -- real array, the three-center overlap integral over two
-!                NAO basis functions and one auxiliary basis function.
-! **********************************************************************
+  !> brief Compute the least-square coefficients of the separable RI method
+  !>  M_Pk^k=\sum_k[(\sum_ij M_ij^P * D_ij^k') (sum_ij D_ij^k * D_ij^k')^-1]
+  !! param[inout] ri_rs:  Separable resolution-of-the identity environment 
+  !! param[in] ovlp_3fn:  real array, the three-center overlap integral over two
+  !!                       NAO basis functions and one auxiliary basis function.
+  !! @param[in] n_basis_pairs: Number of orbital basis pairs (dimension 1 of ovlp3fn array)
+  !! @param[in] n_basbas: Number of auxiliary basis fuctions (dimension 2 of ovlp3fn array)
    subroutine get_coeff_zrs (ri_rs,ovlp3fn,n_basis_pairs,n_basbas)
 
    type(separable_ri_types) :: ri_rs

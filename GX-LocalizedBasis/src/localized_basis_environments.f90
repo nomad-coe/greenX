@@ -1,8 +1,15 @@
+! **************************************************************************************************
+!  Copyright (C) 2020-2024 GreenX library
+!  This file is distributed under the terms of the APACHE2 License.
+!
+! **************************************************************************************************
+!> \brief This module contains the subroutines for the localized basis set component of the library
+! ***************************************************************************************************
 module localized_basis_environments
 
-   use kinds,             only: dp
-   use localized_basis_types
-   use lapack_interfaces, only: dgemm, dsyevx
+   use kinds,                 only: dp
+   use localized_basis_types, only: separable_ri_types
+   use lapack_interfaces,     only: dgemm, dsyevx
 
 
    implicit none
@@ -11,6 +18,8 @@ module localized_basis_environments
 
    contains
 
+  !> \brief Initialize the ri_rs types.
+  !! @param[inout] ri_rs: type for the separable ri
    subroutine initialization(ri_rs)
 
    type(separable_ri_types) :: ri_rs
@@ -37,6 +46,8 @@ module localized_basis_environments
    
    end subroutine initialization
 
+  !> \brief Deallocate the ri_rs types.
+  !! @param[inout] ri_rs: type for the separable ri   
    subroutine deallocations(ri_rs)
 
    type(separable_ri_types) :: ri_rs
@@ -49,6 +60,12 @@ module localized_basis_environments
 
    end subroutine deallocations
 
+  !> \brief Compute the error between the RI-V and RI-RS three center overlap coefficients
+  !! @param[in] ri_rs: Type for the separable ri
+  !! @param[in] n_basis_pairs: Number of orbital basis pairs (dimension 1 of ovlp3fn array)
+  !! @param[in] n_basbas: Number of auxiliary basis fuctions (dimension 2 of ovlp3fn array)
+  !! @param[in] ovlp3fn: RI-V three-center overlap coefficients
+  !! @param[out] n_basis_pairs: maximun error
    subroutine calculate_error(ri_rs, n_basis_pairs, n_basbas, ovlp3fn, error)
 
    integer n_basbas, n_basis_pairs
@@ -64,7 +81,6 @@ module localized_basis_environments
 
    !*******************************************************************!
 
-
    do i_pair=1,n_basis_pairs
       do i_basbas=1, n_basbas
          tmp_error = abs(ri_rs%ovlp3fn(i_pair,i_basbas) - ovlp3fn(i_pair,i_basbas))
@@ -72,9 +88,10 @@ module localized_basis_environments
       end do
    end do
 
-
    end subroutine calculate_error
 
+  !> \brief Get the machine precision for safe threshold during the lapack diagonalization
+  !! @param[in] safe_minimum: Type for the separable ri
    subroutine get_machine_precision(safe_minimum)
 
    real(kind=dp) :: safe_minimum
@@ -84,6 +101,11 @@ module localized_basis_environments
 
    end subroutine get_machine_precision
 
+  !> \brief Compute the power of a matrix using the lapack diagonalization
+  !! @param[inout] matrix: working array
+  !! @param[in] n_dim: dimension of the working array
+  !! @param[in] power: exponent of the power
+  !! @param[in] threshold: threshold for the eigenvalue 
    subroutine power_genmat(matrix, n_dim, power, threshold)
 
    integer :: n_dim
@@ -138,6 +160,13 @@ module localized_basis_environments
 
    end subroutine power_genmat
 
+  !> \brief Perform lapack diagonalization 
+  !! @param[inout] matrix: working array
+  !! @param[in] n_dim: dimension of the working array
+  !! @param[in] threshold: threshold for the eigenvalue
+  !! @param[in] n_singular: number of non singular eigenvalues
+  !! @param[in] eigenvalues: array that contains the eigenvalues
+  !! @param[in] work: auxiliary working array
    subroutine diagonalize_genmat(matrix,n_dim,threshold,n_nonsingular,eigenvalues,work) 
 
    integer                                 :: n_dim,n_nonsingular
