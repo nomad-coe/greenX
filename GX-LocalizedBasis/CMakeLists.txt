@@ -28,10 +28,10 @@ target_include_directories(LibGXLBasis PUBLIC src/ api/)
 
 # Define source that comprise LibGXLBasis
 target_sources(LibGXLBasis PRIVATE
-	src/localized_basis.f90
+	src/separable_ri.f90
         src/localized_basis_types.f90
 	src/localized_basis_environments.f90
-	api/gx_loc_basis.f90
+	api/gx_localized_basis.f90
         )
 
 # Link external libraries and lower-level GX lib dependency

@@ -1,7 +1,7 @@
 program test_gx_localized_basis
 
    use kinds,                           only: dp        
-   use localized_basis,                 only: gx_rirs_coefficients
+   use gx_localized_basis,              only: gx_rirs_coefficients
 
    implicit none
 
@@ -55,8 +55,9 @@ program test_gx_localized_basis
    close(unit_id)
 
    ! Call proccedure 
-   call gx_rirs_coefficients(n_basbas,n_basis_pairs,n_rk_points, &
+   call gx_rirs_coefficients(n_basis_pairs,n_basbas,n_rk_points, &
                              ovlp2fn,ovlp3fn,error)
+
 
    ! Deallocation of working arrays
    deallocate(ovlp2fn,ovlp3fn)

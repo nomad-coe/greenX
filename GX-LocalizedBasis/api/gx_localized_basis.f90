@@ -15,6 +15,6 @@
 
 module gx_localized_basis
 
-   use localized_basis,  only: gx_rirs_coefficients
+   use separable_ri,  only: gx_rirs_coefficients
 
 end module gx_localized_basis
