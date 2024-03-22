@@ -64,6 +64,8 @@ contains
         ref = cmplx(0.5, -0.5, dp)
         f_approx = pade(n, x, f, xx)
 
+        write(*,'(A6,2F24.16)') " Ref: ", ref
+        write(*,'(A6,2F24.16)') "Test: ", f_approx
         call test%assert(is_close(f_approx, ref, tol=tol), name = 'Test pade ~ -1 / (x - x0)')
 
     end subroutine test_pade
