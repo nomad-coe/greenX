@@ -2,12 +2,17 @@
 # CMake will append CMAKE_Fortran_FLAGS with CMAKE_Fortran_FLAGS_BUILDTYPE
 # CMAKE_Fortran_FLAGS_BUILDTYPE may also have predefined values, hence initialise it 
 
-# GCC
-set(GCC_BASE
-     -std='f2008'            # Fortran standard set to 2008
-     -fimplicit-none         # Specify that no implicit typing is allowed
-     -ffree-line-length-0    # No fixed line length
+# Standard flags to use in all cases
+set(STD_FFLAGS 
+    -std='f2008'            # Fortran standard set to 2008
+    -fimplicit-none         # Specify that no implicit typing is allowed
+    -ffree-line-length-0    # No fixed line length
    )
+string(REPLACE ";" " " STD_FFLAGS "${STD_FFLAGS}")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${STD_FFLAGS}")
+
+
+# GCC
 set(GCC_DEBUG 
      -g               # Generate symbols
      -fbacktrace      # symbolic stack traceback
@@ -18,15 +23,10 @@ set(GCC_DEBUG
 set(GCC_RELEASE -O3)  # Level 3 optimisation. Could also consider -fpack-derived
 
 # Intel 
-set(INTEL_BASE
-    -stand f08          # Set standard to Fortran 2008 and warn for non-standard language elements
-    -implicitnone       # Set the default type of a variable to undefined
-    -diag-disable=5268  # Remove warning: Extension to standard: The text exceeds right hand column allowed on the line.
-    -free               # Specify free-fortmat
-   )
 set(INTEL_DEBUG 
     -g           # Generate symbols
     -traceback   # symbolic stack traceback
+    -fp          # Disables the ebp register in optimizations and sets the ebp register to be used as the frame pointer.
     -check all    # Checks for all runtime failures.
     -check bounds # Generates code to perform runtime checks on array subscript and character substring expressions. 
     -check-uninit #  Enables runtime checking for uninitialized variables.
@@ -42,12 +42,10 @@ set(INTEL_RELEASE
    )
 
 if (CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
-   set(FF_BASE ${GCC_BASE})
    set(FF_DEBUG ${GCC_DEBUG})
    set(FF_RELEASE ${GCC_RELEASE})
 
 elseif (CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
-   set(FF_BASE ${INTEL_BASE})
    set(FF_DEBUG ${INTEL_DEBUG})
    set(FF_RELEASE ${INTEL_RELEASE})
 
@@ -56,12 +54,9 @@ else ()
             ${CMAKE_Fortran_COMPILER_ID}")
 endif()
 
-string(REPLACE ";" " " FF_BASE "${FF_BASE}")
 string(REPLACE ";" " " FF_DEBUG "${FF_DEBUG}")
 string(REPLACE ";" " " FF_RELEASE "${FF_RELEASE}")
 
-# Standard flags to use in all cases
-set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${FF_BASE}")
 # Initialise BUILDTYPE flags so we completely define/control
 # the compiler settings
 set(CMAKE_Fortran_FLAGS_DEBUG "${FF_DEBUG}")
