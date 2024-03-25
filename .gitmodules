@@ -1,0 +1,6 @@
+[submodule "GX-q=0/IDieL"]
+	path = GX-q=0/IDieL
+	url = https://github.com/mrm24/inverse_dielectric
+[submodule "GX-PlaneWaves/ABINITv10.0.1/abinit"]
+	path = GX-PlaneWaves/ABINITv10.0.1/abinit
+	url = https://github.com/abinit/abinit
