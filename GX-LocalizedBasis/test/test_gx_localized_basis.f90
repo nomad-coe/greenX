@@ -1,3 +1,9 @@
+! **************************************************************************************************
+!  Copyright (C) 2020-2024 GreenX library
+!  This file is distributed under the terms of the APACHE2 License.
+!
+! **************************************************************************************************
+
 program test_gx_localized_basis
 
    use kinds,                           only: dp        
