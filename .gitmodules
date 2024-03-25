@@ -4,3 +4,7 @@
 [submodule "GX-PlaneWaves/ABINITv10.0.1/abinit"]
 	path = GX-PlaneWaves/ABINITv10.0.1/abinit
 	url = https://github.com/abinit/abinit
+[submodule "GX-LAPW/exciting_cubic_gw"]
+	path = GX-LAPW/exciting_cubic_gw
+	url = https://github.com/exciting/exciting.git
+	branch = cubic_GW
