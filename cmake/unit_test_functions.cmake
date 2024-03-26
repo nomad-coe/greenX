@@ -44,7 +44,7 @@ function(create_unit_test_executable)
     add_custom_command(
             OUTPUT "${FUNC_TARGET_TEST_DIR}/${FUNC_TEST_NAME}_driver.f90"
             # For example, ./zofu-driver path/to/module.f90 target/location/module_driver.f90
-            COMMAND ${ZOFU_DRIVER} "${CMAKE_CURRENT_SOURCE_DIR}/src/${FUNC_TEST_NAME}.f90" "${FUNC_TARGET_TEST_DIR}/${FUNC_TEST_NAME}_driver.f90"
+            COMMAND ${ZOFU_DRIVER} "${CMAKE_CURRENT_SOURCE_DIR}/test/${FUNC_TEST_NAME}.f90" "${FUNC_TARGET_TEST_DIR}/${FUNC_TEST_NAME}_driver.f90"
             COMMENT "Generating ${FUNC_TARGET_TEST_DIR}/${FUNC_TEST_NAME}_driver.f90"
     )
 
@@ -61,7 +61,7 @@ function(create_unit_test_executable)
     # Specify source code that the target will depend on
     target_sources(${FUNC_TEST_NAME} PRIVATE
             # Test module
-            src/${FUNC_TEST_NAME}.f90
+            test/${FUNC_TEST_NAME}.f90
             # Trivial, aut-generated program to execute module
             "${FUNC_TARGET_TEST_DIR}/${FUNC_TEST_NAME}_driver.f90")
 

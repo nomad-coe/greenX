@@ -32,7 +32,7 @@ jobs:
         run: pip3 install numpy pytest
 
       - name: Install blas, lapack and other dependencies
-        run: sudo apt-get install libblas-dev liblapack-dev doxygen
+        run: sudo apt-get install libblas-dev liblapack-dev doxygen libgmp10 libgmpxx4ldbl libgmp-dev
 
       - name: Install Zofu Test Framework
         run: |
@@ -51,7 +51,10 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -DENABLE_UNITTESTS=ON -DZOFU_PATH=/home/runner/work/greenX/greenX/external/zofu/install ../
+          cmake -DENABLE_UNITTESTS=ON \
+                -DZOFU_PATH=/home/runner/work/greenX/greenX/external/zofu/install \
+                -DGMPXX_INCLUDE_DIR=/usr/include/ \
+                -DGMPXX_LIBRARY=/usr/lib/x86_64-linux-gnu/libgmpxx.so.4.6.0 ../
           make -j$(nproc) VERBOSE=1
 
       - name: Run Tests

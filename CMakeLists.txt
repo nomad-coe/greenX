@@ -8,17 +8,19 @@
 cmake_minimum_required(VERSION 3.15.0)
 
 project(greenX
-    LANGUAGES Fortran
-    VERSION 0.0.1
+  LANGUAGES Fortran
+  VERSION 0.0.1
 )
 
-#To use the Intel MKL implementation of BLAS, a project must enable at least one of the C or CXX languages.
+# Need for Intel MKL and for GNU GMP
 enable_language(CXX)
+
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 17)
 
 # Set folder structure for build directory
 set(CMAKE_Fortran_BIN_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_Fortran_LIB_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
-# Note, this will put modules of each library in <BUILD_DIR>/modules
 set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/modules)
 
 # Define GNU standard installation directories
@@ -47,9 +49,9 @@ include(cmake/python3.cmake)
 
 find_package(Python3 3.7 COMPONENTS Interpreter Development)
 if(Python3_FOUND)
-    message("-- Python 3 interpreter version: " ${Python3_VERSION})
+  message("-- Python 3 interpreter version: " ${Python3_VERSION})
 else()
-    message("-- Python 3 interpreter not found")
+  message("-- Python 3 interpreter not found")
 endif()
 
 # Enable ctest
@@ -60,16 +62,22 @@ enable_testing()
 # pygreenx version specified in its setup.cfg
 find_python_module(pygreenx VERSION 0.0.1)
 if (NOT pygreenx_FOUND)
-    message("-- pygreenx is required for application testing. To install it, cd <PROJECTROOT>/python and run `pip install -e .`")
+  message("-- pygreenx is required for application testing. To install it, cd <PROJECTROOT>/python and run `pip install -e .`")
 endif ()
 
+# Optional multiple precision arithmetic
+option(ENABLE_GNU_GMP "Enable the GNU GMP library for multiple precision arithmetic" ON)
+if (${ENABLE_GNU_GMP})
+  find_package(GMPXX)
+endif()
+
 # Optional unit testing lib
-option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" OFF)
+option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" ON)
 if (${ENABLE_UNITTESTS})
-    # Function for generating unit test executables (assumes Zofu)
-    include(cmake/unit_test_functions.cmake)
-    # Calling find_package is equivalent to: include(cmake/Findzofu.cmake)
-    find_package(zofu REQUIRED)
+  # Function for generating unit test executables (assumes Zofu)
+  include(cmake/unit_test_functions.cmake)
+  # Calling find_package is equivalent to: include(cmake/Findzofu.cmake)
+  find_package(zofu REQUIRED)
 endif()
 
 # Our library directories
@@ -82,17 +90,17 @@ add_subdirectory(GX-LocalizedBasis)
 # Documentation
 option(ENABLE_DOCS "Enable documentation" OFF)
 if (${ENABLE_DOCS})
-    find_program(DOXYGEN doxygen REQUIRED)
-    message("-- Doxygen documentation support enabled.")
-    set(doxy_output "documentation")
-    file(MAKE_DIRECTORY ${doxy_output})
-    add_custom_target(docs COMMAND ${DOXYGEN} ${PROJECT_SOURCE_DIR}/Doxyfile)
+  find_program(DOXYGEN doxygen REQUIRED)
+  message("-- Doxygen documentation support enabled.")
+  set(doxy_output "documentation")
+  file(MAKE_DIRECTORY ${doxy_output})
+  add_custom_target(docs COMMAND ${DOXYGEN} ${PROJECT_SOURCE_DIR}/Doxyfile)
 endif ()
 
 # Set installation location
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(default_install_prefix "${PROJECT_SOURCE_DIR}/install")
-    set(CMAKE_INSTALL_PREFIX ${default_install_prefix}
-            CACHE STRING "Choose the installation directory. Default location is ${default_install_prefix}"
-            FORCE)
+  set(default_install_prefix "${PROJECT_SOURCE_DIR}/install")
+  set(CMAKE_INSTALL_PREFIX ${default_install_prefix}
+    CACHE STRING "Choose the installation directory. Default location is ${default_install_prefix}"
+    FORCE)
 endif()
