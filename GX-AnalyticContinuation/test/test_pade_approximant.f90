@@ -112,7 +112,7 @@ contains
     ref = -1.0_dp / (xx(1) - x0)
 
     params_thiele = create_thiele_pade(n, x, f)
-    f_approx = evaluate_thiele_pade_at(params_thiele, xx)
+    f_approx(1:1) = evaluate_thiele_pade_at(params_thiele, xx)
 
     !> Test execution
     call test%assert(is_close(f_approx(1), ref, tol=tol), name = 'Test Pade GMP ~ -1 / (x - x0)')
@@ -190,7 +190,7 @@ contains
     xx = cmplx(1.0_dp, 3.0_dp, kind=dp) 
     ref = 1.0_dp / (-xx(1) * xx(1) + 1.0_dp)
     params_thiele = create_thiele_pade(n, x, f)
-    f_approx = evaluate_thiele_pade_at(params_thiele, xx)
+    f_approx(1:1) = evaluate_thiele_pade_at(params_thiele, xx)
 
     !> Test execution
     call test%assert(is_close(f_approx(1), ref, tol=tol), name = 'Test GMP Thiele-Pade ~ 1 / (-x^2 + 1)')
@@ -286,8 +286,7 @@ contains
     ref = abs(xx(1))
 
     params_thiele = create_thiele_pade(npar, x, f)
-    f_approx =  evaluate_thiele_pade_at(params_thiele, xx)
-
+    f_approx(1:1) =  evaluate_thiele_pade_at(params_thiele, xx)
 
     !> Test execution
     call test%assert(is_close(f_approx(1), ref, tol=tol), name = 'Test GMP Thiele-Pade ~ |x|')
