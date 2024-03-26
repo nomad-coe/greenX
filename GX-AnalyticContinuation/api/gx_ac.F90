@@ -18,8 +18,8 @@ module gx_ac
              free_params, &
              arbitrary_precision_available
 
-   !> brief store the parameters of the tiehle pade model 
-   !> (potentially in abitrary precision floats using GMP)
+   !> @brief store the parameters of the tiehle pade model 
+   !!!       (potentially in abitrary precision floats using GMP)
    type :: params 
        logical    :: initialized = .false.
        integer    :: n_par
@@ -43,7 +43,9 @@ module gx_ac
 #ifdef GMPXX_FOUND
    interface
 
-      !> auxiliary function to compute Thiele-Pade parameters using arbitrary precision numbers
+      !> @brief auxiliary function to compute Thiele-Pade parameters using 
+      !!        arbitrary precision numbers
+      !!
       !! @param[in] n_par - order of the interpolant
       !! @param[in] x_ref - array of the reference points
       !! @param[in] y_ref - array of the reference function values
@@ -59,7 +61,9 @@ module gx_ac
          type(c_ptr)                              :: thiele_pade_mp_aux
       end function thiele_pade_mp_aux
 
-      !> auxiliary function to evaluate the Thiele-Pade parameters using arbitrary precision numbers
+      !> @brief auxiliary function to evaluate the Thiele-Pade parameters using 
+      !!        arbitrary precision numbers
+      !!
       !! @param[in] x - point where the function needs to be evaluated
       !! @param[in] params_ptr - pointer to abstract type to store all parameters
       !! @return - interpolated function value
@@ -70,7 +74,8 @@ module gx_ac
          complex(c_double_complex)           :: evaluate_thiele_pade_mp_aux
       end function evaluate_thiele_pade_mp_aux
 
-      !> Frees the C++ pointers used in the Fortran type
+      !> @brief Frees the C++ pointers used in the Fortran type
+      !!
       !! @param[in] params_ptr - the C++ pointer
       subroutine free_pade_model(params_ptr) bind(C, name="free_pade_model")
          import :: c_ptr
@@ -82,7 +87,9 @@ module gx_ac
 
 contains
 
-   !> API function to compute Thiele-Pade approximations of a meromorphic function
+   !> @brief API function to compute Thiele-Pade approximations of a meromorphic 
+   !!        function
+   !!
    !! @param[in] n_par - order of the interpolant
    !! @param[in] x_ref - array of the reference points
    !! @param[in] y_ref - array of the reference function values
@@ -116,8 +123,8 @@ contains
 
 
 
-   !> API function to compute Thiele-Pade parameters 
-   !! (potentially using arbitrary precision arithmetic)
+   !> @brief API function to compute Thiele-Pade parameters 
+   !!        (potentially using arbitrary precision arithmetic)
    !!
    !! @param[in] n_par - order of the interpolant
    !! @param[in] x     - array of the reference points
@@ -196,8 +203,8 @@ contains
 
 
 
-   !> API function to evaluate the Thiele-Pade approximation 
-   !! (potentially using arbitrary precision numbers)
+   !> @brief API function to evaluate the Thiele-Pade approximation 
+   !!        (potentially using arbitrary precision numbers)
    !!
    !! @param[in] x - point where the function is evaluated
    !! @param[in] params - abstract type to store all parameters 
@@ -237,7 +244,7 @@ contains
 
 
 
-   !> deallocate the pade model 
+   !> @brief deallocate the pade model 
    !!
    !! @param[inout] par - pade model struct 
    subroutine free_params(par)

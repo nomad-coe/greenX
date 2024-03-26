@@ -26,38 +26,48 @@ module test_pade_approximant
 
 contains
 
-  ! Unfortunately Zofu asserts require real or double precision declarations
-  ! (etc), which are not equivalent to real(dp), complex(dp)...
-  ! so one needs a helper function such that a logical can be evaluated.
-  ! Sensible thing would be to fork the framework and modify, or open a PR.
+
+  !> @brief helper function to assert if the difference between two complex 
+  !!        numbers is under a threshold
+  !!
+  !! Unfortunately Zofu asserts require real or double precision declarations
+  !! (etc), which are not equivalent to real(kind=dp), complex(kind=dp)...
+  !! so one needs a helper function such that a logical can be evaluated.
+  !! Sensible thing would be to fork the framework and modify, or open a PR.
+  !!
+  !! @param[in] a   - complex number
+  !! @param[in] b   - complex number
+  !! @param[in] tol - threshold
+  !! @return (abs(a - b) <= tol)
   logical function is_close_complex_dp(a, b, tol)
-    complex(dp), intent(in) :: a
-    complex(dp), intent(in) :: b
-    real(dp), optional, intent(in) :: tol
+    complex(kind=dp), intent(in) :: a
+    complex(kind=dp), intent(in) :: b
+    real(kind=dp), optional, intent(in) :: tol
     ! abs() evaluates to real, hence tolerance is real
-    real(dp) :: tolerance = 1.-8_dp
+    real(kind=dp) :: tolerance = 1.-8_dp
     if (present(tol)) tolerance = tol
     is_close_complex_dp = abs(a - b) <= tolerance
   end function is_close_complex_dp
 
 
 
-  !> Test the Pade interpolant against the function -1 / (x - x0)
+  !> @brief Test the Pade interpolant against the function -1 / (x - x0)
+  !!
+  !! @param test - test object
   subroutine test_pade(test)
-    !> Test object
     class(unit_test_type), intent(inout) :: test
 
     !> N sampling points
     integer, parameter :: n = 100
     !> Variable and function, respectively
-    complex(dp), allocatable :: x(:), f(:)
+    complex(kind=dp), allocatable :: x(:), f(:)
     !> Pade approximant of f, and the its reference value
-    complex(dp) :: f_approx, ref
+    complex(kind=dp) :: f_approx, ref
     !> Some function center
-    complex(dp), parameter :: x0 = cmplx(2.0_dp, 2.0_dp, kind=dp)
-    complex(dp), parameter :: xx = cmplx(1.0_dp, 1.0_dp, kind=dp)
+    complex(kind=dp), parameter :: x0 = cmplx(2.0_dp, 2.0_dp, kind=dp)
+    complex(kind=dp), parameter :: xx = cmplx(1.0_dp, 1.0_dp, kind=dp)
     !> Tolerance
-    real(dp) :: tol = 1.e-7_dp
+    real(kind=dp) :: tol = 1.e-7_dp
     integer :: i
 
     !> Test setup
@@ -81,7 +91,9 @@ contains
 
 
 
-  !> Test the GMP Pade interpolant against the function -1 / (x - x0)
+  !> @brief Test the GMP Pade interpolant against the function -1 / (x - x0)
+  !!
+  !! @param test - test object
   subroutine test_pade_mp(test)
     !> Test object
     class(unit_test_type), intent(inout) :: test
@@ -90,15 +102,15 @@ contains
     integer, parameter :: n = 100
     type(params) :: params_thiele
     !> Variable and function, respectively
-    complex(dp), allocatable :: x(:), f(:)
+    complex(kind=dp), allocatable :: x(:), f(:)
     !> Pade approximant of f, and its reference value
-    complex(dp), dimension(:), allocatable :: xx
-    complex(dp), dimension(:), allocatable :: f_approx
-    complex(dp) :: ref
+    complex(kind=dp), dimension(:), allocatable :: xx
+    complex(kind=dp), dimension(:), allocatable :: f_approx
+    complex(kind=dp) :: ref
     !> Some function center
-    complex(dp), parameter :: x0 = cmplx(2.0_dp, 2.0_dp, kind=dp)
+    complex(kind=dp), parameter :: x0 = cmplx(2.0_dp, 2.0_dp, kind=dp)
     !> Tolerance
-    real(dp) :: tol = 1.e-7_dp
+    real(kind=dp) :: tol = 1.e-7_dp
     integer :: i
 
     !> Test setup
@@ -125,21 +137,24 @@ contains
 
 
 
-  !> Test the Thiele-Pade interpolant against the function 1 / (-x^2 + 1) which has poles
+  !> @brief Test the Thiele-Pade interpolant against the function 1 / (-x^2 + 1) 
+  !!        which has poles
+  !!
+  !! @param test - test object
   subroutine test_thiele_pade_poles(test)
     class(unit_test_type), intent(inout) :: test
 
     !> N sampling points
     integer, parameter :: n = 100
     !> Variable, function, and parameters, respectively
-    complex(dp), allocatable :: x(:), f(:)
+    complex(kind=dp), allocatable :: x(:), f(:)
     !> Pade approximant of f, and its reference value
-    complex(dp) :: ref
-    complex(dp), dimension(1) :: f_approx
+    complex(kind=dp) :: ref
+    complex(kind=dp), dimension(1) :: f_approx
     !> Test point
-    complex(dp), dimension(1), parameter :: xx = cmplx(1.0_dp, 3.0_dp, kind=dp)
+    complex(kind=dp), dimension(1), parameter :: xx = cmplx(1.0_dp, 3.0_dp, kind=dp)
     !> Tolerance
-    real(dp) :: tol = 1.e-7_dp
+    real(kind=dp) :: tol = 1.e-7_dp
     integer :: i
 
     !> Test setup
@@ -163,21 +178,24 @@ contains
 
 
 
-  !> Test the GMP Thiele-Pade interpolant against the function 1 / (-x^2 + 1) which has poles
+  !> @brief Test the GMP Thiele-Pade interpolant against the function 
+  !!        1 / (-x^2 + 1) which has poles
+  !!
+  !! @param test - test object
   subroutine test_thiele_pade_poles_mp(test)
     class(unit_test_type), intent(inout) :: test
 
     !> N sampling points
     integer, parameter :: n = 100
     !> Variable, function, and parameters, respectively
-    complex(dp), allocatable :: x(:), f(:)
+    complex(kind=dp), allocatable :: x(:), f(:)
     type(params)          :: params_thiele
     !> Pade approximant of f, and its reference value
-    complex(dp), dimension(:), allocatable :: xx 
-    complex(dp), dimension(:), allocatable :: f_approx
-    complex(dp) :: ref
+    complex(kind=dp), dimension(:), allocatable :: xx 
+    complex(kind=dp), dimension(:), allocatable :: f_approx
+    complex(kind=dp) :: ref
     !> Tolerance
-    real(dp) :: tol = 1.e-7_dp
+    real(kind=dp) :: tol = 1.e-7_dp
     integer :: i
 
     !> Test setup
@@ -203,24 +221,27 @@ contains
 
 
 
-  !> Test the Thiele-Pade interpolant against the function |x| which has a branch point
+  !> @brief Test the Thiele-Pade interpolant against the function |x| which has 
+  !!        a branch point
+  !!
+  !! @param test - test object
   subroutine test_thiele_pade_abs(test)
     class(unit_test_type), intent(inout) :: test
 
     !> N sampling points
     integer, parameter :: n = 100
     !> Newman grid constant
-    real(dp), parameter :: eta = exp(-1.0_dp / sqrt(dble(n)))
-    real(dp), parameter :: delta_eta = 0.0005_dp
+    real(kind=dp), parameter :: eta = exp(-1.0_dp / sqrt(dble(n)))
+    real(kind=dp), parameter :: delta_eta = 0.0005_dp
     !> Variable, function, and parameters, respectively
-    complex(dp), allocatable :: x(:), f(:)
+    complex(kind=dp), allocatable :: x(:), f(:)
     !> Pade approximant of f, and its reference value
-    complex(dp) :: ref
-    complex(dp), dimension(1) :: f_approx
+    complex(kind=dp) :: ref
+    complex(kind=dp), dimension(1) :: f_approx
     !> Test point
-    complex(dp), dimension(1), parameter :: xx = cmplx(0.7_dp, 0.0_dp, kind=dp)
+    complex(kind=dp), dimension(1), parameter :: xx = cmplx(0.7_dp, 0.0_dp, kind=dp)
     !> Tolerance
-    real(dp) :: tol = 1.e-7_dp
+    real(kind=dp) :: tol = 1.e-7_dp
     integer :: i, npar
 
     !> Test setup
@@ -249,25 +270,28 @@ contains
 
 
 
-  !> Test the GMP Thiele-Pade interpolant against the function |x| which has a branch point
+  !> @brief Test the GMP Thiele-Pade interpolant against the function |x| which 
+  !!        has a branch point
+  !!
+  !! @param test - test object
   subroutine test_thiele_pade_abs_mp(test)
     class(unit_test_type), intent(inout) :: test
 
     !> N sampling points
     integer, parameter :: n = 100
     !> Newman grid constant
-    real(dp), parameter :: eta = exp(-1.0_dp / sqrt(dble(n)))
-    real(dp), parameter :: delta_eta = 0.0005_dp
+    real(kind=dp), parameter :: eta = exp(-1.0_dp / sqrt(dble(n)))
+    real(kind=dp), parameter :: delta_eta = 0.0005_dp
     !> Variable, function, and parameters, respectively
-    complex(dp), allocatable :: x(:), f(:)
+    complex(kind=dp), allocatable :: x(:), f(:)
     type(params)          :: params_thiele
     !> Pade approximant of f, and its reference value
-    complex(dp), dimension(:), allocatable :: xx 
-    complex(dp), dimension(:), allocatable :: f_approx
-    complex(dp) :: ref
+    complex(kind=dp), dimension(:), allocatable :: xx 
+    complex(kind=dp), dimension(:), allocatable :: f_approx
+    complex(kind=dp) :: ref
     !> Test point
     !> Tolerance
-    real(dp) :: tol = 1.e-7_dp
+    real(kind=dp) :: tol = 1.e-7_dp
     integer :: i, npar
 
     !> Test setup
