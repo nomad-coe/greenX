@@ -15,7 +15,8 @@ module gx_ac
              params, &
              create_thiele_pade, &
              evaluate_thiele_pade_at, &
-             free_params
+             free_params, &
+             arbitrary_precision_available
 
    !> brief store the parameters of the tiehle pade model 
    !> (potentially in abitrary precision floats using GMP)
