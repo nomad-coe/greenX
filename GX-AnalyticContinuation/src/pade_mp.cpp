@@ -61,14 +61,14 @@ void evaluate_thiele_pade_tab_mp(int n_par, const any_complex *x_ref,
 /// @return the value of the interpolant at x
 std::complex<double> evaluate_thiele_pade_mp(const std::complex<double> x,
                                              pade_model *params) {
-  mpf_set_default_prec(PREC);
+  mpf_set_default_prec(params->precision);
 
   // conversion from double to gmp
   ComplexGMP x_mp(x);
 
   // Define constants
   const ComplexGMP c_one(std::complex<double>(1.0, 0.0));
-  const mpf_class tol("1", PREC);
+  const mpf_class tol("1", params->precision);
 
   // Wallis' method coefficients
   std::vector<ComplexGMP> acoef(params->n_par + 1), bcoef(params->n_par + 1);
@@ -96,16 +96,17 @@ std::complex<double> evaluate_thiele_pade_mp(const std::complex<double> x,
 /// @param x_ref array of the reference points
 /// @param y_ref array of the reference function values
 /// @param do_greedy whether to use the default greedy algorithm or the naive
+/// @param precision floating point arythmetic precision in bits (!! not bytes!!)
 /// @return a pointer to the struct holding all model parameters
 pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
-                           const std::complex<double> *y_ref, int do_greedy) {
+                           const std::complex<double> *y_ref, int do_greedy, int precision) {
   // set floating point precision of GMP lib
-  mpf_set_default_prec(PREC);
+  mpf_set_default_prec(precision);
 
   // Define constants
   const ComplexGMP c_one(std::complex<double>(1.0, 0.0));
   const ComplexGMP c_zero(std::complex<double>(0.0, 0.0));
-  const mpf_class tol("1e-6", PREC);
+  const mpf_class tol("1e-6", precision);
 
   // auxiliary variables
   int kdx, n_rem;
@@ -203,7 +204,7 @@ pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
 
     // Add remaining points ensuring min |P_i(x_{1+1}) - F(x_{i+1})|
     for (int idx = 2; idx < n_par; ++idx) {
-      pval = mpf_class("1e9999", PREC); // Huge value
+      pval = mpf_class("1e9999", precision); // Huge value
 
       for (int jdx = 0; jdx < n_rem; ++jdx) {
         // Compute next convergent P_i(x_{i+1})
@@ -256,6 +257,7 @@ pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
   // Create pointer to the parameter struct
   pade_model *params = new pade_model;
   params->a_par = a_par_mp;
+  params->precision = precision;
   params->n_par = n_par;
   params->xref = x_ref_mp;
 

@@ -1,8 +1,6 @@
 #include <complex>
 #include <gmpxx.h>
 
-// Set GMP precision
-const int PREC = 128;
 
 /// @brief  datatype of a complex number using arbitrary precision numbers for
 ///         real and imaginary part
@@ -14,19 +12,19 @@ public:
   mpf_class imag_mp;
 
   /// @brief initialize a complex number 0 + 0i
-  ComplexGMP() : real_mp(0, PREC), imag_mp(0, PREC) {}
+  ComplexGMP() : real_mp(0), imag_mp(0) {}
 
   /// @brief initialize a complex number from real and imag part using arbitrary
   ///        precision numbers
   /// @param real_mp real part arbitrary precision
   /// @param imag_mp imaginary part arbitrary precision
   ComplexGMP(const mpf_class &real_mp, const mpf_class &imag_mp)
-      : real_mp(real_mp, PREC), imag_mp(imag_mp, PREC) {}
+      : real_mp(real_mp), imag_mp(imag_mp) {}
 
   /// @brief initialize a complex number from a complex double
   /// @param z complex number
   ComplexGMP(std::complex<double> z)
-      : real_mp(real(z), PREC), imag_mp(imag(z), PREC) {}
+      : real_mp(real(z)), imag_mp(imag(z)) {}
 
   /// @brief addition of two arbitrary precision complex numbers
   /// @param rhs right summand
@@ -86,6 +84,7 @@ public:
 
 struct pade_model {
   int n_par;
+  int precision;
   ComplexGMP *a_par;
   ComplexGMP *xref;
 };
@@ -95,7 +94,7 @@ extern "C" {
 std::complex<double> evaluate_thiele_pade_mp(const std::complex<double> x,
                                              pade_model *params_ptr);
 pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
-                           const std::complex<double> *y_ref, int do_greedy);
+                           const std::complex<double> *y_ref, int do_greedy, int precision);
 void free_pade_model(pade_model *model) {
   if (model != nullptr) {
     delete[] model->a_par;

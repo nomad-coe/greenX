@@ -42,12 +42,13 @@ module gx_ac
       !! @param[in] y_ref - array of the reference function values
       !! @param[in] do_greedy - whether to use the default greedy algorithm or the naive one
       !! @return - pointer to abstract type to store all parameters
-      function thiele_pade_mp_aux(n_par, x_ref, y_ref, do_greedy) bind(C, name="thiele_pade_mp")
+      function thiele_pade_mp_aux(n_par, x_ref, y_ref, do_greedy, precision) bind(C, name="thiele_pade_mp")
          import :: c_double_complex, c_int, c_ptr
          integer(c_int), value                    :: n_par
          complex(c_double_complex), dimension(*)  :: x_ref
          complex(c_double_complex), dimension(*)  :: y_ref
          integer(c_int), value                    :: do_greedy
+         integer(c_int), value                    :: precision
          type(c_ptr)                              :: thiele_pade_mp_aux
       end function thiele_pade_mp_aux
 
@@ -179,7 +180,7 @@ contains
             end if
         end if
 #ifdef GMPXX_FOUND
-        par%params_ptr = thiele_pade_mp_aux(n_par, x, y, local_do_greedy)
+        par%params_ptr = thiele_pade_mp_aux(n_par, x, y, local_do_greedy, par%precision)
 #endif
 
       end if 
