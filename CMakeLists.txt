@@ -68,7 +68,7 @@ endif ()
 # Optional multiple precision arithmetic
 option(ENABLE_GNU_GMP "Enable the GNU GMP library for multiple precision arithmetic" ON)
 if (${ENABLE_GNU_GMP})
-  find_package(GMPXX REQUIRED)
+  find_package(GMPXX)
 endif()
 
 # Optional unit testing lib

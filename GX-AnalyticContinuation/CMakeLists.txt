@@ -12,11 +12,13 @@ set_target_properties(LibGXAC
   LIBRARY_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY})
 
 target_include_directories(LibGXAC PUBLIC src/)
-target_sources(LibGXAC PRIVATE src/pade_approximant.f90 src/pade_mp.cpp api/gx_ac.f90)
 if(GMPXX_FOUND)
+  add_definitions(-DGMPXX_FOUND)
+  target_sources(LibGXAC PRIVATE src/pade_approximant.f90 src/pade_mp.cpp api/gx_ac.F90)
   target_include_directories(LibGXAC PRIVATE ${GMPXX_INCLUDE_DIRS})
   target_link_libraries(LibGXAC GXCommon ${GMPXX_LIBRARIES} gmp)
 else()
+  target_sources(LibGXAC PRIVATE src/pade_approximant.f90 api/gx_ac.F90)
   target_link_libraries(LibGXAC GXCommon)
 endif()
 

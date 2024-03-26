@@ -1,5 +1,5 @@
 ! ***************************************************************************************************
-!  Copyright (C) 2020-2023 GreenX library
+!  Copyright (C) 2020-2024 GreenX library
 !  This file is distributed under the terms of the APACHE2 License.
 !
 ! ***************************************************************************************************
@@ -10,29 +10,30 @@ module gx_ac
    use pade_approximant, only: evaluate_thiele_pade, thiele_pade, c_zero, c_one
    implicit none
 
+   private 
    public :: thiele_pade_api, &
-      params, &
-      create_thiele_pade, &
-      evaluate_thiele_pade_at, &
-      params_mp, &
-      create_thiele_pade_mp, &
-      evaluate_thiele_pade_mp, &
-      free_pade_model
+             params, &
+             create_thiele_pade, &
+             evaluate_thiele_pade_at, &
+             free_params
 
-   !> brief store arbitrary precision parameters
-   type :: params_mp
-      logical     :: initialized = .False.
-      type(c_ptr) :: params_ptr
-   end type params_mp
-
-   type :: params
+   !> brief store the parameters of the tiehle pade model 
+   !> (potentially in abitrary precision floats using GMP)
+   type :: params 
        logical    :: initialized = .false.
        integer    :: n_par
+       integer    :: precision 
+       logical    :: multiprecision_used_internally
+
+       ! for multiple precision arithmetic
+       type(c_ptr) :: params_ptr
+
+       ! for double precision arithmetic
        complex(kind=dp), dimension(:), allocatable :: x_ref
        complex(kind=dp), dimension(:), allocatable :: a_par
-   end type params
+   end type params 
 
-
+#ifdef GMPXX_FOUND
    interface
 
       !> auxiliary function to compute Thiele-Pade parameters using arbitrary precision numbers
@@ -69,6 +70,7 @@ module gx_ac
       end subroutine free_pade_model
 
    end interface
+#endif
 
 contains
 
@@ -104,25 +106,94 @@ contains
 
    end subroutine thiele_pade_api
 
-   type(params) function create_thiele_pade(n_par, x, y, do_greedy) result(par)
+
+
+   !> API function to compute Thiele-Pade parameters 
+   !! (potentially using arbitrary precision arithmetic)
+   !!
+   !! @param[in] n_par - order of the interpolant
+   !! @param[in] x     - array of the reference points
+   !! @param[in] y     - array of the reference function values
+   !! @param[in] do_greedy - whether to use the default greedy algorithm or the naive one
+   !! @param[in] precision - precision in bits (!! not bytes !!)
+   !! @return    params - abstract type to store all parameters in arb. prec. representation
+   type(params) function create_thiele_pade(n_par, x, y, do_greedy, precision) result(par)
       integer, intent(in)                        :: n_par
       complex(kind=dp), dimension(:), intent(in) :: x, y
       logical, optional, intent(in)              :: do_greedy
+      integer, optional, intent(in)              :: precision 
+
+      ! Internal variables
+      integer                                         :: local_do_greedy = 1
 
       ! initialize type
       par%initialized = .true.
       par%n_par = n_par
-      allocate(par%a_par(n_par))
-      allocate(par%x_ref(size(x)))
 
-      ! compute the coefficients 
-      par%x_ref(:) = x
-      call thiele_pade(n_par, par%x_ref, y, par%a_par, do_greedy)
+      ! precision of arithmetic internally
+      if (present(precision)) then 
+        if (precision .eq. 64) then 
+            ! double precision case
+            par%precision = precision
+            par%multiprecision_used_internally = .false.
+        else 
+            ! arbitrary precision case
+            par%precision = precision
+            par%multiprecision_used_internally = .true.
+#ifdef GMPXX_FOUND
+#else 
+            print *, "*** ERROR: multiple precision float arithmetic requested but not linked against GMP library"
+            return 
+#endif
+            
+        end if 
+      else 
+#ifdef GMPXX_FOUND
+        ! default is quadrupel precision if GMP is linked
+        par%precision = 128
+        par%multiprecision_used_internally = .true.
+#else 
+        ! default is double precision if GMP is not linked
+        par%precision = 64
+        par%multiprecision_used_internally = .false.
+#endif
+      end if 
+
+      if (.not. par%multiprecision_used_internally) then 
+
+        allocate(par%a_par(n_par))
+        allocate(par%x_ref(size(x)))
+
+        ! compute the coefficients 
+        par%x_ref(:) = x
+        call thiele_pade(n_par, par%x_ref, y, par%a_par, do_greedy)
+
+      elseif (par%multiprecision_used_internally) then 
+
+        ! use integer bools for interoperability with C
+        if (present(do_greedy)) then
+            if (do_greedy) then
+                local_do_greedy = 1
+            else
+                local_do_greedy = 0
+            end if
+        end if
+#ifdef GMPXX_FOUND
+        par%params_ptr = thiele_pade_mp_aux(n_par, x, y, local_do_greedy)
+#endif
+
+      end if 
 
    end function create_thiele_pade 
 
 
 
+   !> API function to evaluate the Thiele-Pade approximation 
+   !! (potentially using arbitrary precision numbers)
+   !!
+   !! @param[in] x - point where the function is evaluated
+   !! @param[in] params - abstract type to store all parameters 
+   !! @return    y - interpolated function value at x
    function evaluate_thiele_pade_at(par, x) result(y)
       type(params), intent(in) :: par
       complex(kind=dp), dimension(:), intent(in) :: x
@@ -134,6 +205,8 @@ contains
       ! initialized?
       if (par%initialized .eqv. .false.) then 
           print *, "WARNING: pade parameters not initialized"
+          y(:) = 0.0d0 
+          return 
       end if 
 
       ! Compute the number of query points
@@ -141,69 +214,38 @@ contains
 
       ! Evaluate the Thiele-Pade approximation at the query points
       do i = 1, num_query
-         call evaluate_thiele_pade(par%n_par, par%x_ref, x(i), par%a_par, y(i))
+
+        if (.not. par%multiprecision_used_internally) then 
+            call evaluate_thiele_pade(par%n_par, par%x_ref, x(i), par%a_par, y(i))
+        elseif (par%multiprecision_used_internally) then 
+#ifdef GMPXX_FOUND
+            y(i) = evaluate_thiele_pade_mp_aux(x(i), par%params_ptr)
+#endif
+        end if 
+
       end do
 
    end function evaluate_thiele_pade_at
 
 
 
+   !> deallocate the pade model 
+   !!
+   !! @param[inout] par - pade model struct 
    subroutine free_params(par)
        type(params), intent(inout) :: par 
+
+       if (.not. par%initialized) return 
 
        if (allocated(par%a_par)) deallocate(par%a_par)
        if (allocated(par%x_ref)) deallocate(par%x_ref)
 
+       if (par%multiprecision_used_internally) then 
+#ifdef GMPXX_FOUND
+         call free_pade_model(par%params_ptr)
+#endif
+       end if 
+
    end subroutine free_params
-
-
-
-
-
-   !> API function to compute Thiele-Pade parameters using arbitrary precision numbers
-   !! @param[in] n_par - order of the interpolant
-   !! @param[in] x_ref - array of the reference points
-   !! @param[in] y_ref - array of the reference function values
-   !! @param[out] params - abstract type to store all parameters in arb. prec. representation
-   !! @param[in] do_greedy - whether to use the default greedy algorithm or the naive one
-   subroutine create_thiele_pade_mp(n_par, x_ref, y_ref, params, do_greedy)
-      integer, intent(in)                             :: n_par
-      complex(kind=dp), dimension(:), intent(in)      :: x_ref, y_ref
-      type(params_mp), intent(out)                    :: params
-      logical, optional, intent(in)                   :: do_greedy
-
-      ! Internal variables
-      integer                                         :: local_do_greedy = 1
-
-      ! use integer bools for interoperability with C
-      if (present(do_greedy)) then
-         if (do_greedy) then
-            local_do_greedy = 1
-         else
-            local_do_greedy = 0
-         end if
-      end if
-
-      ! compute coefficients
-      params%initialized = .True.
-      params%params_ptr = thiele_pade_mp_aux(n_par, x_ref, y_ref, local_do_greedy)
-
-   end subroutine create_thiele_pade_mp
-
-   !> API function to evaluate the Thiele-Pade approximation using arbitrary precision numbers
-   !! @param[in] x - point where the function is evaluated
-   !! @param[out] y - interpolated function value at x
-   !! @param[in] params - abstract type to store all parameters in arb. prec. representation
-   subroutine evaluate_thiele_pade_mp(x, y, params)
-      complex(kind=dp), intent(in)     :: x
-      complex(kind=dp), intent(out)    :: y
-      type(params_mp), intent(in)      :: params
-      
-      y = cmplx(0.0d0, 0.0d0, kind=8)
-      if (.not. params%initialized)  return
-
-      y = evaluate_thiele_pade_mp_aux(x, params%params_ptr)
-
-   end subroutine evaluate_thiele_pade_mp
 
 end module gx_ac
