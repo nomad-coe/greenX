@@ -34,6 +34,12 @@ module gx_ac
    end type params 
 
 #ifdef GMPXX_FOUND
+   logical, parameter :: arbitrary_precision_available = .true.
+#else
+   logical, parameter :: arbitrary_precision_available = .false.
+#endif
+
+#ifdef GMPXX_FOUND
    interface
 
       !> auxiliary function to compute Thiele-Pade parameters using arbitrary precision numbers
