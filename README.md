@@ -10,11 +10,11 @@ It is available under the APACHE2 [license](LICENSE.txt).
 
 ## Libraries
 
-* [GX-AnalyticContinuation](....)
-* [GX-LAPW](....)
-* [GX-LocalizedBasis](....)
-* [GX-PAW](....)
-* [GX-PlaneWaves](....)
+* [GX-AnalyticContinuation](....):
+* [GX-LAPW](....):
+* [GX-LocalizedBasis](....):
+* [GX-PAW](....):
+* [GX-PlaneWaves](....):
 * [GX Time-frequency](GX-TimeFrequency/README.md): Optimised quadrature grids and weights for 
   RPA and GW imaginary time-frequency transforms.
 * [GX-q=0](....)
