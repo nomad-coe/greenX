@@ -12,12 +12,12 @@ It is available under the APACHE2 [license](LICENSE.txt).
 
 * [GX-AnalyticContinuation](GX-AnalyticContinuation):
 * [GX-LAPW](https://github.com/nomad-coe/greenX/tree/main/GX-LAPW):
-* [GX-LocalizedBasis](....):
-* [GX-PAW](....):
-* [GX-PlaneWaves](....):
+* [GX-LocalizedBasis](https://github.com/nomad-coe/greenX/tree/main/GX-LocalizedBasis):
+* [GX-PAW](https://github.com/nomad-coe/greenX/tree/main/GX-PAW):
+* [GX-PlaneWaves](https://github.com/nomad-coe/greenX/tree/main/GX-PlaneWaves):
 * [GX Time-frequency](GX-TimeFrequency/README.md): Optimised quadrature grids and weights for 
   RPA and GW imaginary time-frequency transforms.
-* [GX-q=0](....)
+* [GX-q=0](https://github.com/nomad-coe/greenX/tree/main/GX-q%3D0)
 
 
 ## Installation
