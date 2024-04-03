@@ -10,8 +10,8 @@ It is available under the APACHE2 [license](LICENSE.txt).
 
 ## Libraries
 
-* [GX-AnalyticContinuation](....):
-* [GX-LAPW](....):
+* [GX-AnalyticContinuation](GX-AnalyticContinuation):
+* [GX-LAPW](https://github.com/nomad-coe/greenX/tree/main/GX-LAPW):
 * [GX-LocalizedBasis](....):
 * [GX-PAW](....):
 * [GX-PlaneWaves](....):
