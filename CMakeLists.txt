@@ -38,6 +38,9 @@ include(cmake/CompilerFlags.cmake)
 # Compiler warnings
 include(cmake/CompilerWarnings.cmake)
 
+# Allows CMake to compile external projects and submodules.
+include(ExternalProject)
+
 # External libraries
 # Note, for Blas and Lapack, this is also able to find vendor-specific versions:
 # https://cmake.org/cmake/help/v3.15/module/FindBLAS.html
@@ -74,6 +77,20 @@ endif()
 # Optional unit testing lib
 option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" ON)
 if (${ENABLE_UNITTESTS})
+  # Build zofu
+  ExternalProject_Add(
+    zofu
+    PREFIX ${CMAKE_BINARY_DIR}/external/zofu  # Directory to download and build the project
+    GIT_REPOSITORY https://github.com/acroucher/zofu.git  # GitHub repository URL
+    GIT_TAG master  # Specific branch, tag, or commit
+    CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE=release
+        -DCMAKE_INSTALL_PREFIX=${PROJECT_SOURCE_DIR}/external/zofu/install
+        -DZOFU_FORTRAN_MODULE_INSTALL_DIR:PATH=include
+    UPDATE_COMMAND ""  # Leave this empty to avoid re-downloading on every build
+    TEST_COMMAND ""  # No test step
+    INSTALL_COMMAND ${CMAKE_COMMAND} --build . --target install
+  )
   # Function for generating unit test executables (assumes Zofu)
   include(cmake/unit_test_functions.cmake)
   # Calling find_package is equivalent to: include(cmake/Findzofu.cmake)
