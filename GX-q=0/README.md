@@ -1,4 +1,2 @@
 ## GreenX library - q=0 
-
-This directory is a placeholder for the development of the q=0 (singularity treatment) component of GreenX.
-See the [GreenX document](Documents/GreenX.md) for the structure of the library. 
+This folder contains **IDieL**(**I**nverse **Diel**ectric **L**ibrary), a modern Fortran library providing a common framework for GW codes, specifically for the most common operations involving the inverse dielectric function. The code is parallelized via multithreading (OPENMP) and GPUs (via MAGMA library). The code is basis-agnostic, but it subject to the condition that the basis permits the partitioning of the dielectric/screened Coulomb matrix into head, wing, and body blocks.
