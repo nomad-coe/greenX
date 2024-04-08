@@ -94,7 +94,7 @@ if (${ENABLE_UNITTESTS})
   # Function for generating unit test executables (assumes Zofu)
   include(cmake/unit_test_functions.cmake)
   # Calling find_package is equivalent to: include(cmake/Findzofu.cmake)
-  find_package(zofu REQUIRED)
+  include(cmake/Findzofu.cmake)
 endif()
 
 # Our library directories
