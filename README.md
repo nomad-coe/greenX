@@ -10,11 +10,11 @@ It is available under the APACHE2 [license](LICENSE.txt).
 
 ## Libraries
 
-* [GX-AnalyticContinuation](GX-AnalyticContinuation):
+* [GX-AnalyticContinuation](GX-AnalyticContinuation): Performs an analytical continuation of the self-energy from the imaginary frequency to the real frequency
 * [GX-LAPW](https://github.com/nomad-coe/greenX/tree/main/GX-LAPW): A cubic scaling GW algorithm in LAPW+lo basis.
-* [GX-LocalizedBasis](https://github.com/nomad-coe/greenX/tree/main/GX-LocalizedBasis):
-* [GX-PAW](https://github.com/nomad-coe/greenX/tree/main/GX-PAW):
-* [GX-PlaneWaves](https://github.com/nomad-coe/greenX/tree/main/GX-PlaneWaves):
+* [GX-LocalizedBasis](https://github.com/nomad-coe/greenX/tree/main/GX-LocalizedBasis): The implementation of the separable resolution of the identity.
+* [GX-PAW](https://github.com/nomad-coe/greenX/tree/main/GX-PAW): Supports the projector-augmented wave method 
+* [GX-PlaneWaves](https://github.com/nomad-coe/greenX/tree/main/GX-PlaneWaves): Low-scaling plane-wave based GW implementation
 * [GX Time-frequency](GX-TimeFrequency/README.md): Optimised quadrature grids and weights for 
   RPA and GW imaginary time-frequency transforms.
 * [GX-q=0](https://github.com/nomad-coe/greenX/tree/main/GX-q%3D0): A code-agnostic framework for the treatment of inverse
