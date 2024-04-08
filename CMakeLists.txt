@@ -105,7 +105,7 @@ add_subdirectory(GX-TimeFrequency)
 add_subdirectory(GX-LocalizedBasis)
 
 # Elements to compile the libraries inside submodules
-option(COMPILE_SUBMODULES "Compile GreenX component contained inside submodules" ON)
+option(COMPILE_SUBMODULES "Compile GreenX component contained inside submodules" OFF)
 if (${COMPILE_SUBMODULES})
   # Build IDieL
   set(IDieL_SOURCE "${PROJECT_SOURCE_DIR}/GX-q=0/IDieL/")
