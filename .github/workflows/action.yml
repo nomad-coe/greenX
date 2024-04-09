@@ -35,20 +35,7 @@ jobs:
         run: pip3 install numpy pytest
 
       - name: Install blas, lapack and other dependencies
-        run: sudo apt-get install libblas-dev liblapack-dev doxygen libgmp10 libgmpxx4ldbl libgmp-dev
-
-      - name: Install Zofu Test Framework
-        run: |
-          mkdir -p external && cd external
-          git clone https://github.com/acroucher/zofu.git
-          mkdir zofu/build && cd zofu/build
-          cmake \
-             -DCMAKE_BUILD_TYPE=release \
-             -DCMAKE_INSTALL_PREFIX=/home/runner/work/greenX/greenX/external/zofu/install \
-             -DZOFU_FORTRAN_MODULE_INSTALL_DIR:PATH=include \
-             ..
-          make -j 4
-          make install
+        run: sudo apt-get install libblas-dev liblapack-dev doxygen libgmp10 libgmpxx4ldbl libgmp-dev libopenblas-dev
 
       - name: Build
         run: |
