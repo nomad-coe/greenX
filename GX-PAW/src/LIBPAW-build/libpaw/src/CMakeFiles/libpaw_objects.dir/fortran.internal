@@ -1,0 +1,26 @@
+# The fortran modules provided by this target.
+provides
+ m_libpaw_libxc.mod
+ m_libpaw_libxc_funcs.mod
+ m_libpaw_mpi.mod
+ m_libpaw_tools.mod
+ m_paral_atom.mod
+ m_paw_an.mod
+ m_paw_atom.mod
+ m_paw_finegrid.mod
+ m_paw_gaussfit.mod
+ m_paw_ij.mod
+ m_paw_io.mod
+ m_paw_numeric.mod
+ m_paw_onsite.mod
+ m_paw_sphharm.mod
+ m_pawang.mod
+ m_pawcprj.mod
+ m_pawdij.mod
+ m_pawfgrtab.mod
+ m_pawpsp.mod
+ m_pawrad.mod
+ m_pawrhoij.mod
+ m_pawtab.mod
+ m_pawxc.mod
+ m_pawxmlps.mod

@@ -120,7 +120,7 @@ if (${COMPILE_SUBMODULES})
                    ${IDieL_CMAKE_OPTIONS}
         BUILD_COMMAND make -j4
         INSTALL_COMMAND make install
-	TEST_COMMAND cd ${IDieL_SOURCE}/src/IDieL-build/test && ctest --output-on-failure -C $<CONFIGURATION>
+        TEST_COMMAND cd ${IDieL_SOURCE}/src/IDieL-build/test && ctest --output-on-failure -C $<CONFIGURATION>
     )
   # Now properly link our IDieL installation from the IDieL install directory to the common one from GreenX
   set(IDieL_INSTALL_DIR "${IDieL_SOURCE}/IDieL")
@@ -131,7 +131,25 @@ if (${COMPILE_SUBMODULES})
   else()
     message(FATAL_ERROR "IDieL source directory not found: ${IDieL_SOURCE}. You can obtain it by executing 'git submodule update --init'.")
   endif()
+
 endif()
+
+# Install libpaw
+set(LIBPAW_SOURCE "${PROJECT_SOURCE_DIR}/GX-PAW/")
+ExternalProject_Add(LIBPAW
+    SOURCE_DIR ${LIBPAW_SOURCE}
+    PREFIX ${LIBPAW_SOURCE}
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+               -DCMAKE_Fortran_COMPILER=gfortran
+    BUILD_COMMAND make
+    INSTALL_COMMAND make install)
+# Now properly link our LIBPAW installation from the LIBPAW install directory to the common one from GreenX
+set(LIBPAW_INSTALL_DIR "${LIBPAW_SOURCE}/libpaw-greenx")
+install(FILES ${LIBPAW_INSTALL_DIR}/lib/libabinit_common.a DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(FILES ${LIBPAW_INSTALL_DIR}/lib/libpaw.so DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(DIRECTORY ${LIBPAW_INSTALL_DIR}/include/
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/modules/
+        FILES_MATCHING PATTERN "*d")
 
 # Documentation
 option(ENABLE_DOCS "Enable documentation" OFF)
