@@ -1,4 +1,20 @@
 ## GreenX library - q=0 
+This is a code-agnostic component of Green-X, aimed at computing the inverse dielectric constant for 3D systems, and the screened Coulomb potential for 2D systems at q=0. It has been adapted to GPUs.
 
-This directory is a placeholder for the development of the q=0 (singularity treatment) component of GreenX.
+## Structure of the library
+<h1 align="center">
+  <img src="./IDieL_structure.png" alt="IDieL_structure" width="300">
+</h1>
+
+## Building
+
+With CMake, change to the GreenX root, then type:
+
+```bash
+mkdir build && cd build
+cmake ../
+make -j 
+make install 
+```
+
 See the [GreenX document](Documents/GreenX.md) for the structure of the library. 

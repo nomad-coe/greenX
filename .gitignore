@@ -3,6 +3,7 @@
 # Build files
 *.o
 *.mod
+*.Rhistory
 
 # Build directories
 build/
