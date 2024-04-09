@@ -17,4 +17,4 @@ make -j
 make install 
 ```
 
-See the [GreenX website](nomad-coe.github.io/greenX/) for more details. 
+See the [GreenX website](https://nomad-coe.github.io/greenX/) for more details. 
