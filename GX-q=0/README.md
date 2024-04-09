@@ -6,7 +6,7 @@ Workflow of IDieL, indicating its interaction with the parent/calling code, and 
 \(W^{L}\), \(W^{U}\) and \(B\) stand for the head, lower wing, upper wing and body of the dielectric matrix, respectively.
 
 <h1 align="center">
-  <img src="./IDieL_structure.png" alt="IDieL_structure" width="300">
+  <img src="./IDieL_structure.png" alt="IDieL_structure" width="500">
 </h1>
 
 ## Building
