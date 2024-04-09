@@ -14,12 +14,12 @@ At the current stage, localized basis component of the GreenX library provide th
 Workflow of the separable RI and cubic-scaling RPA with separable RI implementations as part of the GX-LocalizedBasis component of GreenX.
 
 <h1 align="center">
-  <img src="./img/Localizedbasis_structure.png" alt="Localizedbasis_structure" width="500">
+  <img src="./img/Localizedbasis_structure.png" alt="Localizedbasis_structure" width="700">
 </h1>
 
 ## Benchmark
 <h1 align="center">
-  <img src="./img/Localizedbasis_validation.png" alt="Localizedbasis_validation" width="500">
+  <img src="./img/Localizedbasis_validation.png" alt="Localizedbasis_validation" width="800">
 </h1>
 a) Mean absolute deviations [meV] of separable RI with respect to RI-V utilizing the Thiel benchmark set. b) G0W0 quasiparticle energies errors of separable RI with respect to RI-V. Disordered carbon clusters containing carbon, hydrogen and oxygen atoms up to 116 atoms were used for these calculations
 
