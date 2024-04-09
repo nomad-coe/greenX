@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04]
-        compiler: [gfortran-9]
+        compiler: [gfortran-12]
 
     env:
       FC: ${{ matrix.compiler }}
