@@ -17,4 +17,4 @@ make -j
 make install 
 ```
 
-See the [GreenX document](Documents/GreenX.md) for the structure of the library. 
+See the [GreenX website](nomad-coe.github.io/greenX/) for more details. 
