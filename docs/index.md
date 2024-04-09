@@ -17,6 +17,7 @@ Currently, our library supports the following electronic structure methods:
 
 # Components
 - [Analytic Continuation](gx_ac.md)
+- [Numerical-orbital component ](gx_localized_basis.md)
 - [q=0 Coulomb component](gx_q0.md)
 - [Minimax Time-Frequency](gx_time_frequency.md)
 
