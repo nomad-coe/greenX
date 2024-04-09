@@ -16,8 +16,10 @@ Currently, our library supports the following electronic structure methods:
 - Laplace-transformed direct MP2
 
 # Components
-- [Minimax Time-Frequency](gx_time_frequency.md)
 - [Analytic Continuation](gx_ac.md)
+- [q=0 Coulomb component](gx_q0.md)
+- [Minimax Time-Frequency](gx_time_frequency.md)
+
 
 # Technical Details
  GreenX is written in Fortran 2008. Functionality needed for testing and error handling is written in C and Python. In the following we provide a few more details for current and future developers of GreenX. 
