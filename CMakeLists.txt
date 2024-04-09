@@ -120,7 +120,7 @@ if (${COMPILE_SUBMODULES})
                    ${IDieL_CMAKE_OPTIONS}
         BUILD_COMMAND make -j4
         INSTALL_COMMAND make install
-        TEST_COMMAND cd ${CMAKE_BINARY_DIR}/IDieL-prefix/src/IDieL-build/test && ctest --output-on-failure -C $<CONFIGURATION>
+	TEST_COMMAND cd ${IDieL_SOURCE}/src/IDieL-build/test && ctest --output-on-failure -C $<CONFIGURATION>
     )
   # Now properly link our IDieL installation from the IDieL install directory to the common one from GreenX
   set(IDieL_INSTALL_DIR "${IDieL_SOURCE}/IDieL")
