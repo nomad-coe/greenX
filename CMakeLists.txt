@@ -135,21 +135,21 @@ add_subdirectory(GX-LocalizedBasis)
 # endif()
 
 # Install libpaw
-set(LIBPAW_SOURCE "${PROJECT_SOURCE_DIR}/GX-PAW/")
-ExternalProject_Add(LIBPAW
-    SOURCE_DIR ${LIBPAW_SOURCE}
-    PREFIX ${LIBPAW_SOURCE}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-               -DCMAKE_Fortran_COMPILER=gfortran
-    BUILD_COMMAND make
-    INSTALL_COMMAND make install)
-# Now properly link our LIBPAW installation from the LIBPAW install directory to the common one from GreenX
-set(LIBPAW_INSTALL_DIR "${LIBPAW_SOURCE}/libpaw-greenx")
-install(FILES ${LIBPAW_INSTALL_DIR}/lib/libabinit_common.a DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-install(FILES ${LIBPAW_INSTALL_DIR}/lib/libpaw.so DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-install(DIRECTORY ${LIBPAW_INSTALL_DIR}/include/
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/modules/
-        FILES_MATCHING PATTERN "*d")
+# set(LIBPAW_SOURCE "${PROJECT_SOURCE_DIR}/GX-PAW/")
+# ExternalProject_Add(LIBPAW
+#     SOURCE_DIR ${LIBPAW_SOURCE}
+#     PREFIX ${LIBPAW_SOURCE}
+#     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+#                -DCMAKE_Fortran_COMPILER=gfortran
+#     BUILD_COMMAND make -j 1
+#     INSTALL_COMMAND make install)
+# # Now properly link our LIBPAW installation from the LIBPAW install directory to the common one from GreenX
+# set(LIBPAW_INSTALL_DIR "${LIBPAW_SOURCE}/libpaw-greenx")
+# install(FILES ${LIBPAW_INSTALL_DIR}/lib/libabinit_common.a DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+# install(FILES ${LIBPAW_INSTALL_DIR}/lib/libpaw.so DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+# install(DIRECTORY ${LIBPAW_INSTALL_DIR}/include/
+#         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/modules/
+#         FILES_MATCHING PATTERN "*d")
 
 # Documentation
 option(ENABLE_DOCS "Enable documentation" OFF)
