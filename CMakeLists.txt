@@ -105,34 +105,34 @@ add_subdirectory(GX-TimeFrequency)
 add_subdirectory(GX-LocalizedBasis)
 
 # Elements to compile the libraries inside submodules
-# option(COMPILE_SUBMODULES "Compile GreenX component contained inside submodules" ON)
-# if (${COMPILE_SUBMODULES})
-#   # Build IDieL
-#   set(IDieL_SOURCE "${PROJECT_SOURCE_DIR}/GX-q=0/IDieL/")
-#   set(IDieL_CMAKE_OPTIONS "" CACHE STRING "Other IDieL options to build IDieL")
-#   # Check if IDieL source directory exists
-#   if (EXISTS ${IDieL_SOURCE})
-#     ExternalProject_Add(IDieL
-#         SOURCE_DIR ${IDieL_SOURCE}
-#         PREFIX ${IDieL_SOURCE}
-#         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-#                    -DCMAKE_Fortran_COMPILER=gfortran
-#                    ${IDieL_CMAKE_OPTIONS}
-#         BUILD_COMMAND make -j4
-#         INSTALL_COMMAND make install
-#         TEST_COMMAND cd ${IDieL_SOURCE}/src/IDieL-build/test && ctest --output-on-failure -C $<CONFIGURATION>
-#     )
-#   # Now properly link our IDieL installation from the IDieL install directory to the common one from GreenX
-#   set(IDieL_INSTALL_DIR "${IDieL_SOURCE}/IDieL")
-#   install(FILES ${IDieL_INSTALL_DIR}/lib/libIDieL.so DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-#   install(DIRECTORY ${IDieL_INSTALL_DIR}/include/
-#         DESTINATION ${CMAKE_INSTALL_PREFIX}/include/modules/
-#         FILES_MATCHING PATTERN "*d")
-#   else()
-#     message(FATAL_ERROR "IDieL source directory not found: ${IDieL_SOURCE}. You can obtain it by executing 'git submodule update --init'.")
-#   endif()
-#
-# endif()
+option(COMPILE_SUBMODULES "Compile GreenX component contained inside submodules" ON)
+if (${COMPILE_SUBMODULES})
+  # Build IDieL
+  set(IDieL_SOURCE "${PROJECT_SOURCE_DIR}/GX-q=0/IDieL/")
+  set(IDieL_CMAKE_OPTIONS "" CACHE STRING "Other IDieL options to build IDieL")
+  # Check if IDieL source directory exists
+  if (EXISTS ${IDieL_SOURCE})
+    ExternalProject_Add(IDieL
+        SOURCE_DIR ${IDieL_SOURCE}
+        PREFIX ${IDieL_SOURCE}
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+                   -DCMAKE_Fortran_COMPILER=gfortran
+                   ${IDieL_CMAKE_OPTIONS}
+        BUILD_COMMAND make -j4
+        INSTALL_COMMAND make install
+        TEST_COMMAND cd ${IDieL_SOURCE}/src/IDieL-build/test && ctest --output-on-failure -C $<CONFIGURATION>
+    )
+  # Now properly link our IDieL installation from the IDieL install directory to the common one from GreenX
+  set(IDieL_INSTALL_DIR "${IDieL_SOURCE}/IDieL")
+  install(FILES ${IDieL_INSTALL_DIR}/lib/libIDieL.so DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+  install(DIRECTORY ${IDieL_INSTALL_DIR}/include/
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/modules/
+        FILES_MATCHING PATTERN "*d")
+  else()
+    message(FATAL_ERROR "IDieL source directory not found: ${IDieL_SOURCE}. You can obtain it by executing 'git submodule update --init'.")
+  endif()
+
+endif()
 
 # Install libpaw
 set(LIBPAW_SOURCE "${PROJECT_SOURCE_DIR}/GX-PAW/")
