@@ -28,7 +28,7 @@
 #   CMake configuration time.
 
 # Pass path to Zofu install location to CMake
-set(ZOFU_PATH "" CACHE STRING "Location of Zofu unit-testing library")
+set(ZOFU_PATH ${PROJECT_SOURCE_DIR}/external/zofu/install)
 
 if (ZOFU_PATH)
   find_library(LibZofu NAME "libzofu" "zofu" HINTS "${ZOFU_PATH}/lib")
