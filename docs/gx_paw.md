@@ -20,7 +20,7 @@ At present the GWR code in ABINIT supports norm-conserving pseudopotentials only
 
 ## Benchmark
 <h1 align="center">
-  <img src="./img/benchmark_PAW.png" alt="GWr_AW" width="500">
+  <img src="./img/benchmark_PAW.png" alt="GWr_AW" width="800">
 </h1>
 Comparison between susceptibility of silicon calculated using 
 Adler-Wiser formula (blue) and the real space imaginary-time 
