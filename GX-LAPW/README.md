@@ -1,4 +1,9 @@
-## GreenX library - LAPW 
+## GreenX library - LAPW (Linearized Augmented Plane Wave)
 
-This directory is a placeholder for the development of the LAPW (Linearized Augmented Plane Wave) component of GreenX.
-See the [GreenX document](Documents/GreenX.md) for the structure of the library. 
+The cubic scaling GW method is implemented in exciting following 
+the approach described by Kutepov et al[@kutepov2017linearized].
+A key distinction between Kutepov's methodology and ours lies in 
+their utilization of Matsubara frequencies, whereas we employ 
+the zero-temperature approach relying on imaginary time.
+
+See the [GreenX website](https://nomad-coe.github.io/greenX/) for more details. 

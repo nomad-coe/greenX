@@ -31,4 +31,11 @@ susceptibility. Note the vertical scale of the middle right
 figure, that is to be multiplied by the indicated \\(10^{-12}\\) factor.
 
 
-See the [GreenX website](https://nomad-coe.github.io/greenX/) for more details. 
+<button onclick="goBack()">Go Back</button>
+
+<script>
+function goBack() {
+  window.history.back();
+}
+</script>
+
