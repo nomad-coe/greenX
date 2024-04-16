@@ -25,7 +25,7 @@ from the polarizability in Fourier space and imaginary domain.
 
 At present the GWR code in ABINIT supports norm-conserving pseudopotentials only.
 
-## Benchmark
+# Benchmark
 <h1 align="center">
   <img src="./img/benchmark_PAW.png" alt="GWr_AW" width="800">
 </h1>
