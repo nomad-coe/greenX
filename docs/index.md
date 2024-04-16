@@ -17,7 +17,7 @@ Currently, our library supports the following electronic structure methods:
 
 # Components
 - [Analytic Continuation](gx_ac.md)
-- [Plane-wave component](gx_paw.md)
+- [Plane-wave component](gx_planewave.md)
 - [LAPW component ](gx_lapw.md)
 - [Numerical-orbital component ](gx_localized_basis.md)
 - [q=0 Coulomb component](gx_q0.md)

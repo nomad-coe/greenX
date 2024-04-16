@@ -1,4 +1,11 @@
-## GreenX library - PlaneWaves 
+---
+layout: default
+title: PAW Component
+tagline: GreenX PAW 
+description: Supports the projector-augmented wave method
+---
+
+# General
 
 This implementation of the cubic scaling GWR algorithm 
 takes advantage of well-established HPC libraries. 
@@ -18,4 +25,24 @@ from the polarizability in Fourier space and imaginary domain.
 
 At present the GWR code in ABINIT supports norm-conserving pseudopotentials only.
 
-See the [GreenX website](https://nomad-coe.github.io/greenX/) for more details. 
+# Benchmark
+<h1 align="center">
+  <img src="./img/benchmark_PAW.png" alt="GWr_AW" width="800">
+</h1>
+Comparison between susceptibility of silicon calculated using 
+Adler-Wiser formula (blue) and the real space imaginary-time 
+minimax method (orange), with excellent agreement. 
+The left column shows the real part of the susceptibility, 
+and the right column shows the imaginary part of the 
+susceptibility. Note the vertical scale of the middle right 
+figure, that is to be multiplied by the indicated \\(10^{-12}\\) factor.
+
+
+<button onclick="goBack()">Go Back</button>
+
+<script>
+function goBack() {
+  window.history.back();
+}
+</script>
+
