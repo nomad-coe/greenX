@@ -8,8 +8,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04]
-        compiler: [gfortran-9]
+        os: [ubuntu-22.04]
+        compiler: [gfortran]
 
     env:
       FC: ${{ matrix.compiler }}
@@ -20,6 +20,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 1
+
+      - name: Checkout Submodules
+        run: git submodule update --init --recursive
 
       - uses: actions/setup-python@v1
         with:
@@ -32,7 +35,7 @@ jobs:
         run: pip3 install numpy pytest
 
       - name: Install blas, lapack and other dependencies
-        run: sudo apt-get install libblas-dev liblapack-dev doxygen libgmp10 libgmpxx4ldbl libgmp-dev
+        run: sudo apt-get install libblas-dev liblapack-dev doxygen libgmp10 libgmpxx4ldbl libgmp-dev libopenblas-dev
 
       - name: Install Zofu Test Framework
         run: |
@@ -54,8 +57,8 @@ jobs:
           cmake -DENABLE_UNITTESTS=ON \
                 -DZOFU_PATH=/home/runner/work/greenX/greenX/external/zofu/install \
                 -DGMPXX_INCLUDE_DIR=/usr/include/ \
-                -DGMPXX_LIBRARY=/usr/lib/x86_64-linux-gnu/libgmpxx.so.4.6.0 ../
-          make -j$(nproc) VERBOSE=1
+                -DGMPXX_LIBRARY=/usr/lib/x86_64-linux-gnu/libgmpxx.so ../
+          make -j$(nproc)
 
       - name: Run Tests
         run: |
