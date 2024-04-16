@@ -1,6 +1,6 @@
 ## GreenX library - LocalizedBasis 
 
-This library provides a list localized basis set procedure, commonly occurring in post-scf calculations like MP2, RPA and GW approaches. 
+This library provides a list of localized basis set procedures, commonly occurring in post-scf calculations like MP2, RPA and GW approaches. 
 
 At the current stage, localized basis component of the GreenX library provide the separable resolution of the identity fitting coefficients to be used for the calculation of exact exchange energy, canonical RPA and GW methodologies. Also it can be used for the cubic-scaling RPA and GW, this feature is under development.
 

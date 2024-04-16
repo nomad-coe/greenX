@@ -1,2 +1,23 @@
 ## GreenX library - q=0 
-This folder contains **IDieL**(**I**nverse **Diel**ectric **L**ibrary), a modern Fortran library providing a common framework for GW codes, specifically for the most common operations involving the inverse dielectric function. The code is parallelized via multithreading (OPENMP) and GPUs (via MAGMA library). The code is basis-agnostic, but it subject to the condition that the basis permits the partitioning of the dielectric/screened Coulomb matrix into head, wing, and body blocks.
+This is a code-agnostic component of Green-X, aimed at computing the inverse dielectric constant for 3D systems, and the screened Coulomb potential for 2D systems at q=0. It has been adapted to GPUs.
+
+## Structure of the library
+Workflow of IDieL, indicating its interaction with the parent/calling code, and the major procedures. \(H\)
+\(W^{L}\), \(W^{U}\) and \(B\) stand for the head, lower wing, upper wing and body of the dielectric matrix, respectively.
+
+<h1 align="center">
+  <img src="./IDieL_structure.png" alt="IDieL_structure" width="500">
+</h1>
+
+## Building
+
+With CMake, change to the GreenX root, then type:
+
+```bash
+mkdir build && cd build
+cmake ../
+make -j 
+make install 
+```
+
+See the [GreenX website](https://nomad-coe.github.io/greenX/) for more details. 

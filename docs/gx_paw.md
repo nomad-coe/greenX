@@ -1,4 +1,11 @@
-## GreenX library - PAW 
+---
+layout: default
+title: PAW Component
+tagline: GreenX PAW 
+description: Supports the projector-augmented wave method
+---
+
+# General
 
 From our original PAW implementation, we have devel-
 oped a portable PAW library, called LIBPAW in order to
@@ -11,4 +18,12 @@ gives access to implementations of core PAW procedures with
 basis-independent data interfaces and thus can potentially be
 combined with any other basis used in different programs.
 
-See the [GreenX website](https://nomad-coe.github.io/greenX/) for more details. 
+
+<button onclick="goBack()">Go Back</button>
+
+<script>
+function goBack() {
+  window.history.back();
+}
+</script>
+
