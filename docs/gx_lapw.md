@@ -1,12 +1,18 @@
-## GreenX library - LAPW (Linearized Augmented Plane Wave)
+---
+layout: default
+title: LAPW Component
+tagline: GreenX LAPW 
+description: A cubic scaling GW algorithm in LAPW+lo basis. 
+---
 
+# General
 The cubic scaling GW method is implemented in exciting following 
 the approach described by Kutepov et al[@kutepov2017linearized].
 A key distinction between Kutepov's methodology and ours lies in 
 their utilization of Matsubara frequencies, whereas we employ 
 the zero-temperature approach relying on imaginary time.
 
-## Benchmark
+# Benchmark
 <h1 align="center">
   <img src="./img/polarizability_lapw.png" alt="polarizability_lapw" width="800">
 </h1>

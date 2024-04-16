@@ -1,4 +1,11 @@
-## GreenX library - PAW 
+---
+layout: default
+title: PAW Component
+tagline: GreenX PAW 
+description: Supports the projector-augmented wave method
+---
+
+# General
 
 This implementation of the cubic scaling GWR algorithm 
 takes advantage of well-established HPC libraries. 
