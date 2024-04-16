@@ -1,7 +1,7 @@
 ---
 layout: default
-title: PAW Component
-tagline: GreenX PAW 
+title: Plane wave Component
+tagline: GreenX Plane-wave 
 description: Supports the projector-augmented wave method
 ---
 
