@@ -23,12 +23,13 @@ We have benchmarked the separable RI approach in our [recent publication](https:
 
 <p align="center">
   <img src="./img/Localizedbasis_validation.png" alt="Localizedbasis_validation" width="400">
-<p>
+</p>
 <p align="center">
 <em> Mean absolute deviations [meV] of separable RI with respect to RI-V utilizing the Thiel benchmark set.
 </em></p>
 
 Further benchmark calculations on the [GW100 test set](https://pubs.acs.org/doi/10.1021/acs.jctc.5b00453) and [disordered carbon cluster](https://doi.org/10.1021/acs.chemmater.1c04279) can be found in [DOI:10.1063/5.0184406](https://doi.org/10.1063/5.0184406)
+
 
 
 <button onclick="goBack()">Go Back</button>
