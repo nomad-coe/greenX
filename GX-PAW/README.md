@@ -1,7 +1,6 @@
 ## GreenX library - PAW 
 
-From our original PAW implementation, we have devel-
-oped a portable PAW library, called LIBPAW in order to
+From our original PAW implementation, we have developed a portable PAW library, called LIBPAW in order to
 facilitate the porting of PAW in other codes. This library provides
 a formalism for computational physics — the pseudopo-
 tential/PAW approach — at a relatively high implementation
