@@ -24,6 +24,9 @@ RPA total energies for solids can be computed as well starting
 from the polarizability in Fourier space and imaginary domain. 
 
 At present the GWR code in ABINIT supports norm-conserving pseudopotentials only.
+The equations needed to generalize the implementation to support the 
+projector-augmented wave method (PAW) are well known and all these terms 
+can be computed using the low-level routines provided by the [LibPAW library](https://github.com/nomad-coe/greenX/tree/main/GX-PAW).
 
 # Benchmark
 <h1 align="center">
