@@ -69,7 +69,7 @@ if (NOT pygreenx_FOUND)
 endif ()
 
 # Optional unit testing lib
-option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" ON)
+option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" OFF)
 if (${ENABLE_UNITTESTS})
   # Build zofu
   ExternalProject_Add(

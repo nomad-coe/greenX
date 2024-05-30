@@ -53,12 +53,54 @@ configure with:
 cmake ../ -DBUILD_SHARED_LIBS=OFF
 ```
 
+Specific shared libraries can be disable, e.g to disable the Projector-Augmented Wave (PAW) component of GreenX, run CMake configure with: 
+
+```bash
+cmake ../ -DPAW_COMPONENT=OFF
+```
+
+Available options to disable one or more components
+
+| Component                              | CMake configure                    |
+|----------------------------------------|------------------------------------|
+| Analytical Continuation component      | `cmake .. -DAC_COMPONENT=OFF`      |
+| Minimax Time-Frequency grids component | `cmake .. -DMINIMAX_COMPONENT=OFF` |
+| Localized Basis component              | `cmake .. -DLBASIS_COMPONENT=OFF`  |
+| Projector-Augmented Wave component     | `cmake .. -DPAW_COMPONENT=OFF`     |
+
+GreenX uses GNU Multiple Precision Arithmetic Library by default in the Analytical Continuation component, you can disable it without any harm by runing CMake configure with:
+
+```bash
+cmake ../ -DENABLE_GNU_GMP=OFF
+```
+
+GreenX uses submodules and they are built by default. You can obtained them by executing:
+
+```bash
+git submodule update --init --recursive
+```
+
+To build GreenX without the submodules, one can configure with:
+
+```bash
+cmake ../ -DCOMPILE_SUBMODULES=OFF
+```
+
 If all requirements are found, build and install the project:
 
  ```bash
 make -j
 make install 
  ```
+
+Minimal example to build and install only the Time-Frequency component of GreenX:
+
+ ```bash
+cmake .. -DAC_COMPONENT=OFF -DLBASIS_COMPONENT=OFF -DPAW_COMPONENT=OFF -DCOMPILE_SUBMODULES=OFF
+make -j
+make install
+ ```
+
 
 ## Running the Tests
 
