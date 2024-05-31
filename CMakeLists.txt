@@ -68,14 +68,8 @@ if (NOT pygreenx_FOUND)
   message("-- pygreenx is required for application testing. To install it, cd <PROJECTROOT>/python and run `pip install -e .`")
 endif ()
 
-# Optional multiple precision arithmetic
-option(ENABLE_GNU_GMP "Enable the GNU GMP library for multiple precision arithmetic" ON)
-if (${ENABLE_GNU_GMP})
-  find_package(GMPXX)
-endif()
-
 # Optional unit testing lib
-option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" ON)
+option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" OFF)
 if (${ENABLE_UNITTESTS})
   # Build zofu
   ExternalProject_Add(
@@ -99,10 +93,25 @@ endif()
 
 # Our library directories
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
-add_subdirectory(GX-AnalyticContinuation)
 add_subdirectory(GX-common)
-add_subdirectory(GX-TimeFrequency)
-add_subdirectory(GX-LocalizedBasis)
+option(AC_COMPONENT "Enable the Analytical Continuation component" ON)
+if (${AC_COMPONENT})
+   # Optional multiple precision arithmetic
+   option(ENABLE_GNU_GMP "Enable the GNU GMP library for multiple precision arithmetic" ON)
+   if (${ENABLE_GNU_GMP})
+      find_package(GMPXX)
+   endif()
+   add_subdirectory(GX-AnalyticContinuation)
+endif()
+option(MINIMAX_COMPONENT "Enable the minimax time-frequency grids component" ON)
+if (${MINIMAX_COMPONENT})
+   add_subdirectory(GX-TimeFrequency)
+endif ()
+
+option (LBASIS_COMPONENT "Enable the localized basis component" ON) 
+if (${LBASIS_COMPONENT})
+   add_subdirectory(GX-LocalizedBasis)
+endif()
 
 # Elements to compile the libraries inside submodules
 option(COMPILE_SUBMODULES "Compile GreenX component contained inside submodules" ON)
@@ -135,21 +144,24 @@ if (${COMPILE_SUBMODULES})
 endif()
 
 # Install libpaw
-set(LIBPAW_SOURCE "${PROJECT_SOURCE_DIR}/GX-PAW/")
-ExternalProject_Add(LIBPAW
-    SOURCE_DIR ${LIBPAW_SOURCE}
-    PREFIX ${LIBPAW_SOURCE}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-               -DCMAKE_Fortran_COMPILER=gfortran
-    BUILD_COMMAND make -j 1
-    INSTALL_COMMAND make install)
-# Now properly link our LIBPAW installation from the LIBPAW install directory to the common one from GreenX
-set(LIBPAW_INSTALL_DIR "${LIBPAW_SOURCE}/libpaw-greenx")
-install(FILES ${LIBPAW_INSTALL_DIR}/lib/libabinit_common.a DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-install(FILES ${LIBPAW_INSTALL_DIR}/lib/libpaw.so DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-install(DIRECTORY ${LIBPAW_INSTALL_DIR}/include/
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/modules/
-        FILES_MATCHING PATTERN "*d")
+option(PAW_COMPONENT "Enable the PAW component" ON)
+if (${PAW_COMPONENT})
+   set(LIBPAW_SOURCE "${PROJECT_SOURCE_DIR}/GX-PAW/")
+   ExternalProject_Add(LIBPAW
+      SOURCE_DIR ${LIBPAW_SOURCE}
+      PREFIX ${LIBPAW_SOURCE}
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+                 -DCMAKE_Fortran_COMPILER=gfortran
+      BUILD_COMMAND make -j 1
+      INSTALL_COMMAND make install)
+   # Now properly link our LIBPAW installation from the LIBPAW install directory to the common one from GreenX
+   set(LIBPAW_INSTALL_DIR "${LIBPAW_SOURCE}/libpaw-greenx")
+   install(FILES ${LIBPAW_INSTALL_DIR}/lib/libabinit_common.a DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+   install(FILES ${LIBPAW_INSTALL_DIR}/lib/libpaw.so DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+   install(DIRECTORY ${LIBPAW_INSTALL_DIR}/include/
+           DESTINATION ${CMAKE_INSTALL_PREFIX}/include/modules/
+           FILES_MATCHING PATTERN "*d")
+endif()
 
 # Documentation
 option(ENABLE_DOCS "Enable documentation" OFF)
