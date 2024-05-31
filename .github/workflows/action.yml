@@ -54,7 +54,7 @@ jobs:
         run: |
           mkdir -p build
           cd build
-          cmake -DENABLE_UNITTESTS=ON \
+          cmake -DENABLE_GREENX_UNIT_TESTS=ON \
                 -DZOFU_PATH=/home/runner/work/greenX/greenX/external/zofu/install \
                 -DGMPXX_INCLUDE_DIR=/usr/include/ \
                 -DGMPXX_LIBRARY=/usr/lib/x86_64-linux-gnu/libgmpxx.so ../
