@@ -136,7 +136,7 @@ GreenX is documented using Doxygen, and documentation support is disabled by
 default. To enable CMake looking for Doxygen, configure with:
 
 ```bash
-cmake ../ -DENABLE_DOCS=ON
+cmake ../ -DENABLE_GREENX_DOCS=ON
 ```
 
 To build the document, type in the build directory:
@@ -179,7 +179,7 @@ make install
 GreenX can be built with unit-testing enabled using:
 
 ```bash
-cmake -DENABLE_UNITTESTS=ON -DZOFU_PATH=${GX_ROOT}/external/zofu/install ../
+cmake -DENABLE_GREENX_UNIT_TESTS=ON -DZOFU_PATH=${GX_ROOT}/external/zofu/install ../
 ```
 
 Unit tests are run with the application tests, using ctest. Simply type `ctest`

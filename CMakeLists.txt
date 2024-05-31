@@ -47,30 +47,32 @@ include(ExternalProject)
 find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
 
-# Python required for application testing
-include(cmake/python3.cmake)
+option(ENABLE_GREENX_CTEST "Enable GreenX CTest" ON)
+if (${ENABLE_GREENX_CTEST})
+   # Python required for application testing
+   include(cmake/python3.cmake)
+   find_package(Python3 3.7 COMPONENTS Interpreter Development)
+   if (Python3_FOUND)
+      message("-- Python 3 interpreter version: " ${Python3_VERSION})
+   else()
+      message("-- Python 3 interpreter not found")
+   endif()
 
-find_package(Python3 3.7 COMPONENTS Interpreter Development)
-if(Python3_FOUND)
-  message("-- Python 3 interpreter version: " ${Python3_VERSION})
-else()
-  message("-- Python 3 interpreter not found")
-endif()
+   # Enable ctest
+   enable_testing()
 
-# Enable ctest
-enable_testing()
-
-# Application test python module
-# Note, pygreenx dependencies should be handled pygreenx
-# pygreenx version specified in its setup.cfg
-find_python_module(pygreenx VERSION 0.0.1)
-if (NOT pygreenx_FOUND)
-  message("-- pygreenx is required for application testing. To install it, cd <PROJECTROOT>/python and run `pip install -e .`")
-endif ()
+   # Application test python module
+   # Note, pygreenx dependencies should be handled pygreenx
+   # pygreenx version specified in its setup.cfg
+   find_python_module(pygreenx VERSION 0.0.1)
+   if (NOT pygreenx_FOUND)
+      message("-- pygreenx is required for application testing. To install it, cd <PROJECTROOT>/python and run `pip install -e .`")
+   endif ()
+endif()   
 
 # Optional unit testing lib
-option(ENABLE_UNITTESTS "Enable GreenX Unit Testing" OFF)
-if (${ENABLE_UNITTESTS})
+option(ENABLE_GREENX_UNIT_TESTS "Enable GreenX Unit Testing" OFF)
+if (${ENABLE_GREENX_UNIT_TESTS})
   # Build zofu
   ExternalProject_Add(
     zofu
@@ -164,8 +166,8 @@ if (${PAW_COMPONENT})
 endif()
 
 # Documentation
-option(ENABLE_DOCS "Enable documentation" OFF)
-if (${ENABLE_DOCS})
+option(ENABLE_GREENX_DOCS "Enable documentation" OFF)
+if (${ENABLE_GREENX_DOCS})
   find_program(DOXYGEN doxygen REQUIRED)
   message("-- Doxygen documentation support enabled.")
   set(doxy_output "documentation")
