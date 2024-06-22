@@ -7,7 +7,7 @@ authors:
 cff-version: 1.2.0
 contact: contact@nomad-lab.eu
 preferred-citation:
-  - doi: (to be given when JOSS paper available  - example : 10.1016/J.cpc.2019.107042)
+  - doi: 10.21105/joss.05770 
 license: 
   - Apache-2.0
 message: "If you use this software, please cite the article from preferred-citation DOI containt in this CITATION.cff file."
