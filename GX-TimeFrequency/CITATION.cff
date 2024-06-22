@@ -10,6 +10,6 @@ preferred-citation:
   - doi: 10.21105/joss.05770 
 license: 
   - Apache-2.0
-message: "If you use this software, please cite the article from preferred-citation DOI containt in this CITATION.cff file."
+message: "If you use this software, please cite the article from preferred-citation DOI contained in this CITATION.cff file."
 repository-code: "https://github.com/nomad-coe/greenX/tree/main/GX-TimeFrequency"
 title: "Time-frequency component of the GreenX library"

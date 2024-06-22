@@ -1,0 +1,13 @@
+abstract: "This library provides a formalism for the pseudopotential+PAW approach — at a relatively high implementation
+level (not only low-level methods, such as I/O, error-handling or systems resolution).
+authors:
+  - name: "The ABINIT group"
+cff-version: 1.2.0
+contact: info@abinit.org
+preferred-citation:
+  - doi: 10.1063/1.5144261
+license: 
+  - Mozilla 2.0
+message: "If you use this software, please cite the article from preferred-citation DOI contained in this CITATION.cff file."
+repository-code: "https://github.com/nomad-coe/greenX/tree/main/GX-PAW"
+title: "PAW component of the GreenX library"
