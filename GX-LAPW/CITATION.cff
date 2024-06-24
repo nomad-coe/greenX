@@ -1,0 +1,12 @@
+abstract: "This library provides a formalism for the LAPW approach, including but not limited to a cubic-scaling GW implementation."
+authors:
+  - name: "exciting developers"
+cff-version: 1.2.0
+contact: claudia.draxl@physik.hu-berlin.de
+preferred-citation:
+  - doi: 10.1088/0953-8984/26/36/363202
+license:
+  - GPL2
+message: "If you use this software, please cite the article from preferred-citation DOI contained in this CITATION.cff file."
+repository-code: "https://github.com/nomad-coe/greenX/tree/main/GX-LAPW"
+title: "LAPW component of the GreenX library"
