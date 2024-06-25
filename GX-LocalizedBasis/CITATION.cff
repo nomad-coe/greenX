@@ -1,0 +1,15 @@
+abstract: "This library provides a list localized basis set procedure, commonly occurring in post-scf calculations like second-orded Moller-Plesset (MP2) perturbation theory, random phase approximation (RPA) and G0W0 approach. At the current stage, localized basis component of the GreenX library provide the separable resolution of the identity (RI) fitting coefficients to be used for the calculation of exact exchange energy, canonical RPA and GW methodologies."
+authors:
+  - name: "GreenX library"
+  - family-names : Delesma Diaz
+    given-names : Francisco Antonio
+    orcid : 0000-0001-6912-7745
+cff-version: 1.2.0
+contact: francisco_antonio.delesma_diaz@tu-dresden.de
+preferred-citation:
+  - doi: 10.1063/5.0184406  
+license: 
+  - Apache-2.0
+message: "If you use this software, please cite the article from preferred-citation DOI contained in this CITATION.cff file."
+repository-code: "https://github.com/nomad-coe/greenX/tree/main/GX-LocalizedBasis"
+title: "Localized basis component of the GreenX library"
