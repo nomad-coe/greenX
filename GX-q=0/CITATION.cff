@@ -1,0 +1,15 @@
+abstract: "This library is a code-agnostic component of Green-X, aimed at computing the inverse dielectric constant for 3D systems, and the screened Coulomb potential for 2D systems at q=0. It has been adapted to GPUs."
+authors:
+  - name: "GreenX: IDieL"
+  - family-names : Raya Moreno
+    given-names : Martí
+    orcid : 0000-0001-6190-9769
+cff-version: 1.2.0
+contact: marti.raya.moreno@physik.hu-berlin.de
+preferred-citation:
+  - url: https://github.com/nomad-coe/greenX/tree/main/GX-q%3D0
+license:
+  - Apache 2.0
+message: "If you use this software, please cite the article from preferred-citation DOI contained in this CITATION.cff file."
+repository-code: "https://github.com/nomad-coe/greenX/tree/main/GX-q%3D0"
+title: "q=0 component of the GreenX library: IDieL"
