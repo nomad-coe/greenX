@@ -17,12 +17,14 @@ Currently, our library supports the following electronic structure methods:
 
 # Components
 - [Analytic Continuation](gx_ac.md)
+- [LAPW component](gx_lapw.md)
+- [PAW component](gx_paw.md)
 - [Plane-wave component](gx_planewave.md)
 - [LAPW component ](gx_lapw.md)
 - [Numerical-orbital component ](gx_localized_basis.md)
+- [Time-Frequency component](gx_time_frequency.md)
+- [Common component](gx_common.md)
 - [q=0 Coulomb component](gx_q0.md)
-- [Minimax Time-Frequency](gx_time_frequency.md)
-
 
 # Technical Details
  GreenX is written in Fortran 2008. The functionality needed for testing and error handling is written in C and Python. In the following we provide a few more details for current and future developers of GreenX. 
