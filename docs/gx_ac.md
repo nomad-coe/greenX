@@ -7,7 +7,7 @@ description: Analytic continuation routines for GW calculations
 
 # General
 
-This component of the library is currently being developed, stay tuned!
+This component of the library implements the analytic continuation approach for GW calculations
 
 <button onclick="goBack()">Go Back</button>
 
