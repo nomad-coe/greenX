@@ -42,7 +42,7 @@ install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}  DESTINATION include)
 # -----------------------------------------------
 # Unit Testing Set-up
 # -----------------------------------------------
-if (${ENABLE_UNITTESTS})
+if (${ENABLE_GREENX_UNIT_TESTS})
   # Create a directory in the build folder to place generated test drivers and binaries
   set(UNIT_TEST_DIR "${PROJECT_BINARY_DIR}/unit_tests/analytic-continuation")
   file(MAKE_DIRECTORY ${UNIT_TEST_DIR})
