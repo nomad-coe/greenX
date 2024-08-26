@@ -53,7 +53,7 @@ if (LibZofu)
 else()
   message("-- LibZofu not found")
   # Build zofu at compile time
-  set(ZUFU_BUILD_ON_FLY TRUE) 
+  set(ZOFU_BUILD_ON_FLY TRUE) 
   set(ZOFU_PATH_ROOT "${CMAKE_BINARY_DIR}/external/zofu")
 
   ExternalProject_Add(
