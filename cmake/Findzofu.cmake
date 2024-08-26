@@ -27,11 +27,14 @@
 #   work because there's no guarantee that the library has already been build at
 #   CMake configuration time.
 
-# Pass path to Zofu install location to CMake
-set(ZOFU_PATH ${PROJECT_SOURCE_DIR}/external/zofu/install)
-
+# if ZOFU_PATH given, try to find it
 if (ZOFU_PATH)
   find_library(LibZofu NAME "libzofu" "zofu" HINTS "${ZOFU_PATH}/lib")
+endif()
+
+# if found, use it; else: build on the fly
+if (LibZofu)
+  message("-- Found LibZofu ${LibZofu}")
 
   # Check for multiple possible include directories
   if (EXISTS "${ZOFU_PATH}/include")
@@ -45,11 +48,37 @@ if (ZOFU_PATH)
 
   # Program that generates a unit test driver given a test module.
   set(ZOFU_DRIVER ${ZOFU_PATH}/bin/zofu-driver)
-endif()
 
-if (LibZofu)
-  message("-- Found LibZofu ${LibZofu}")
   message("-- LibZofu's module path: ${ZOFU_INCLUDE_PATH}")
 else()
-  message("-- LibZofu not built at configure time")
+  message("-- LibZofu not found")
+  # Build zofu at compile time
+  set(ZUFU_BUILD_ON_FLY TRUE) 
+  set(ZOFU_PATH_ROOT "${CMAKE_BINARY_DIR}/external/zofu")
+
+  ExternalProject_Add(
+      zofu
+      PREFIX ${ZOFU_PATH_ROOT}  # Directory to download and build the project
+      GIT_REPOSITORY https://github.com/acroucher/zofu.git  # GitHub repository URL
+      GIT_TAG master  # Specific branch, tag, or commit
+      CMAKE_ARGS
+          -DCMAKE_BUILD_TYPE=release
+          -DCMAKE_INSTALL_PREFIX=${ZOFU_PATH_ROOT}/install
+          -DZOFU_FORTRAN_MODULE_INSTALL_DIR:PATH=include
+      UPDATE_COMMAND ""  # Leave this empty to avoid re-downloading on every build
+      TEST_COMMAND ""  # No test step
+  )
+
+  # set the zofu library 
+  set(LibZofu "${ZOFU_PATH_ROOT}/install/lib/libzofu.a")
+
+  # set the zofu library include directory
+  set(ZOFU_INCLUDE_PATH "${ZOFU_PATH_ROOT}/install/include")
+  include_directories(${ZOFU_INCLUDE_PATH})
+
+  # Program that generates a unit test driver given a test module.
+  set(ZOFU_DRIVER ${ZOFU_PATH_ROOT}/install/bin/zofu-driver)
+
+  message("-- LibZofu will be built in ${ZOFU_PATH_ROOT}")
+  message("-- LibZofu's module path: ${ZOFU_INCLUDE_PATH}")
 endif()
