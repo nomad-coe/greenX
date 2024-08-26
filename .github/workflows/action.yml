@@ -37,25 +37,11 @@ jobs:
       - name: Install blas, lapack and other dependencies
         run: sudo apt-get install libblas-dev liblapack-dev doxygen libgmp10 libgmpxx4ldbl libgmp-dev libopenblas-dev
 
-      - name: Install Zofu Test Framework
-        run: |
-          mkdir -p external && cd external
-          git clone https://github.com/acroucher/zofu.git
-          mkdir zofu/build && cd zofu/build
-          cmake \
-             -DCMAKE_BUILD_TYPE=release \
-             -DCMAKE_INSTALL_PREFIX=/home/runner/work/greenX/greenX/external/zofu/install \
-             -DZOFU_FORTRAN_MODULE_INSTALL_DIR:PATH=include \
-             ..
-          make -j 4
-          make install
-
       - name: Build
         run: |
           mkdir -p build
           cd build
           cmake -DENABLE_GREENX_UNIT_TESTS=ON \
-                -DZOFU_PATH=/home/runner/work/greenX/greenX/external/zofu/install \
                 -DGMPXX_INCLUDE_DIR=/usr/include/ \
                 -DGMPXX_LIBRARY=/usr/lib/x86_64-linux-gnu/libgmpxx.so ../
           make -j$(nproc)
