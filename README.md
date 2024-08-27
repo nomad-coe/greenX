@@ -155,12 +155,24 @@ For more information and benchmark examples see also the [GreenX website](https:
 
 ## Unit Testing
 
-### Installing the Unit-Testing Framework
+### Running Unit Tests
 
-Unit tests require the unit-testing framework [Zofu](https://github.com/acroucher/zofu).
-To build Zofu, from GreenX's root (noting that one must define `$GX_ROOT`):
+Unit tests require the unit-testing framework [Zofu](https://github.com/acroucher/zofu). This library is build together with Greenx when `ENABLE_GREENX_UNIT_TESTS=ON`: 
 
-```bash
+```bash 
+cmake -DENABLE_GREENX_UNIT_TESTS=ON ../
+```
+Unit tests are run with the application tests, using ctest. Simply type `ctest`
+in the build directory.
+
+
+### Installing the Unit-Testing Framework manually
+
+It is also possible to compile Zofu manually. To build Zofu, from GreenX's root (noting that one must define `$GX_ROOT`):
+
+```bash 
+
+# building zofu
 mkdir external && cd external
 git clone https://github.com/acroucher/zofu.git
 cd zofu
@@ -172,18 +184,15 @@ cmake \
    ..
 make -j 4
 make install
-```
 
-### Running Unit Tests
-
-GreenX can be built with unit-testing enabled using:
-
-```bash
+# building GreenX 
+cd $GX_ROOT 
+mkdir build && cd build 
 cmake -DENABLE_GREENX_UNIT_TESTS=ON -DZOFU_PATH=${GX_ROOT}/external/zofu/install ../
+make -j 2
+make install
 ```
-
-Unit tests are run with the application tests, using ctest. Simply type `ctest`
-in the build directory.
+Again, typing `ctest` in the GreenX build directory starts the unit tests together with the application tests.
 
 ### Adding Unit Tests
 

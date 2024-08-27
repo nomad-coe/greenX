@@ -34,3 +34,9 @@ install(TARGETS GXCommon
 ## CMakeLists.txt
 install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
         DESTINATION include)
+
+
+# ensure that zofu is build before GXCommon 
+if (${ZOFU_BUILD_ON_FLY})
+  add_dependencies(GXCommon zofu)
+endif()
