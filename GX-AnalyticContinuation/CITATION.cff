@@ -1,15 +1,15 @@
 abstract: "Electronic structure calculations based on many-body perturbation theory involve analytic continuation from imaginary axis to real axis. The AnalyticContinuation component of the GreenX library has the aim to provide such tool."
 authors:
-  - name: "GreenX library"
-  - family-names : Azizi
-    given-names : Maryam
-    orcid : 0000-0001-9089-1043
-cff-version: 1.2.0
-contact: contact@nomad-lab.eu
+  - name: ""
+  - family-names : ""
+    given-names : ""
+    orcid : ""
+cff-version: ""
+contact: ""
 preferred-citation:
-  - doi: 10.21105/joss.05770 
+  - doi: ""
 license: 
   - Apache-2.0
 message: "If you use this software, please cite the article from preferred-citation DOI contained in this CITATION.cff file."
-repository-code: "https://github.com/nomad-coe/greenX/tree/main/GX-TimeFrequency"
+repository-code: "https://github.com/nomad-coe/greenX/tree/main/GX-AnalyticContinuation"
 title: "Analytic continuation component of the GreenX library"
