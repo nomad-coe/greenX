@@ -4,37 +4,7 @@
 !
 ! ***************************************************************************************************
 
-!>   The Pade approximants are a particular type of rational fraction
-!>   approximation to the value of a function. The idea is to match the Taylor
-!>   series expansion as far as possible.
-!>   Here, we Implemented the Pad\'e approximant using Thiele's reciprocal-difference method.
-!>   This routine takes a function $(f_n=f(x_n))$, considering complex $x_n$ which is
-!>   evaluated at an initial set of arguments, $(x_n)$
-!>   approximates the function with the help of Pad\'e approximants, and evaluates (extrapolates/rotates)
-!>   this approximation at a given set of arguments $(x)$. The $N$-point Pad\'e approximant
-!>   then reads
-!>   $$ P_N(x)=
-!>     \cfrac{a_1}
-!>     {1+\cfrac{a_2(x-x_1)}{\cdots+\cfrac{a_n(x-x_{N-1})}{1+(x-x_N)g_{N+1}(x)}}}
-!>   $$
-!>     \cfrac{a_1}
-!>     {1+\cfrac{a_2(x-x_1)}{\cdots+\cfrac{a_n(x-x_{N-1})}{1+(x-x_N)g_{N+1}(x)}}}
-!>   $$
-!>   where
-!>   $$  P_N(x)=
-!>          \lim_{n \to \infty}\cfrac{A_n(x)}{B_n(x)},
-!>   $$
-!>   $$  g_n(x)=\frac{g_{n-1}(x_{n-1})-g_{n-1}(x)}
-!>                   {(x-x_{n-1})g_{n-1}(x)}, \; n \ge 2
-!>   $$
-!>   and
-!>   $$  a_n=g_n(x_n),\; g_1(x_n)=f_n,\; n=1,\ldots,N.
-!>   $$
-!>
-!>   Expressions are taken from G. A. J. Baker, Essentials of Padé Approximants (Academic,New York, 1975).
-!>   See also:
-!>   PHYSICAL REVIEW B 94, 165109 (2016).
-!>   J. CHEM. THEORY COMPUT. 19, 16, 5450–5464 (2023)
+!>  Fortran double precision implementation of the thiele pade approximation. 
 module pade_approximant
    use kinds, only: dp
    implicit none

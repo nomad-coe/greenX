@@ -4,6 +4,30 @@
 !
 ! ***************************************************************************************************
 
+!>   The Pade approximants are a particular type of rational fraction
+!!   approximation to the value of a function. The idea is to match the Taylor
+!!   series expansion as far as possible.
+!!   Here, we Implemented the Pade approximant using Thiele's reciprocal-difference method.
+!!   This routine takes a function \f$f_n=f(x_n)\f$, considering complex \f$x_n\f$ which is
+!!   evaluated at an initial set of arguments, \f$(x_n)\f$
+!!   approximates the function with the help of Pade approximants, and evaluates (extrapolates/rotates)
+!!   this approximation at a given set of arguments \f$(x)\f$. The \f$N\f$-point Pade approximant
+!!   then reads
+!!   $$ f(x) \approx P_N(x)=
+!!     \cfrac{a_1}
+!!     {1+\cfrac{a_2(x-x_1)}{\cdots+\cfrac{a_n(x-x_{N-1})}{1+(x-x_N)g_{N+1}(x)}}}
+!!   $$
+!!   where
+!!   $$  g_n(x)=\frac{g_{n-1}(x_{n-1})-g_{n-1}(x)}
+!!                   {(x-x_{n-1})g_{n-1}(x)}, \; n \ge 2
+!!   $$
+!!   and
+!!   \f[  a_n=g_n(x_n)\\ g_1(x_n)=f_n\\ n=1,\ldots,N \f]
+!!
+!!   Expressions are taken from G. A. J. Baker, Essentials of Padé Approximants (Academic,New York, 1975).
+!!   See also:
+!!   PHYSICAL REVIEW B 94, 165109 (2016);
+!!   J. CHEM. THEORY COMPUT. 19, 16, 5450–5464 (2023)
 module gx_ac
    use kinds, only: dp
    use, intrinsic :: iso_c_binding, only: c_int, c_double_complex, c_ptr
@@ -11,26 +35,32 @@ module gx_ac
    implicit none
 
    private 
-   public :: thiele_pade_api, &
-             params, &
+   public :: params, &
              create_thiele_pade, &
              evaluate_thiele_pade_at, &
              free_params, &
-             arbitrary_precision_available
+             arbitrary_precision_available, &
+             thiele_pade_api
 
-   !> @brief store the parameters of the tiehle pade model 
-   !!!       (potentially in abitrary precision floats using GMP)
+
+   !> @brief store the parameters of the thiele pade model 
+   !!        (potentially in abitrary precision floats using GMP)
    type :: params 
-       logical    :: initialized = .false.
+       !> switch to check whether parameters are already initialized
+       logical    :: initialized = .false.          
+       !> number of pade parameters
        integer    :: n_par
+       !> internal float arithmetic precision
        integer    :: precision 
+       !> switch to check whether GMP was used for multi precision floats
        logical    :: multiprecision_used_internally
 
-       ! for multiple precision arithmetic
+       !> pointer to c++ struct for multiple precision arithmetic
        type(c_ptr) :: params_ptr
 
-       ! for double precision arithmetic
+       !> reference points (used in fortran double precision routines)
        complex(kind=dp), dimension(:), allocatable :: x_ref
+       !> pade parameters (used in fortran double precision routines)
        complex(kind=dp), dimension(:), allocatable :: a_par
    end type params 
 
@@ -89,6 +119,9 @@ contains
 
    !> @brief API function to compute Thiele-Pade approximations of a meromorphic 
    !!        function
+   !!       
+   !!        >> Deprecated, please use create_thiele_pade() and 
+   !!        evaluate_thiele_pade_at() whenever possible! <<
    !!
    !! @param[in] n_par - order of the interpolant
    !! @param[in] x_ref - array of the reference points
