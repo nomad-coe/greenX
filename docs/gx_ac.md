@@ -11,6 +11,10 @@ This component of the library implements the analytic continuation approach for 
 - what is AC 
 - plot of AC 
 
+<p align="center">
+  <img src="./img/Analyticcontinuation_main.pdf" alt="Performance of the GX-AC component" width="700">
+</p>
+
 # Benchmarks
 
 ## Analytic Continuation GW
