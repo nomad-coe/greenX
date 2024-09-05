@@ -2,28 +2,38 @@
 layout: default
 title: Analytic Continuation Component
 tagline: Analytic Continuation
-description: Analytic continuation routines for GW calculations
+description: Analytic continuation Component Documentation
 ---
 
 # General
 This component of the GreenX library (GX-AC) implements the analytic continuation using Padé approximants.
 
-<p align="center">
+<p style="text-align: center;">
   <img src="./img/Analyticcontinuation_main.svg" alt="Performance of the GX-AC component" width="700">
 </p>
 
 Analytic continuation is a common challenge in theoretical chemistry when you have a complex analytic function $f(z)$ defined in one domain but need it in another. This issue can be addressed using Padé approximants, which are fitted to the function in one domain (such as the imaginary axis) and then evaluated in a different domain (such as the real axis). These Padé approximants are rational functions of the form
-$$ f(z) \approx T_{M}(z) = \frac{A_0 + A_1z + \cdots + A_pz^p + \cdots + A_{\frac{M-1}{2}}z^{\frac{M-1}{2}}}{1 + B_1z + \cdots + B_pz^p + \cdots + B_{\frac{M}{2}}z^{\frac{M}{2}}}.$$
+```math
+ f(z) \approx T_{M}(z) = \frac{A_0 + A_1z + \cdots + A_pz^p + \cdots + A_{\frac{M-1}{2}}z^{\frac{M-1}{2}}}{1 + B_1z + \cdots + B_pz^p + \cdots + B_{\frac{M}{2}}z^{\frac{M}{2}}}.
+ ```
 
 The GX-AC component uses the Thiele's reciprocal differences algorithm (A.B. George, Essentials of Padé Approximants, Elsevier 1975) to obtain the Padé parameters in a continued fraction form that is [equivalent](https://pubs.acs.org/doi/10.1021/acs.jctc.3c00555) to the rational functions form above
-$$T_M(z) = \cfrac{a_1}{1+ \cfrac{a_2(z - z_1)}{\quad\ddots\quad 1+ \cfrac{a_p(z-z_{p-1})}{1+\cfrac{a_{p+1}(z-z_p)}{\quad\ddots\quad 1+a_M(z-z_{M-1})}}}}$$
+```math
+T_M(z) = \cfrac{a_1}{1+ \cfrac{a_2(z - z_1)}{\quad\ddots\quad 1+ \cfrac{a_p(z-z_{p-1})}{1+\cfrac{a_{p+1}(z-z_p)}{\quad\ddots\quad 1+a_M(z-z_{M-1})}}}}
+```
 
 where $\{z_i\}$ are a set of reference points that are used to create the Padé model.  The following relation holds for every reference point:
-$$ f(z_i) = T_M(z_i)\qquad i = 1, \;\dots,\; M$$
+```math
+ f(z_i) = T_M(z_i)\qquad i = 1, \;\dots,\; M
+ ```
 
 the parameters $a_i$ are obtained by recursion:
-$$a_i = g_i(z_i)\qquad i = 1, \;\dots,\; M$$
-$$g_p(z_i) = \begin{dcases}  f(z_i) & p=1 \\\;\\ \frac{g_{p-1}(z_{p-1})-g_{p-1}(z_i)}{(z_i - z_{p-1})g_{p-1}(z_i)} & p>1\end{dcases}$$
+```math 
+a_i = g_i(z_i)\qquad i = 1, \;\dots,\; M 
+```
+```math 
+g_p(z_i) = \begin{dcases}  f(z_i) & p=1 \\\;\\ \frac{g_{p-1}(z_{p-1})-g_{p-1}(z_i)}{(z_i - z_{p-1})g_{p-1}(z_i)} & p>1\end{dcases}
+```
 
 Padé approximants are known to be [numerical instable](https://doi.org/10.1093/imamat/25.3.267). The GX-AC component uses two strategies to numerically stabilize the interpolation. 
 First, it incorporates a [greedy algorithm for Thiele Padé approximants](https://pubs.acs.org/doi/full/10.1021/acs.jctc.3c00555) that minimizes the numerical error by reordering of the reference points. Additionally it is possible to use the component with a  higher internal numerical floating point precision. This helps reducing the numerical noise caused by [catastrophic cancellation](https://doi.org/10.1145/103162.103163). Catastrophic cancellation occurs when rounding errors are amplified through the subtraction of rounded numbers, such as double-precision floating-point numbers commonly used in most programs. This is implemented using the [GNU Multiple Precision (GMP) library](https://gmplib.org/) which allows floating-point operations with customizable precision.
@@ -35,7 +45,7 @@ First, it incorporates a [greedy algorithm for Thiele Padé approximants](https:
 ## Model Functions
 This benchmark tests the numerical stability of the Padé interpolant of the GX-AC component using three model functions. In each case, a grid along the imaginary axis $x \in [0i, 1i]$  was used to determine the Padé parameters, followed by the evaluation of 1,000 function values on the real axis $x \in [0 + \eta i, 1 + \eta i]$ using the created Padé model. A small imaginary shift $\eta=0.01$ was introduced to avoid singularities in the tested pole models. The 1,000 computed points were then compared to the exact function values of the model functions to assess the mean absolute error.
 
-<p align="center">
+<p style="text-align: center;">
   <img src="./img/Analyticcontinuation_functions.svg" alt="Performance of the GX-AC component" width="1000">
 </p>
 
@@ -50,11 +60,11 @@ The three model functions described above were tested with three different confi
 It was observed that the greedy algorithm with quadruple precision performed similarly to "plain-128". Therefore, this configuration was left out of the plot.
 The results show that using precision higher than double precision (internally) reduces the mean absolute error for all model functions. Additionally, the greedy algorithm further lowers the error compared to the plain Thiele Padé approach, at least for the tested 2-pole model.
 
-<p align="center">
+<p style="text-align: center;">
   <img src="./img/Analyticcontinuation_model_functions.svg" alt="Performance of the GX-AC component" width="700">
-
+  <br>
   <em>
-  Left: Comparison of the model function with the Padé interpolated function (128 parameters) along the real axis. Right: Mean absolute error between the correct model function and interpolated functions at 1,000 test points along the real axis.
+      Left: Comparison of the model function with the Padé interpolated function (128 parameters) along the real axis. Right: Mean absolute error between the correct model function and interpolated functions at 1,000 test points along the real axis.
   </em>
 </p>
 
@@ -63,7 +73,7 @@ Creating the Padé model (calling `create_thiele_Padé()`) scales quadratically 
 
 Evaluating the Padé model (calling `evaluate_thiele_Padé_at()`) scales linear with the number of points that are evaluated (see left side of the figure below). The type of algorithm doesn't influence the runtime but using a higher precision internally will again result in a longer runtime.
 
-<p align="center">
+<p style="text-align: center;">
   <img src="./img/Analyticcontinuation_performance.svg" alt="Performance of the GX-AC component" width="800">
 </p>
 
@@ -75,8 +85,9 @@ In this test, we present GW calculations using [FHI-aims](https://fhi-aims.org/)
 
 The plot demonstrates that, regardless of the GX-AC component settings (greedy/non-greedy algorithm and floating-point precision), the self-energy and screened interaction can be accurately described using Padé approximants.
 
-<p align="center">
+<p style="text-align: center;">
   <img src="./img/Analyticcontinuation_gw.svg" alt="Performance of the GX-AC component" width="900">
+  <br>
   <em> 
   Left: Analytic continuation (AC) of the self energy of the highest occupied molecular orbital (HOMO) from the imaginary to the real frequency axis  and comparison to contour deformation.  All Padé approximants use 400 parameters.   Right: Analytic continuation of the screened interaction of a core 1s state (benzene) from the imaginary to the real frequency axis.   
   </em>
@@ -99,7 +110,7 @@ params_thiele = create_thiele_pade(n_par, x_ref, y_ref)
 ```fortran
 y_return =  evaluate_thiele_pade_at(params_thiele, x_query)
 ```
-`y_return` and `x_query` must be arrays of the same length. If the Padé model is not needed anymore, the parameters can be conviniently deallocated by:
+`y_return` and `x_query` must be arrays of the same length. If the Padé model is not needed anymore, the parameters can be conveniently deallocated by:
 ```fortran 
 call free_params(params_thiele)
 ```
