@@ -52,10 +52,11 @@ The results show that using precision higher than double precision (internally) 
 
 <p align="center">
   <img src="./img/Analyticcontinuation_model_functions.svg" alt="Performance of the GX-AC component" width="700">
-</p>
 
-<em>Left: Comparison of the model function with the Padé interpolated function (128 parameters) along the real axis.
-Right: Mean absolute error between the correct model function and interpolated functions at 1,000 test points along the real axis.</em>
+  <em>
+  Left: Comparison of the model function with the Padé interpolated function (128 parameters) along the real axis. Right: Mean absolute error between the correct model function and interpolated functions at 1,000 test points along the real axis.
+  </em>
+</p>
 
 ### Performance 
 Creating the Padé model (calling `create_thiele_Padé()`) scales quadratically with the number of Padé parameters (see left side of the figure below). The model settings influence the runtime as well. Using a higher precision internally will result in a higher runtime. Additionally, using the greedy algorithm for parameter evaluation will also increase the runtime compared to the plain Thiele Padé algorithm.
@@ -63,13 +64,24 @@ Creating the Padé model (calling `create_thiele_Padé()`) scales quadratically 
 Evaluating the Padé model (calling `evaluate_thiele_Padé_at()`) scales linear with the number of points that are evaluated (see left side of the figure below). The type of algorithm doesn't influence the runtime but using a higher precision internally will again result in a longer runtime.
 
 <p align="center">
-  <img src="./img/Analyticcontinuation_performance.svg" alt="Performance of the GX-AC component" width="700">
+  <img src="./img/Analyticcontinuation_performance.svg" alt="Performance of the GX-AC component" width="800">
 </p>
 
-## Analytic Continuation GW
+## Analytic Continuation in *GW*
 
-### Self Energy
-### Coulomb Interaction
+The [*GW* method](https://doi.org/10.3389/fchem.2019.00377) stems from many body pertubation theory and is used for calculating electronic excitations in photoemission spectroscopy. Padé approximants are used in *GW* to continue analytic functions like the [self energy](https://dx.doi.org/10.1088/1367-2630/14/5/053020) $\Sigma(\omega)$ or the [coulomb interaction](https://doi.org/10.1021/acs.jctc.3c00555) $W(\omega)$ from the imaginary to the real frequency axis. 
+
+In this test, we present GW calculations using [FHI-aims](https://fhi-aims.org/), where either the self energy or the screened interaction is interpolated using Padé approximants from the GX-AC component. The G<sub>0</sub>W<sub>0</sub>@PBE calculations use a NAO tier 1 basis set and 400 imaginary frequency points to obtain the Padé models. For comparison, we reference a G<sub>0</sub>W<sub>0</sub>@PBE calculation using the [contour deformation](https://doi.org/10.1021/acs.jctc.8b00458) (CD) approach to accurately obtain the self-energy and screened interaction on the real axis.
+
+The plot demonstrates that, regardless of the GX-AC component settings (greedy/non-greedy algorithm and floating-point precision), the self-energy and screened interaction can be accurately described using Padé approximants.
+
+<p align="center">
+  <img src="./img/Analyticcontinuation_gw.svg" alt="Performance of the GX-AC component" width="900">
+  <em> 
+  Left: Analytic continuation (AC) of the self energy of the highest occupied molecular orbital (HOMO) from the imaginary to the real frequency axis  and comparison to contour deformation.  All Padé approximants use 400 parameters.   Right: Analytic continuation of the screened interaction of a core 1s state (benzene) from the imaginary to the real frequency axis.   
+  </em>
+</p>
+
 
 ## Analytic Continuation in RT-TDDFT 
 
@@ -79,34 +91,25 @@ Evaluating the Padé model (calling `evaluate_thiele_Padé_at()`) scales linear 
 
 # Usage
 
-There are two API functions that are needed in order to generate and evaluate a Thiele Padé interpolation.
-
-To create the Thiele Padé parameters call `create_thiele_Padé()` with the reference function arguments and values:
+There are two API functions that are needed in order to generate and evaluate a Thiele Padé interpolation. To create the Thiele Padé parameters call `create_thiele_Pade()` with the reference function arguments and values:
 ```fortran 
-params_thiele = create_thiele_Padé(n_par, x_ref, y_ref)
+params_thiele = create_thiele_pade(n_par, x_ref, y_ref)
 ```
-`x_ref`, `y_ref` must be of length `n_par`. After this step the parameters are stored in the struct called `params_thiele`.
-
-The parameters don't need to be accessed. In order to use the Padé model to evaluate function values with arbitrary function arguments you can use the API function `evaluate_thiele_Padé_at()`:
+`x_ref`, `y_ref` must be of length `n_par`. After this step the parameters are stored in a fortran type called `params_thiele`. The parameters don't need to be accessed. In order to use the Padé model to evaluate function values with arbitrary function arguments you can use the API function `evaluate_thiele_Pade_at()`:
 ```fortran
-y_return =  evaluate_thiele_Padé_at(params_thiele, x_query)
+y_return =  evaluate_thiele_pade_at(params_thiele, x_query)
 ```
-If the Padé model is not needed anymore, the parameters can be conviniently deallocated by:
+`y_return` and `x_query` must be arrays of the same length. If the Padé model is not needed anymore, the parameters can be conviniently deallocated by:
 ```fortran 
 call free_params(params_thiele)
 ```
 
 
 
-### Basic usage Padé interpolation
-
-> **Defaults**:
-> - use the greedy algorithm
-> - use 64 bit float precision (double precision) when GMP is not linked
-> - use 128 bit float precision (quadrupel precision) when linked against GMP
+### Example of a Basic Padé Interpolation
 
 ```fortran
-use gx_ac, only: create_thiele_Padé, evaluate_thiele_Padé_at, & 
+use gx_ac, only: create_thiele_pade, evaluate_thiele_pade_at, & 
                  free_params, params
 
 type(params)                           :: params_thiele
@@ -124,31 +127,44 @@ allocate(x_query(n_fit), y_return(n_fit))
 ...
 
 ! create the Padé interpolation model and store it in struct
-params_thiele = create_thiele_Padé(n_par, x_ref, y_ref)
+params_thiele = create_thiele_pade(n_par, x_ref, y_ref)
 
 ! evaluate the Padé interpolation model at given x points
-y_return(1:n_fit) =  evaluate_thiele_Padé_at(params_thiele, x_query)
+y_return(1:n_fit) =  evaluate_thiele_pade_at(params_thiele, x_query)
 
 ! Clean-up
 call free_params(params_thiele)
 ```
-This is an excerpt of a stand-alone example program that can be found in `greenX/GX-AnalyticContinuation/examples/`. You can use this script to test the GX-AC component using a model function.
+This is an excerpt of a stand-alone example program that can be found in `greenX/GX-AnalyticContinuation/examples/`. You can use this script to test the GX-AC component functionalities using a model function.
 
-### Advanced usage Padé interpolation
-e.g. using the plain thiele Padé algorithm (non-greedy) with 256 bit float precision (8-fold precision): 
+### Advanced usage of Padé Interpolation
+By calling 
 ```fortran
-params_thiele = create_thiele_Padé(n_par, x_ref, y_ref, do_greedy=.false., precision=256)
+params_thiele = create_thiele_pade(n_par, x_ref, y_ref)
+y_return =  evaluate_thiele_pade_at(params_thiele, x_query)
 ```
-e.g. using the greedy algorithm with the faster double precision fortran implementation (doesn't make use of GMP even if it is linked) :
+the following **defaults** are used:
+- thiele pade with greedy algorithm
+- internal multiple precision float representation
+    - turned on when GMP is linked 
+    - turned off if GMP is not linked 
+
+It is possible to change the default behavior by specifying the optional parameters `do_greedy` and `precision`. To give two examples, using the plain thiele Padé algorithm (non-greedy) with 256 bit float precision (8-fold precision): 
 ```fortran
-params_thiele = create_thiele_Padé(n_par, x_ref, y_ref, do_greedy=.true., precision=64)
+params_thiele = create_thiele_pade(n_par, x_ref, y_ref, do_greedy=.false., precision=256)
+y_return =  evaluate_thiele_pade_at(params_thiele, x_query)
+```
+or using the greedy algorithm with the faster double precision fortran implementation (doesn't make use of GMP even if it is linked) :
+```fortran
+params_thiele = create_thiele_pade(n_par, x_ref, y_ref, do_greedy=.true., precision=64)
+y_return =  evaluate_thiele_pade_at(params_thiele, x_query)
 ```
 All possible combinations of `do_greedy` and `precision` are supported. 
 
 **Some considerations**:
 - 64 bit precision is faster than any other precision (because only fortran is used, no GMP)
 - `do_greedy=.true.` is slower than `do_greedy=.false.` 
-- the routines scale $\mathcal{O}(N^2)$ in memory where $N$ is the number of Padé parameters 
+- the routine scales $\mathcal{O}(N^2)$ in memory where $N$ is the number of Padé parameters 
 
 
 
@@ -156,14 +172,14 @@ All possible combinations of `do_greedy` and `precision` are supported.
 
 It is possible to check whether GMP is linked against GreenX at runtime:
 ```fortran
-use gx_ac, only: arbitrary_precision_available, create_thiele_Padé
+use gx_ac, only: arbitrary_precision_available, create_thiele_pade
 
 if (arbitrary_precision_available) then
     ! this will succeed
-    params_thiele = create_thiele_Padé(n_par, x_ref, y_ref, do_greedy=.false., precision=320)
+    params_thiele = create_thiele_pade(n_par, x_ref, y_ref, do_greedy=.false., precision=320)
 else if (.not. arbitrary_precision_available) then 
     ! this will result in an error
-    params_thiele = create_thiele_Padé(n_par, x_ref, y_ref, do_greedy=.false., precision=320)
+    params_thiele = create_thiele_pade(n_par, x_ref, y_ref, do_greedy=.false., precision=320)
 end if   
 ```
 
