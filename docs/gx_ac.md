@@ -8,9 +8,9 @@ description: Analytic continuation Component Documentation
 # General
 This component of the GreenX library (GX-AC) implements the analytic continuation using Padé approximants.
 
-<p style="text-align: center;">
-  <img src="./img/Analyticcontinuation_main.svg" alt="Performance of the GX-AC component" width="700">
-</p>
+<div style="display:flex; justify-content: center; align-items: center; padding-bottom: 20px; padding-top: 20px">
+  <img src="./img/Analyticcontinuation_main.svg" width="700">
+</div>
 
 Analytic continuation is a common challenge in theoretical chemistry when you have a complex analytic function $f(z)$ defined in one domain but need it in another. This issue can be addressed using Padé approximants, which are fitted to the function in one domain (such as the imaginary axis) and then evaluated in a different domain (such as the real axis). These Padé approximants are rational functions of the form
 ```math
@@ -45,9 +45,9 @@ First, it incorporates a [greedy algorithm for Thiele Padé approximants](https:
 ## Model Functions
 This benchmark tests the numerical stability of the Padé interpolant of the GX-AC component using three model functions. In each case, a grid along the imaginary axis $x \in [0i, 1i]$  was used to determine the Padé parameters, followed by the evaluation of 1,000 function values on the real axis $x \in [0 + \eta i, 1 + \eta i]$ using the created Padé model. A small imaginary shift $\eta=0.01$ was introduced to avoid singularities in the tested pole models. The 1,000 computed points were then compared to the exact function values of the model functions to assess the mean absolute error.
 
-<p style="text-align: center;">
-  <img src="./img/Analyticcontinuation_functions.svg" alt="Performance of the GX-AC component" width="1000">
-</p>
+<div style="display:flex; justify-content: center; align-items: center;">
+  <img src="./img/Analyticcontinuation_functions.svg"  width="1000">
+</div>
 
 
 ### Convergence with Number of Padé Parameters 
@@ -60,22 +60,30 @@ The three model functions described above were tested with three different confi
 It was observed that the greedy algorithm with quadruple precision performed similarly to "plain-128". Therefore, this configuration was left out of the plot.
 The results show that using precision higher than double precision (internally) reduces the mean absolute error for all model functions. Additionally, the greedy algorithm further lowers the error compared to the plain Thiele Padé approach, at least for the tested 2-pole model.
 
-<p style="text-align: center;">
-  <img src="./img/Analyticcontinuation_model_functions.svg" alt="Performance of the GX-AC component" width="700">
+<div style="display:flex; justify-content: center; align-items: center;">
+  <div style="width: 600px;">
+  <img src="./img/Analyticcontinuation_model_functions.svg">
   <br>
-  <em>
-      Left: Comparison of the model function with the Padé interpolated function (128 parameters) along the real axis. Right: Mean absolute error between the correct model function and interpolated functions at 1,000 test points along the real axis.
-  </em>
-</p>
+  <div style="display: block; padding: 20px; color: gray; text-align: justify;">
+  Left: Comparison of the model function with the Padé interpolated function (128 parameters) along the real axis. Right: Mean absolute error between the correct model function and interpolated functions at 1,000 test points along the real axis.  
+  </div>
+  </div>
+</div>
 
 ### Performance 
 Creating the Padé model (calling `create_thiele_Padé()`) scales quadratically with the number of Padé parameters (see left side of the figure below). The model settings influence the runtime as well. Using a higher precision internally will result in a higher runtime. Additionally, using the greedy algorithm for parameter evaluation will also increase the runtime compared to the plain Thiele Padé algorithm.
 
 Evaluating the Padé model (calling `evaluate_thiele_Padé_at()`) scales linear with the number of points that are evaluated (see left side of the figure below). The type of algorithm doesn't influence the runtime but using a higher precision internally will again result in a longer runtime.
 
-<p style="text-align: center;">
-  <img src="./img/Analyticcontinuation_performance.svg" alt="Performance of the GX-AC component" width="800">
-</p>
+<div style="display:flex; justify-content: center; align-items: center;">
+  <div style="width: 800px;">
+  <img src="./img/Analyticcontinuation_performance.svg" alt="Performance of the GX-AC component">
+  <br>
+  <div style="display: block; padding: 20px; color: gray; text-align: justify;">
+    Performance Benchmark of the GX-AC component using the 2-pole model function. Left: Runtime of obtaining the Padé parameters depending on how many parameters were used. Right: Runtime of evaluating function values using the pade model with 100 parameters.
+  </div>
+  </div>
+</div>
 
 ## Analytic Continuation in *GW*
 
@@ -85,13 +93,15 @@ In this test, we present GW calculations using [FHI-aims](https://fhi-aims.org/)
 
 The plot demonstrates that, regardless of the GX-AC component settings (greedy/non-greedy algorithm and floating-point precision), the self-energy and screened interaction can be accurately described using Padé approximants.
 
-<p style="text-align: center;">
-  <img src="./img/Analyticcontinuation_gw.svg" alt="Performance of the GX-AC component" width="900">
+<div style="display:flex; justify-content: center; align-items: center;">
+  <div style="width: 900px;">
+  <img src="./img/Analyticcontinuation_gw.svg">
   <br>
-  <em> 
+  <div style="display: block; padding: 20px; color: gray; text-align: justify;">
   Left: Analytic continuation (AC) of the self energy of the highest occupied molecular orbital (HOMO) from the imaginary to the real frequency axis  and comparison to contour deformation.  All Padé approximants use 400 parameters.   Right: Analytic continuation of the screened interaction of a core 1s state (benzene) from the imaginary to the real frequency axis.   
-  </em>
-</p>
+  </div>
+  </div>
+</div>
 
 
 ## Analytic Continuation in RT-TDDFT 
