@@ -54,6 +54,10 @@ module gx_ac
        integer    :: precision 
        !> switch to check whether GMP was used for multi precision floats
        logical    :: multiprecision_used_internally
+       !> enforce symmetry of pade fit e.g. ("x", "y", "xy", "even", "none")
+       character(len=15) :: enforced_symmetry
+       !> switch to check wether greedy algorithm was used 
+       logical    :: use_greedy
 
        !> pointer to c++ struct for multiple precision arithmetic
        type(c_ptr) :: params_ptr
@@ -142,14 +146,14 @@ contains
 
       ! Compute the coefficients a_par
       x_ref_local(:) = x_ref
-      call thiele_pade(n_par, x_ref_local, y_ref, a_par, do_greedy)
+      call thiele_pade(n_par, x_ref_local, y_ref, a_par, do_greedy, "none")
 
       ! Compute the number of query points
       num_query = size(x_query)
 
       ! Evaluate the Thiele-Pade approximation at the query points
       do i = 1, num_query
-         call evaluate_thiele_pade(n_par, x_ref_local, x_query(i), a_par, y_query(i))
+         call evaluate_thiele_pade(n_par, x_ref_local, x_query(i), a_par, y_query(i), "none")
       end do
 
    end subroutine thiele_pade_api
@@ -164,15 +168,17 @@ contains
    !! @param[in] y     - array of the reference function values
    !! @param[in] do_greedy - whether to use the default greedy algorithm or the naive one
    !! @param[in] precision - precision in bits (!! not bytes !!)
+   !! @param[in] enforce_symmetry - force the model to have a certain symmetry ("x", "y", "xy", "even", "none")
    !! @return    params - abstract type to store all parameters in arb. prec. representation
-   type(params) function create_thiele_pade(n_par, x, y, do_greedy, precision) result(par)
+   type(params) function create_thiele_pade(n_par, x, y, do_greedy, precision, enforce_symmetry) result(par)
       integer, intent(in)                        :: n_par
       complex(kind=dp), dimension(:), intent(in) :: x, y
       logical, optional, intent(in)              :: do_greedy
       integer, optional, intent(in)              :: precision 
+      character(*), optional, intent(in)         :: enforce_symmetry
 
       ! Internal variables
-      integer                                         :: local_do_greedy = 1
+      integer                                         :: local_do_greedy
 
       ! initialize type
       par%initialized = .true.
@@ -207,29 +213,50 @@ contains
 #endif
       end if 
 
+      ! Symmetry 
+      if (present(enforce_symmetry)) then 
+          if ((enforce_symmetry.eq."x") &
+              .or. (enforce_symmetry.eq."y") & 
+              .or. (enforce_symmetry.eq."xy") &
+              .or. (enforce_symmetry.eq."even") &
+              .or. (enforce_symmetry.eq."odd") &
+              .or. (enforce_symmetry.eq."conjugate") &
+              .or. (enforce_symmetry.eq."anti-conjugate") &
+              .or. (enforce_symmetry.eq."none") &
+              ) then
+              par%enforced_symmetry = enforce_symmetry
+          else
+              print *, "*** create_thiele_pade: enorce_symmetry=", enforce_symmetry, &
+                       " not known or not supported! Aborting..."
+              stop
+          end if  
+      else 
+          par%enforced_symmetry = "none"
+      end if 
+
+      ! greedy algorithm
+      if (present(do_greedy)) then 
+          par%use_greedy = do_greedy
+      else 
+          par%use_greedy = .true.
+      end if 
+
+      ! create the pade model 
       if (.not. par%multiprecision_used_internally) then 
-
-        allocate(par%a_par(n_par))
-        allocate(par%x_ref(size(x)))
-
-        ! compute the coefficients 
-        par%x_ref(:) = x
-        call thiele_pade(n_par, par%x_ref, y, par%a_par, do_greedy)
-
+          allocate(par%a_par(n_par))
+          allocate(par%x_ref(size(x)))
+          par%x_ref(:) = x
+          call thiele_pade(n_par, par%x_ref, y, par%a_par, par%use_greedy, par%enforced_symmetry)
       elseif (par%multiprecision_used_internally) then 
-
-        ! use integer bools for interoperability with C
-        if (present(do_greedy)) then
-            if (do_greedy) then
-                local_do_greedy = 1
-            else
-                local_do_greedy = 0
-            end if
-        end if
+          ! use integer bools for interoperability with C
+          if (par%use_greedy) then
+              local_do_greedy = 1
+          else
+              local_do_greedy = 0
+          end if
 #ifdef GMPXX_FOUND
-        par%params_ptr = thiele_pade_mp_aux(n_par, x, y, local_do_greedy, par%precision)
+          par%params_ptr = thiele_pade_mp_aux(n_par, x, y, local_do_greedy, par%precision)
 #endif
-
       end if 
 
    end function create_thiele_pade 
@@ -264,7 +291,8 @@ contains
       do i = 1, num_query
 
         if (.not. par%multiprecision_used_internally) then 
-            call evaluate_thiele_pade(par%n_par, par%x_ref, x(i), par%a_par, y(i))
+            call evaluate_thiele_pade(par%n_par, par%x_ref, x(i), par%a_par, &
+                                      y(i), par%enforced_symmetry)
         elseif (par%multiprecision_used_internally) then 
 #ifdef GMPXX_FOUND
             y(i) = evaluate_thiele_pade_mp_aux(x(i), par%params_ptr)
