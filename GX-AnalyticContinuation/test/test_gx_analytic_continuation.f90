@@ -162,6 +162,9 @@ program test_gx_analytic_continuation
             else if (constant_along .eq. "imag") then
                 prototype = cmplx(1.0d0, 0.0d0, kind=8)
                 constant_prototype = cmplx(0.0d0, shift, kind=8)
+            else 
+                print *, "create_complex_grid: constant_along value illegal"
+                stop
             end if 
 
             do i = 1, n_points 

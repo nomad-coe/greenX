@@ -6,7 +6,7 @@
 
 #include "pade_mp.h"
 
-#include <complex>
+//#include <complex>
 #include <iostream>
 #include <optional>
 #include <vector>
@@ -108,6 +108,13 @@ pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
                            const std::complex<double> *y_ref, int do_greedy, int precision) {
     // set floating point precision of GMP lib
     mpf_set_default_prec(precision);
+
+    // store settings in struct
+    pade_model *params = new pade_model;
+    params->n_par = n_par;
+    params->precision = precision;
+    params->symmetry.set_symmetry(1);
+
 
     // Define constants
     const ComplexGMP c_one(std::complex<double>(1.0, 0.0));
@@ -260,11 +267,8 @@ pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
         }
     }
 
-    // Create pointer to the parameter struct
-    pade_model *params = new pade_model;
+    // store the parameters for later evaluations 
     params->a_par = a_par_mp;
-    params->precision = precision;
-    params->n_par = n_par;
     params->xref = x_ref_mp;
 
     // Clean-up
@@ -272,3 +276,6 @@ pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
 
     return params;
 }
+
+
+

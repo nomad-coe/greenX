@@ -20,7 +20,7 @@ set_target_properties(LibGXAC
 target_include_directories(LibGXAC PUBLIC src/)
 if(GMPXX_FOUND)
   add_definitions(-DGMPXX_FOUND)
-  target_sources(LibGXAC PRIVATE src/pade_approximant.f90 src/pade_mp.cpp api/gx_ac.F90)
+  target_sources(LibGXAC PRIVATE src/pade_approximant.f90 src/ComplexGMP.cpp src/Symmetry_pade.cpp src/pade_mp.cpp api/gx_ac.F90)
   target_include_directories(LibGXAC PRIVATE ${GMPXX_INCLUDE_DIRS})
   target_link_libraries(LibGXAC GXCommon ${GMPXX_LIBRARIES} gmp)
 else()
