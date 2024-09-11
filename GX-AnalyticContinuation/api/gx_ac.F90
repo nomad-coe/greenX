@@ -85,13 +85,14 @@ module gx_ac
       !! @param[in] y_ref - array of the reference function values
       !! @param[in] do_greedy - whether to use the default greedy algorithm or the naive one
       !! @return - pointer to abstract type to store all parameters
-      function thiele_pade_mp_aux(n_par, x_ref, y_ref, do_greedy, precision) bind(C, name="thiele_pade_mp")
+      function thiele_pade_mp_aux(n_par, x_ref, y_ref, do_greedy, precision, symmetry) bind(C, name="thiele_pade_mp")
          import :: c_double_complex, c_int, c_ptr
          integer(c_int), value                    :: n_par
          complex(c_double_complex), dimension(*)  :: x_ref
          complex(c_double_complex), dimension(*)  :: y_ref
          integer(c_int), value                    :: do_greedy
          integer(c_int), value                    :: precision
+         integer(c_int), value                    :: symmetry
          type(c_ptr)                              :: thiele_pade_mp_aux
       end function thiele_pade_mp_aux
 
@@ -178,13 +179,14 @@ contains
       character(*), optional, intent(in)         :: enforce_symmetry
 
       ! Internal variables
-      integer                                         :: local_do_greedy
+      integer :: c_do_greedy
+      integer :: c_symmetry_label
 
       ! initialize type
       par%initialized = .true.
       par%n_par = n_par
 
-      ! precision of arithmetic internally
+      ! precision of internal arithmetic
       if (present(precision)) then 
         if (precision .eq. 64) then 
             ! double precision case
@@ -213,7 +215,7 @@ contains
 #endif
       end if 
 
-      ! Symmetry 
+      ! Symmetry consistency check
       if (present(enforce_symmetry)) then 
           if ((enforce_symmetry.eq."x") &
               .or. (enforce_symmetry.eq."y") & 
@@ -222,9 +224,31 @@ contains
               .or. (enforce_symmetry.eq."odd") &
               .or. (enforce_symmetry.eq."conjugate") &
               .or. (enforce_symmetry.eq."anti-conjugate") &
-              .or. (enforce_symmetry.eq."none") &
-              ) then
+              .or. (enforce_symmetry.eq."none")) then
+              ! character for fortran
               par%enforced_symmetry = enforce_symmetry
+              ! integer for c
+              select case (enforce_symmetry)
+                  case ("y")
+                      c_symmetry_label = 1
+                  case ("x")
+                      c_symmetry_label = 2
+                  case ("xy")
+                      c_symmetry_label = 3
+                  case ("even")
+                      c_symmetry_label = 4
+                  case ("odd")
+                      c_symmetry_label = 5
+                  case ("conjugate")
+                      c_symmetry_label = 6
+                  case ("anti-conjugate")
+                      c_symmetry_label = 7
+                  case ("none")
+                      c_symmetry_label = 0
+                  case default 
+                      print *, "symmetry not known!"
+                      stop 
+              end select 
           else
               print *, "*** create_thiele_pade: enorce_symmetry=", enforce_symmetry, &
                        " not known or not supported! Aborting..."
@@ -232,13 +256,22 @@ contains
           end if  
       else 
           par%enforced_symmetry = "none"
+          c_symmetry_label = 0
       end if 
 
       ! greedy algorithm
       if (present(do_greedy)) then 
+          ! actual bool for fortran
           par%use_greedy = do_greedy
+          ! use integer bools for interoperability with C
+          if (do_greedy) then 
+            c_do_greedy = 1
+          else 
+            c_do_greedy = 0
+          end if 
       else 
           par%use_greedy = .true.
+          c_do_greedy = 0
       end if 
 
       ! create the pade model 
@@ -246,16 +279,12 @@ contains
           allocate(par%a_par(n_par))
           allocate(par%x_ref(size(x)))
           par%x_ref(:) = x
-          call thiele_pade(n_par, par%x_ref, y, par%a_par, par%use_greedy, par%enforced_symmetry)
+          call thiele_pade(n_par, par%x_ref, y, par%a_par, &
+                           par%use_greedy, par%enforced_symmetry)
       elseif (par%multiprecision_used_internally) then 
-          ! use integer bools for interoperability with C
-          if (par%use_greedy) then
-              local_do_greedy = 1
-          else
-              local_do_greedy = 0
-          end if
 #ifdef GMPXX_FOUND
-          par%params_ptr = thiele_pade_mp_aux(n_par, x, y, local_do_greedy, par%precision)
+          par%params_ptr = thiele_pade_mp_aux(n_par, x, y, c_do_greedy, &
+                                              par%precision, c_symmetry_label)
 #endif
       end if 
 

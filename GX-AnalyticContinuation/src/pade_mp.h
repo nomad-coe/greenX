@@ -26,10 +26,14 @@ struct pade_model {
 
 // function prototype for fortran interface
 extern "C" {
+
 std::complex<double> evaluate_thiele_pade_mp(const std::complex<double> x,
                                              pade_model *params_ptr);
+
 pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
-                           const std::complex<double> *y_ref, int do_greedy, int precision);
+                           const std::complex<double> *y_ref, int do_greedy, 
+                           int precision, int symmetry);
+
 void free_pade_model(pade_model *model) {
     if (model != nullptr) {
         delete[] model->a_par;
@@ -37,4 +41,5 @@ void free_pade_model(pade_model *model) {
         delete model;
     }
 }
+
 }

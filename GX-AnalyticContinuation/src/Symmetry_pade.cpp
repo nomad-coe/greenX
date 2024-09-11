@@ -38,35 +38,35 @@ std::complex<double> Symmetry_pade::apply_sym_x(std::complex<double> x) {
             break;
         }
         case sym_y: {
-            x_symm = std::complex<double>(abs(x.real()), x.imag());
+            x_symm = std::complex<double>(std::abs(x.real()), x.imag());
             break;
         }
         case sym_x: {
-            x_symm = std::complex<double>(x.real(), abs(x.imag()));
+            x_symm = std::complex<double>(x.real(), std::abs(x.imag()));
             break;
         }
         case sym_xy: {
-            x_symm = std::complex<double>(abs(x.real()), abs(x.imag()));
+            x_symm = std::complex<double>(std::abs(x.real()), std::abs(x.imag()));
             break;
         }
         case sym_even: {
             double new_im = std::copysign(1.0, x.real()) * x.imag();
-            x_symm = std::complex<double>(abs(x.real()), new_im);
+            x_symm = std::complex<double>(std::abs(x.real()), new_im);
             break;
         }
         case sym_odd: {
             double new_im = std::copysign(1.0, x.real()) * x.imag();
-            x_symm = std::complex<double>(abs(x.real()), new_im);
+            x_symm = std::complex<double>(std::abs(x.real()), new_im);
             break;
         }
         case sym_conjugate: {
             double new_im = std::copysign(1.0, x.real()) * x.imag();
-            x_symm = std::complex<double>(abs(x.real()), new_im);
+            x_symm = std::complex<double>(std::abs(x.real()), new_im);
             break;
         }
         case sym_anti_conjugate: {
             double new_im = std::copysign(1.0, x.real()) * x.imag();
-            x_symm = std::complex<double>(abs(x.real()), new_im);
+            x_symm = std::complex<double>(std::abs(x.real()), new_im);
             break;
         }
     }
