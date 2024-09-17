@@ -90,36 +90,15 @@ set_target_properties(test_gx_analytic_continuation
         PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_Fortran_BIN_DIRECTORY})
 
-# Copy .py test to the `build/test` directory, such that one can run pytest there
+# Copy all .py test to the `build/test` directory, such that one can run pytest there
 # where CMAKE_CURRENT_SOURCE_DIR => CMakeLists.txt on this level
 add_custom_command(
 	TARGET LibGXAC POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
                 # Test source relative to the time-frequency (this) folder
-                ${CMAKE_CURRENT_SOURCE_DIR}/test/test_gx_analytic_continuation_no-greedy_64bit.py
+                ${CMAKE_CURRENT_SOURCE_DIR}/test/test_*.py
                 # Location to copy the test to
-                ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/test_gx_analytic_continuation_no-greedy_64bit.py)
-add_custom_command(
-	TARGET LibGXAC POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-                # Test source relative to the time-frequency (this) folder
-                ${CMAKE_CURRENT_SOURCE_DIR}/test/test_gx_analytic_continuation_greedy_64bit.py
-                # Location to copy the test to
-                ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/test_gx_analytic_continuation_greedy_64bit.py)
-add_custom_command(
-	TARGET LibGXAC POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-                # Test source relative to the time-frequency (this) folder
-                ${CMAKE_CURRENT_SOURCE_DIR}/test/test_gx_analytic_continuation_no-greedy_128bit.py
-                # Location to copy the test to
-                ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/test_gx_analytic_continuation_no-greedy_128bit.py)
-add_custom_command(
-	TARGET LibGXAC POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-                # Test source relative to the time-frequency (this) folder
-                ${CMAKE_CURRENT_SOURCE_DIR}/test/test_gx_analytic_continuation_greedy_128bit.py
-                # Location to copy the test to
-                ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/test_gx_analytic_continuation_greedy_128bit.py)
+                ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/)
 
 # Add test to ctest
 add_test(
@@ -140,5 +119,15 @@ add_test(
 add_test(
         NAME test_gx_analytic_continuation_greedy_128bit
         COMMAND pytest -s test_gx_analytic_continuation_greedy_128bit.py --build-dir ${CMAKE_BINARY_DIR}
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
+)
+add_test(
+        NAME test_gx_analytic_continuation_symmetry_64bit
+        COMMAND pytest -s test_gx_analytic_continuation_symmetry_64bit.py --build-dir ${CMAKE_BINARY_DIR}
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
+)
+add_test(
+        NAME test_gx_analytic_continuation_symmetry_128bit
+        COMMAND pytest -s test_gx_analytic_continuation_symmetry_128bit.py --build-dir ${CMAKE_BINARY_DIR}
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
 )

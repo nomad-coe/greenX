@@ -28,9 +28,10 @@ program test_gx_analytic_continuation
 
     integer,      parameter :: n_parameters = 16            ! number of pade parameters (= points on imaginary axis)
     integer,      parameter :: n_points     = 100           ! number of interpolated points on real axis
-    real(kind=8), parameter :: imag_shift   = 0.001d0       ! imaginary shift for interpolated points 
+    real(kind=8)            :: imag_shift                   ! imaginary shift for interpolated points 
     logical                 :: do_greedy                    ! whether greedy algorithm is used in pade approximation
     integer                 :: precision                    ! internal floating point precision of pade fit
+    character(15)           :: symmetry                     ! enforced symmetry of the pade model
 
     type(params)                               :: params_thiele
     complex(kind=8), dimension(:), allocatable :: x_query
@@ -44,7 +45,13 @@ program test_gx_analytic_continuation
     allocate(x_query(n_points), y_return(n_points), y_correct(n_points)) 
 
     ! get settings
-    call parse_settings(do_greedy, precision)
+    call parse_settings(do_greedy, precision, symmetry)
+    if (symmetry .eq. "none") then 
+        imag_shift = 0.001d0
+    else 
+        ! to see the effect of the enforced symmetry
+        imag_shift = -0.001d0
+    end if  
 
     ! create points along the imaginary axis
     call create_complex_grid(n_parameters, x_ref, constant_along="real", shift=0.0d0)
@@ -57,8 +64,10 @@ program test_gx_analytic_continuation
     ! ---- GreenX API calls ------------------------------------------------------------
 
     ! create the pade interpolation model and store it in struct
-    params_thiele = create_thiele_pade(n_parameters, x_ref, y_ref, &
-                                       do_greedy=do_greedy, precision=precision)
+    params_thiele = create_thiele_pade(n_parameters, x_ref, y_ref,  &
+                                       do_greedy=do_greedy,         &
+                                       precision=precision,         &
+                                       enforce_symmetry=symmetry)
 
     ! evaluate the pade interpolation model at given x points
     y_return(1:n_points) =  evaluate_thiele_pade_at(params_thiele, x_query)
@@ -87,9 +96,10 @@ program test_gx_analytic_continuation
         !!
         !! @param[out] do_greedy -- whether greedy algorithm is used in pade fit
         !! @param[out] precision -- internal floating point precision
-        subroutine parse_settings(do_greedy, precision)
+        subroutine parse_settings(do_greedy, precision, symmetry)
             logical, intent(out) :: do_greedy 
             integer, intent(out) :: precision 
+            character(15), intent(out) :: symmetry
 
             ! internal variables 
             character(10) :: tmp 
@@ -109,6 +119,10 @@ program test_gx_analytic_continuation
             ! which precision?
             call get_command_argument(2, tmp)
             read(tmp, *) precision
+
+            ! which symmetry?
+            call get_command_argument(3, symmetry)
+            symmetry = trim(symmetry)
 
         end subroutine parse_settings
 
