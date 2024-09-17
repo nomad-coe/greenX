@@ -10,12 +10,13 @@
 !! This example program is intendet to showcase the usage of the GreenX - Analytic 
 !! Continuation component by fitting a 16-parameter pade model at a two-pole function.
 !!
-!!      reference function:     y = (x - 0.25)^{-1} + (x - 0.75)^{-1} - 50
+!!      reference function:     y =   0.9*(x - 0.25)^(-1)  + (x - 0.75)^(-1) 
+!!                                  - 0.7*(x + 0.25)^(-1)  - (x + 0.75)^(-1) 
 !!
-!! - the reference function values are taken along the imaginary axis x \in [0i, 1i]
+!! - the reference function values are taken along the imaginary axis x \in [-1.1i, 1i]
 !! - these values are used to obtain a pade model 
 !! - this pade model is used to evaluate the function along the real axis with 
-!!   a small imaginary shift x \in [0 + imag_shift, 1 + imag_shift]
+!!   a small imaginary shift x \in [-1.1 + i*imag_shift, 1 + i*imag_shift]
 !! - the function values obtained with the pade model are compared against the 
 !!   correct ones
 program use_pade 
@@ -25,9 +26,9 @@ program use_pade
 
     implicit none 
 
-    integer,      parameter :: n_parameters = 16            ! number of pade parameters (= points on imaginary axis)
-    integer,      parameter :: n_points     = 100           ! number of interpolated points on real axis
-    real(kind=8), parameter :: imag_shift   = 0.001d0       ! imaginary shift for interpolated points 
+    integer,      parameter :: n_parameters = 8            ! number of pade parameters (= points on imaginary axis)
+    integer,      parameter :: n_points     = 1000           ! number of interpolated points on real axis
+    real(kind=8), parameter :: imag_shift   = 0.01d0       ! imaginary shift for interpolated points 
 
     type(params)                               :: params_thiele
     complex(kind=8), dimension(:), allocatable :: x_query
@@ -42,7 +43,7 @@ program use_pade
     ! create points along the imaginary axis
     call create_complex_grid(n_parameters, x_ref, constant_along="real", shift=0.0d0)
     ! evaluate function values along imaginary axis 
-    call evaluate_two_pole_model(n_parameters, x_ref, y_ref)
+    call evaluate_reference_function(n_parameters, x_ref, y_ref)
     ! create a grid along the real axis where analytically continued function 
     !    values will be evaluated by pade
     call create_complex_grid(n_points, x_query, constant_along="imag", shift=imag_shift)
@@ -51,7 +52,9 @@ program use_pade
 
     ! create the pade interpolation model and store it in struct
     params_thiele = create_thiele_pade(n_parameters, x_ref, y_ref, &
-                                       do_greedy=.false., precision=64)
+                                       do_greedy=.false.,            &
+                                       precision=64,               &
+                                       enforce_symmetry="none")
 
     ! evaluate the pade interpolation model at given x points
     y_return(1:n_points) =  evaluate_thiele_pade_at(params_thiele, x_query)
@@ -59,7 +62,7 @@ program use_pade
     ! ----------------------------------------------------------------------------------
 
     ! compare the analytic continuation with the correct function values
-    call evaluate_two_pole_model(n_points, x_query, y_correct)
+    call evaluate_reference_function(n_points, x_query, y_correct)
     call print_comparison(n_points, x_query, y_return, y_correct)
 
 
@@ -80,14 +83,15 @@ program use_pade
         !! @parameter[in]  n_points -- number of points
         !! @parameter[in]  x        -- coplex grid points
         !! @parameter[out] y        -- function values of two-pole model
-        subroutine evaluate_two_pole_model(n_points, x, y)
+        subroutine evaluate_reference_function(n_points, x, y)
             integer,                              intent(in)  :: n_points 
             complex(kind=8), dimension(n_points), intent(in)  :: x
             complex(kind=8), dimension(n_points), intent(out) :: y
 
-            y = (x - 0.25d0)**(-1.0d0) + (x - 0.75d0)**(-1.0d0) - 50.0d0*x
+            y = 0.9d0*(x - 0.25d0)**(-1.0d0)  + (x - 0.75d0)**(-1.0d0) &
+                - 0.7d0*(x + 0.25d0)**(-1.0d0)  - (x + 0.75d0)**(-1.0d0) 
 
-        end subroutine evaluate_two_pole_model
+        end subroutine evaluate_reference_function
 
 
         !> @brief creates a complex grid along imaginary or real axis
@@ -104,7 +108,7 @@ program use_pade
             ! internal variables
             integer :: i
 
-            real(kind=8), parameter :: x_start = 0.0d0
+            real(kind=8), parameter :: x_start = -1.1d0
             real(kind=8), parameter :: x_end   = 1.0d0
             real(kind=8) :: x_step 
             real(kind=8), dimension(n_points) :: x_tmp
@@ -148,7 +152,7 @@ program use_pade
             ! internal variables 
             integer :: i 
 
-            print "(a, 2x, a, 2x, a, 2x, a, 2x, a, 2x, a)", "  real(x) ", & 
+            print "(a, 2x, a, 2x, a, 2x, a, 2x, a, 2x, a)", "# real(x) ", & 
                   "imag(x)   ", "real(y_pade)  ", "imag(y_pade)  ", &
                   "real(y_ref)   ", "imag(y_ref)    "
 

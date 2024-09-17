@@ -17,6 +17,9 @@ cmake -DMINIMAX_COMPONENT=OFF -DLBASIS_COMPONENT=OFF \
       -DPAW_COMPONENT=OFF -DCOMPILE_SUBMODULES=OFF ../
 make -j 
 make install 
+
+# optional: for running the regression tests
+ctest
 ```
 
 ### Linking against GNU Multiple Precision (GMP) Library
@@ -69,18 +72,16 @@ make
 ```
 The program can be executed by running:
 ```bash 
-./pade_example
+./pade_example > output.dat
 ```
-Feel free to change some parameters in the script and compile again to see how it is affecting the pade interpolation.
-
-## Running the Unit Tests 
-Unit tests of the GX-AC component use the unit-testing framework [Zofu](https://github.com/acroucher/zofu). This library is build together with Greenx automatically when `ENABLE_GREENX_UNIT_TESTS=ON`: 
-
+To plot the reference function and the Padé interpolation call the python script:
 ```bash 
-cmake -DENABLE_GREENX_UNIT_TESTS=ON ../
+python plot.py output.dat comparison.png
 ```
-Unit tests are run together with the application tests, using ctest. Simply type `ctest`
-in the build directory after the GreenX library has been build.
+The figure is saved as `comparison.png`. Feel free to change some parameters in the `pade_example.f90` script and compile again to see how it is affecting the pade interpolation.
+
+## Running the regression tests 
+Regression tests of the GX-AC component use the testing framework [pytest](https://docs.pytest.org/en/stable/#). Simply type `ctest` in the build directory after the GreenX library has been build.
 
 For more information please refer to the main [README.md](https://github.com/nomad-coe/greenX/blob/main/README.md) of this repository.
 
