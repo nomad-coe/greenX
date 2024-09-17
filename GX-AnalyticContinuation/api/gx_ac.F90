@@ -217,43 +217,31 @@ contains
 
       ! Symmetry consistency check
       if (present(enforce_symmetry)) then 
-          if ((enforce_symmetry.eq."x") &
-              .or. (enforce_symmetry.eq."y") & 
-              .or. (enforce_symmetry.eq."xy") &
-              .or. (enforce_symmetry.eq."even") &
-              .or. (enforce_symmetry.eq."odd") &
-              .or. (enforce_symmetry.eq."conjugate") &
-              .or. (enforce_symmetry.eq."anti-conjugate") &
-              .or. (enforce_symmetry.eq."none")) then
-              ! character for fortran
-              par%enforced_symmetry = enforce_symmetry
-              ! integer for c
-              select case (enforce_symmetry)
-                  case ("y")
-                      c_symmetry_label = 1
-                  case ("x")
-                      c_symmetry_label = 2
-                  case ("xy")
-                      c_symmetry_label = 3
-                  case ("even")
-                      c_symmetry_label = 4
-                  case ("odd")
-                      c_symmetry_label = 5
-                  case ("conjugate")
-                      c_symmetry_label = 6
-                  case ("anti-conjugate")
-                      c_symmetry_label = 7
-                  case ("none")
-                      c_symmetry_label = 0
-                  case default 
-                      print *, "symmetry not known!"
-                      stop 
-              end select 
-          else
-              print *, "*** create_thiele_pade: enorce_symmetry=", enforce_symmetry, &
-                       " not known or not supported! Aborting..."
-              stop
-          end if  
+          ! character for fortran
+          par%enforced_symmetry = enforce_symmetry
+          ! integer for c
+          select case (enforce_symmetry)
+              case ("mirror_real")
+                  c_symmetry_label = 1
+              case ("mirror_imag")
+                  c_symmetry_label = 2
+              case ("mirror_both")
+                  c_symmetry_label = 3
+              case ("even")
+                  c_symmetry_label = 4
+              case ("odd")
+                  c_symmetry_label = 5
+              case ("conjugate")
+                  c_symmetry_label = 6
+              case ("anti-conjugate")
+                  c_symmetry_label = 7
+              case ("none")
+                  c_symmetry_label = 0
+              case default 
+                  print *, "*** create_thiele_pade: enorce_symmetry=", enforce_symmetry, &
+                           " not known or not supported! Aborting..."
+                  stop
+          end select 
       else 
           par%enforced_symmetry = "none"
           c_symmetry_label = 0

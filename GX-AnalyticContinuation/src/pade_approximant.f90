@@ -352,11 +352,11 @@ contains
       character(len=*), intent(in) :: symm
 
       select case (symm)
-        case ("y")
+        case ("mirror_real")
             x_symm = cmplx(abs(x%re), x%im, kind=8)
-        case ("x")
+        case ("mirror_imag")
             x_symm = cmplx(x%re, abs(x%im), kind=8)
-        case ("xy")
+        case ("mirror_both")
             x_symm = cmplx(abs(x%re), abs(x%im), kind=8)
         case ("even")
             x_symm = cmplx(abs(x%re), sign(1.0d0, x%re) * x%im, kind=8)

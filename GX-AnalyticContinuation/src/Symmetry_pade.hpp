@@ -17,11 +17,11 @@ class Symmetry_pade {
         /// symmetry type: no symmetry
         static const int sym_none = 0;
         /// symmetry type: mirror at img axis
-        static const int sym_y = 1;
+        static const int sym_mirror_real = 1;
         /// symmetry type: mirror at real axis
-        static const int sym_x = 2;
+        static const int sym_mirror_imag = 2;
         /// symmetry type: mirror at img and real axis
-        static const int sym_xy = 3;
+        static const int sym_mirror_both = 3;
         /// symmetry type: even function
         static const int sym_even = 4;
         /// symmetry type: odd function

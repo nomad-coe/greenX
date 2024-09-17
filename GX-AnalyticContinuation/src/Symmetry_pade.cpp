@@ -37,15 +37,15 @@ std::complex<double> Symmetry_pade::apply_sym_x(std::complex<double> x) {
             x_symm = x;
             break;
         }
-        case sym_y: {
+        case sym_mirror_real: {
             x_symm = std::complex<double>(std::abs(x.real()), x.imag());
             break;
         }
-        case sym_x: {
+        case sym_mirror_imag: {
             x_symm = std::complex<double>(x.real(), std::abs(x.imag()));
             break;
         }
-        case sym_xy: {
+        case sym_mirror_both: {
             x_symm = std::complex<double>(std::abs(x.real()), std::abs(x.imag()));
             break;
         }
