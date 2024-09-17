@@ -164,10 +164,10 @@ Fine-grained control over the generated pade model is provided by calling `creat
 params_thiele = create_thiele_pade(n_par, x_ref, y_ref, &
                                    do_greedy = .true., &
                                    precision = 64,      &
-                                   symmetry  = "none")
+                                   enforce_symmetry = "none")
 y_return =  evaluate_thiele_pade_at(params_thiele, x_query)
 ```
-The chosen options are stored in the model type and don't have to be repeated when the model is evaluated. All possible combinations of `do_greedy`, `precision` and `symmetry` options are supported. 
+The chosen options are stored in the model type and don't have to be repeated when the model is evaluated. All possible combinations of `do_greedy`, `precision` and `enforce_symmetry` options are supported. 
 
 #### keyword argument `do_greedy` 
 **Default:** `.true.` <br>
@@ -179,7 +179,7 @@ If true, a greedy algorithm is used to sort the reference points with the aim to
 **Possible options:** any positive number greater zero of type `integer` <br>
 The internal floating point precision in bit (not byte). Controls how floats are represented during creation and evaluation of the model using the GNU MP library for handling higher precision floats if a precision greater that 64 bit (double precision) is requested. The arrays containing the reference points (input) and also the evaluated function values (output) are in double precision independent of the `precision` keyword value. Note that a higher precision can increase the time of creating and evaluating the pade model drastically.
 
-#### keyword argument `symmetry` 
+#### keyword argument `enforce_symmetry` 
 **Default:** `none` <br>
 **Possible options:** See table below. <br>
 Force the pade model to have a certain symmetry. 
