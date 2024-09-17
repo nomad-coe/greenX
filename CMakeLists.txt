@@ -72,12 +72,6 @@ endif()
 
 # Optional unit testing lib
 option(ENABLE_GREENX_UNIT_TESTS "Enable GreenX Unit Testing" OFF)
-if (${ENABLE_GREENX_UNIT_TESTS})
-  # Function for generating unit test executables (assumes Zofu)
-  include(cmake/unit_test_functions.cmake)
-  # find ZOFU in $ZOFU_PATH or build on the fly
-  include(cmake/Findzofu.cmake)
-endif()
 
 # Our library directories
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
@@ -104,6 +98,13 @@ endif()
 # Elements to compile the libraries inside submodules
 option(COMPILE_SUBMODULES "Compile GreenX component contained inside submodules" ON)
 if (${COMPILE_SUBMODULES})
+  # zofu is needed for IDieL regression tests
+  if (${ENABLE_GREENX_UNIT_TESTS})
+    # Function for generating unit test executables (assumes Zofu)
+    include(cmake/unit_test_functions.cmake)
+    # find ZOFU in $ZOFU_PATH or build on the fly
+    include(cmake/Findzofu.cmake)
+  endif()
   # Build IDieL
   set(IDieL_SOURCE "${PROJECT_SOURCE_DIR}/GX-q=0/IDieL/")
   set(IDieL_CMAKE_OPTIONS "" CACHE STRING "Other IDieL options to build IDieL")
