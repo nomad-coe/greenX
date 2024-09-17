@@ -169,7 +169,7 @@ contains
    !! @param[in] y     - array of the reference function values
    !! @param[in] do_greedy - whether to use the default greedy algorithm or the naive one
    !! @param[in] precision - precision in bits (!! not bytes !!)
-   !! @param[in] enforce_symmetry - force the model to have a certain symmetry ("x", "y", "xy", "even", "none")
+   !! @param[in] enforce_symmetry - force the model to have a certain symmetry ("even", "odd", "conjugate", "none", ...)
    !! @return    params - abstract type to store all parameters in arb. prec. representation
    type(params) function create_thiele_pade(n_par, x, y, do_greedy, precision, enforce_symmetry) result(par)
       integer, intent(in)                        :: n_par

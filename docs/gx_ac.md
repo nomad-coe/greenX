@@ -158,35 +158,42 @@ call free_params(params_thiele)
 ```
 This is an excerpt of a stand-alone example program that can be found in `greenX/GX-AnalyticContinuation/examples/`. You can use this script to test the GX-AC component functionalities using a model function.
 
-### Advanced usage of Padé Interpolation
-By calling 
+### Available Options of Padé Interpolation
+Fine-grained control over the generated pade model is provided by calling `create_thiele_pade()`with optional keyword arguments:
 ```fortran
-params_thiele = create_thiele_pade(n_par, x_ref, y_ref)
+params_thiele = create_thiele_pade(n_par, x_ref, y_ref, &
+                                   do_greedy = .true., &
+                                   precision = 64,      &
+                                   symmetry  = "none")
 y_return =  evaluate_thiele_pade_at(params_thiele, x_query)
 ```
-the following **defaults** are used:
-- thiele pade with greedy algorithm
-- internal multiple precision float representation
-    - turned on when GMP is linked 
-    - turned off if GMP is not linked 
+The chosen options are stored in the model type and don't have to be repeated when the model is evaluated. All possible combinations of `do_greedy`, `precision` and `symmetry` options are supported. 
 
-It is possible to change the default behavior by specifying the optional parameters `do_greedy` and `precision`. To give two examples, using the plain thiele Padé algorithm (non-greedy) with 256 bit float precision (8-fold precision): 
-```fortran
-params_thiele = create_thiele_pade(n_par, x_ref, y_ref, do_greedy=.false., precision=256)
-y_return =  evaluate_thiele_pade_at(params_thiele, x_query)
-```
-or using the greedy algorithm with the faster double precision fortran implementation (doesn't make use of GMP even if it is linked) :
-```fortran
-params_thiele = create_thiele_pade(n_par, x_ref, y_ref, do_greedy=.true., precision=64)
-y_return =  evaluate_thiele_pade_at(params_thiele, x_query)
-```
-All possible combinations of `do_greedy` and `precision` are supported. 
+#### keyword argument `do_greedy` 
+**Default:** `.true.` <br>
+**Possible options:** `.true.`, `.false.`<br>
+If true, a greedy algorithm is used to sort the reference points with the aim to lower the numerical noise. This comes at the cost of a slightly increased time to create the pade model. 
 
-**Some considerations**:
-- 64 bit precision is faster than any other precision (because only fortran is used, no GMP)
-- `do_greedy=.true.` is slower than `do_greedy=.false.` 
-- the routine scales $\mathcal{O}(N^2)$ in memory where $N$ is the number of Padé parameters 
+#### keyword argument `precision` 
+**Default:** `128` if linked against GMP, else: `64`<br>
+**Possible options:** any positive number greater zero of type `integer` <br>
+The internal floating point precision in bit (not byte). Controls how floats are represented during creation and evaluation of the model using the GNU MP library for handling higher precision floats if a precision greater that 64 bit (double precision) is requested. The arrays containing the reference points (input) and also the evaluated function values (output) are in double precision independent of the `precision` keyword value. Note that a higher precision can increase the time of creating and evaluating the pade model drastically.
 
+#### keyword argument `symmetry` 
+**Default:** `none` <br>
+**Possible options:** See table below. <br>
+Force the pade model to have a certain symmetry. 
+
+| symmetry label | enforced symmetry | 
+| --- | --- |
+| `mirror_real` |  $f(z) = f(a+ib) = f(-a+ib)$ |
+| `mirror_imag`  | $f(z) = f(a+ib) = f(a-ib)$ |
+| `mirror_both` | $f(z) = f(a+ib) = f(a-ib) = f(-a+ib) = f(-a-ib) $ |
+| `even` | $f(z) = f(-z)$ |
+| `odd` | $f(z) = -f(-z)$ |
+| `conjugate` | $f(z) = \overline{f(-z)}$ |
+| `anti-conjugate` | $f(z) = -\overline{f(-z)}$ |
+| `none` |  no symmetry enforced |
 
 
 ### Availability of GMP at runtime
