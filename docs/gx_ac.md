@@ -36,14 +36,15 @@ g_p(z_i) = \begin{dcases}  f(z_i) & p=1 \\\;\\ \frac{g_{p-1}(z_{p-1})-g_{p-1}(z_
 ```
 
 Padé approximants are known to be [numerical instable](https://doi.org/10.1093/imamat/25.3.267). The GX-AC component uses two strategies to numerically stabilize the interpolation. 
-First, it incorporates a [greedy algorithm for Thiele Padé approximants](https://pubs.acs.org/doi/full/10.1021/acs.jctc.3c00555) that minimizes the numerical error by reordering of the reference points. Additionally it is possible to use the component with a  higher internal numerical floating point precision. This helps reducing the numerical noise caused by [catastrophic cancellation](https://doi.org/10.1145/103162.103163). Catastrophic cancellation occurs when rounding errors are amplified through the subtraction of rounded numbers, such as double-precision floating-point numbers commonly used in most programs. This is implemented using the [GNU Multiple Precision (GMP) library](https://gmplib.org/) which allows floating-point operations with customizable precision.
+First, it incorporates a [greedy algorithm for Thiele Padé approximants](https://pubs.acs.org/doi/full/10.1021/acs.jctc.3c00555) that minimizes the numerical error by reordering of the reference points. A validation of the greedy algorithm can be found in this [reference](https://pubs.acs.org/doi/full/10.1021/acs.jctc.3c00555). Additionally it is possible to use the component with a  higher internal numerical floating point precision. This helps reducing the numerical noise caused by [catastrophic cancellation](https://doi.org/10.1145/103162.103163). Catastrophic cancellation occurs when rounding errors are amplified through the subtraction of rounded numbers, such as double-precision floating-point numbers commonly used in most programs. This is implemented using the [GNU Multiple Precision (GMP) library](https://gmplib.org/) which allows floating-point operations with customizable precision. Furthermore, it is possible to impose various symmetries onto the Padé model using the GX-AC component. To maximize performance, the evaluation of the Padé  model uses the [Wallis algorithm](https://numerical.recipes/book.html), which minimizes the number of divisions, an operation that is computationally expensive, especially for complex floating-point numbers and even more so for higher-precision complex numbers.
 
 
 # Benchmarks
 
+In this benchmark section, we first analyze the effect of various parameters by using simple model functions, providing insights into their behavior, and then demonstrate practical applications with GW and RT-TDDFT simulations. 
 
 ## Model Functions
-This benchmark tests the numerical stability of the Padé interpolant of the GX-AC component using three model functions. In each case, a grid along the imaginary axis $x \in [0i, 1i]$  was used to determine the Padé parameters, followed by the evaluation of 1,000 function values on the real axis $x \in [0 + \eta i, 1 + \eta i]$ using the created Padé model. A small imaginary shift $\eta=0.01$ was introduced to avoid singularities in the tested pole models. The 1,000 computed points were then compared to the exact function values of the model functions to assess the mean absolute error.
+This benchmark tests the numerical stability of the Padé interpolant of the GX-AC component using three model functions. In each case, a grid along the imaginary axis $z \in [0i, 1i]$  was used to determine the Padé parameters, followed by the evaluation of 1,000 function values on the real axis $z \in [0 + \eta i, 1 + \eta i]$ using the created Padé model. A small imaginary shift $\eta=0.01$ was introduced to avoid singularities in the tested pole models. The 1,000 computed points were then compared to the exact function values of the model functions to assess the mean absolute error.
 
 <div style="display:flex; justify-content: center; align-items: center;">
   <img src="./img/Analyticcontinuation_functions.svg"  width="1000">
@@ -182,7 +183,7 @@ The internal floating point precision in bit (not byte). Controls how floats are
 #### keyword argument `enforce_symmetry` 
 **Default:** `none` <br>
 **Possible options:** See table below. <br>
-Force the pade model to have a certain symmetry. 
+Force the Padé model to have a certain symmetry. If the symmetry of the underlying function is known, the user is advised to enforce this symmetry on the Padé model. This increases the predictive power of the model because more information about the function is provided.
 
 | symmetry label | enforced symmetry | 
 | --- | --- |
