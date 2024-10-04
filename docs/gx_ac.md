@@ -59,7 +59,15 @@ The three model functions described above were tested with three different confi
 - `"plain-128"`: Thiele Padé algorithm using **quadruple-precision** (128 bit) floating points (internally).
 
 It was observed that the greedy algorithm with quadruple precision performed similarly to "plain-128". Therefore, this configuration was left out of the plot.
-The results show that using precision higher than double precision (internally) reduces the mean absolute error for all model functions. Additionally, the greedy algorithm further lowers the error compared to the plain Thiele Padé approach, at least for the tested 2-pole model.
+
+The figure below illustrates how the number of parameters affects the error in analytic continuation. The error is defined as the residual sum between the values obtained from the Padé model and the exact analytic reference function.
+
+On the left, the function along the real axis of $z$ is shown, comparing the analytic continuation of different 128-parameter Padé models with the exact reference function. On the right, the error from analytic continuation is plotted against the number of Padé parameters.
+
+For a simple 2-pole model, increasing the number of parameters does not reduce the error because all features are already well-represented with a small number of parameters. In more complex models (such as the 8-pole model or cosine function), the error decreases as more Padé parameters are used, indicating better representation of these feature-rich functions.
+
+For all three models, the 128-bit Padé approximant shows significantly lower error compared to the 64-bit version. Additionally, the greedy algorithm reduces the error further compared to the standard Thiele Padé method, particularly for the 2-pole model.
+
 
 <div style="display:flex; justify-content: center; align-items: center;">
   <div style="width: 600px;">
@@ -162,9 +170,9 @@ This is an excerpt of a stand-alone example program that can be found in `greenX
 ### Available Options of Padé Interpolation
 Fine-grained control over the generated pade model is provided by calling `create_thiele_pade()`with optional keyword arguments:
 ```fortran
-params_thiele = create_thiele_pade(n_par, x_ref, y_ref, &
-                                   do_greedy = .true., &
-                                   precision = 64,      &
+params_thiele = create_thiele_pade(n_par, x_ref, y_ref,     &
+                                   do_greedy = .true.,      &
+                                   precision = 64,          &
                                    enforce_symmetry = "none")
 y_return =  evaluate_thiele_pade_at(params_thiele, x_query)
 ```
