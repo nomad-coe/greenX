@@ -39,8 +39,7 @@ module gx_ac
              create_thiele_pade, &
              evaluate_thiele_pade_at, &
              free_params, &
-             arbitrary_precision_available, &
-             thiele_pade_api
+             arbitrary_precision_available 
 
 
    !> @brief store the parameters of the thiele pade model 
@@ -121,45 +120,6 @@ module gx_ac
 #endif
 
 contains
-
-   !> @brief API function to compute Thiele-Pade approximations of a meromorphic 
-   !!        function
-   !!       
-   !!        >> Deprecated, please use create_thiele_pade() and 
-   !!        evaluate_thiele_pade_at() whenever possible! <<
-   !!
-   !! @param[in] n_par - order of the interpolant
-   !! @param[in] x_ref - array of the reference points
-   !! @param[in] y_ref - array of the reference function values
-   !! @param[in] x_query - array of points where the function needs to be evaluated
-   !! @param[in] do_greedy - whether to use the default greedy algorithm or the naive one
-   !! @param[out] y_query - array of the interpolated values at x_query
-   subroutine thiele_pade_api(n_par, x_ref, y_ref, x_query, y_query, do_greedy)
-      integer, intent(in)                         :: n_par
-      complex(kind=dp), dimension(:), intent(in)  :: x_ref, y_ref, x_query
-      complex(kind=dp), dimension(:), intent(out) :: y_query
-      logical, optional, intent(in)               :: do_greedy
-
-      ! Internal variables
-      integer                                     :: i, num_query
-      complex(kind=dp), dimension(size(x_ref))    :: x_ref_local
-      complex(kind=dp), dimension(n_par)          :: a_par
-
-      ! Compute the coefficients a_par
-      x_ref_local(:) = x_ref
-      call thiele_pade(n_par, x_ref_local, y_ref, a_par, do_greedy, "none")
-
-      ! Compute the number of query points
-      num_query = size(x_query)
-
-      ! Evaluate the Thiele-Pade approximation at the query points
-      do i = 1, num_query
-         call evaluate_thiele_pade(n_par, x_ref_local, x_query(i), a_par, y_query(i), "none")
-      end do
-
-   end subroutine thiele_pade_api
-
-
 
    !> @brief API function to compute Thiele-Pade parameters 
    !!        (potentially using arbitrary precision arithmetic)

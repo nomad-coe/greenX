@@ -10,7 +10,7 @@ module pade_approximant
    implicit none
 
    private
-   public :: pade, pade_derivative, thiele_pade, evaluate_thiele_pade, evaluate_thiele_pade_tab
+   public :: thiele_pade, evaluate_thiele_pade, evaluate_thiele_pade_tab
 
    !> Complex zero
    complex(dp), public :: c_zero = cmplx(0.0_dp, 0.0_dp, kind=dp)
@@ -18,97 +18,6 @@ module pade_approximant
    complex(dp), public :: c_one = cmplx(1.0_dp, 0.0_dp, kind=dp)
 
 contains
-
-   !> @brief Calculate the pade approximant in $xx$ point of the function $f_n(x)$
-   !> calculated at the $n$ points $x$
-   !>
-   !> @param[in]  n  Number of points
-   !> @param[in]  x  Variable evaluated at discrete points {n}
-   !> @param[in]  f  Function to approximate
-   !> @param[in]  xx  Pade will be computed for this value
-   !> @return     pade   Pade approximant
-   complex(dp) function pade(n, x, f, xx)
-      integer, intent(in)     :: n
-      complex(dp), intent(in) :: xx
-      complex(dp), intent(in) :: x(n), f(n)
-
-      !> Pade coefficients
-      complex(dp) :: a(n)
-
-      ! Generate parameters
-      call pade_coefficient_derivative(x, f, a)
-
-      ! Evaluate using Wallis method
-      call evaluate_thiele_pade(n, x, xx, a, pade, "none")
-
-   end function pade
-
-   !> @brief Calculate the derivative of the pade approximant in xx of the
-   !> function f calculated at the n points x.
-   !>
-   !> @param[in]  n  Number of points
-   !> @param[in]  x  Variable evaluated at discrete points {n}
-   !> @param[in]  f  Function to approximate
-   !> @param[in]  xx  Pade will be computed for this value
-   !> @return     pade   Derivative of the pade approximant
-   complex(dp) function pade_derivative(n, x, f, xx)
-      integer, intent(in)     :: n
-      complex(dp), intent(in) :: xx
-      complex(dp), intent(in) :: x(n), f(n)
-
-      integer :: i
-      complex(dp) :: a(n)
-      !> Coefficients in the numerator and denominator, respectively
-      complex(dp) :: acoef(0:n), bcoef(0:n)
-      !> Derivatives are acoef and bcoef
-      complex(dp) :: dacoef(0:n), dbcoef(0:n)
-
-      call pade_coefficient_derivative(x, f, a)
-
-      acoef(0) = c_zero
-      acoef(1) = a(1)
-      bcoef(0:1) = c_one
-      dacoef(0:1) = c_zero
-      dbcoef(0:1) = c_zero
-
-      do i = 1, n - 1
-         acoef(i + 1) = acoef(i) + (xx - x(i))*a(i + 1)*acoef(i - 1)
-         bcoef(i + 1) = bcoef(i) + (xx - x(i))*a(i + 1)*bcoef(i - 1)
-         dacoef(i + 1) = dacoef(i) + a(i + 1)*acoef(i - 1) + (xx - x(i))*a(i + 1)*dacoef(i - 1)
-         dbcoef(i + 1) = dbcoef(i) + a(i + 1)*bcoef(i - 1) + (xx - x(i))*a(i + 1)*dbcoef(i - 1)
-      end do
-      pade_derivative = dacoef(n)/bcoef(n) - acoef(n)*dbcoef(n)/(bcoef(n)*bcoef(n))
-
-   end function pade_derivative
-
-   !> @brief Calculate the derivative of the the coefficients of pade approximant
-   !>
-   !> @param[in]  x  Variable evaluated at discrete points {n}
-   !> @param[in]  f  Function to approximate
-   !> @return     a   Derivative of the pade approximant coefficients
-   subroutine pade_coefficient_derivative(x, f, a)
-      complex(dp), intent(in)  :: x(:), f(:)
-      complex(dp), intent(out) :: a(:)
-
-      ! Internal variables
-      integer                  :: i, j, n
-      complex(dp), allocatable :: c(:, :)
-
-      n = size(x)
-      allocate (c(n, n))
-      c(1, :) = f(:)
-
-      do i = 2, n
-         do j = i, n
-            c(i, j) = (c(i - 1, i - 1) - c(i - 1, j))/((x(j) - x(i - 1))*c(i - 1, j))
-         end do
-      end do
-
-      do i = 1, n
-         a(i) = c(i, i)
-      end do
-
-   end subroutine pade_coefficient_derivative
 
    !> brief Gets the Pade approximant of a meromorphic function F
    !>       This routine implements a modified version of the Thiele's reciprocal differences
@@ -359,13 +268,13 @@ contains
         case ("mirror_both")
             x_symm = cmplx(abs(x%re), abs(x%im), kind=8)
         case ("even")
-            x_symm = cmplx(abs(x%re), sign(1.0d0, x%re) * x%im, kind=8)
+            x_symm = cmplx(abs(x%re), sign(1.0_dp, x%re) * x%im, kind=8)
         case ("odd")
-            x_symm = cmplx(abs(x%re), sign(1.0d0, x%re) * x%im, kind=8)
+            x_symm = cmplx(abs(x%re), sign(1.0_dp, x%re) * x%im, kind=8)
         case ("conjugate")
-            x_symm = cmplx(abs(x%re), sign(1.0d0, x%re) * x%im, kind=8)
+            x_symm = cmplx(abs(x%re), sign(1.0_dp, x%re) * x%im, kind=8)
         case ("anti-conjugate")
-            x_symm = cmplx(abs(x%re), sign(1.0d0, x%re) * x%im, kind=8)
+            x_symm = cmplx(abs(x%re), sign(1.0_dp, x%re) * x%im, kind=8)
         case ("none")
             x_symm = x
         case default 
