@@ -127,7 +127,7 @@ where $c$ denotes the speed of light.
 The upper plot (a) demonstrates the first absorption peak for naphthalene, generated from the RT-TDDFT trajectories of different simulation lengths. 121.0, 96.8, 72.6, 48.4 and 24.2 fs of simulation times correspond to 50000, 40000, 30000, 20000 and 10000 RT-TDDFT steps, respectively. It is clear that, especially in the spectrum of the 24.2 fs RT-TDDFT trajectory, the position of the absorption peak shifted to higher excitation energies due to lack of data points and low resolution in the data set. The lower plot (b) displays the absorption spectrum of naphthalene for the same excitation energy range, however, this time with the inclusion of the Padé approximants so that that the final number of data points is extended to 80000 in each spectrum. The results indicate that, thanks to the increased resolution, the use of Padé approximants allows reaching a converged absorption spectrum even with RT-TDDFT simulation times as short as 24.2 fs. This makes the total computation time $\approx$ 5 times shorter. 
 
 <div style="display:flex; justify-content: center; align-items: center;">
-  <div style="width: 900px;">
+  <div style="width: 500px;">
   <img src="./img/absorption_naphthalene.png">
   <br>
   <div style="display: block; padding: 20px; color: gray; text-align: justify;">
