@@ -131,7 +131,7 @@ The upper plot (a) demonstrates the first absorption peak for naphthalene, gener
   <img src="./img/absorption_naphthalene.png">
   <br>
   <div style="display: block; padding: 20px; color: gray; text-align: justify;">
-   Absorption spectrum of naphthalene molecule calculated from the RT-TDDFT trajectories of different simulation lengths a) without applying Padé approximants and b) applying Padé approximants using the "plain-128" algorithm.   
+   Absorption spectra of the naphthalene molecule calculated from the RT-TDDFT trajectories of different simulation lengths a) without applying Padé approximants and b) applying Padé approximants using the "plain-128" algorithm.   
   </div>
   </div>
 </div>
