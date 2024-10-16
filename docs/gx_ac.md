@@ -115,9 +115,26 @@ The plot demonstrates that, regardless of the GX-AC component settings (greedy/n
 
 ## Analytic Continuation in RT-TDDFT 
 
+[Real-time time-dependent density functional theory (RT-TDDFT)](https://doi.org/10.1021/acs.chemrev.0c00223) is one of the most popular and computationally efficient methods to simulate electron dynamics. RT-TDDFT relies on the propagation of the electron density in the time-domain under external perturbation. The response properties, such as the dynamic polarizability tensor, can be used to simulate the absorption and/or resonance raman spectroscopies. A single Fourier transformation is sufficient to obtain the full absorption spectrum from an RT-TDDFT run. This is a significant advantage compared to the more conventional linear-response (LR)-TDDFT which requires an iterative solvation scheme for each excitation energy. 
 
+The RT-TDDFT calculations can still get computationally demanding with large system sizes, because obtaining a converged spectrum often requires long simulation times. However, [the use of Padé approximants](https://doi.org/10.1063/1.5051250) enables significantly shorter simulation times and higher resolution in the frequency domain. In this test, we present the absorption spectrum of the naphtalene molecule computed via RT-TDDFT as implemented in the [CP2K](https://www.cp2k.org/) program package. We used PBE functional, Goedecker–Teter–Hutter (GTH) pseudopotentials and TZV2P-GTH basis set for the RT-TDDFT simulations. We applied the initial perturbation in the form of a $\delta$-pulse and we set the field strength parameter to 0.001 au. Setting the RT-TDDFT time step to 0.00242 fs, we ran the simulation for up to 121 fs. We calculated the dipole moments of the whole simulation cell via the Berry phase approach for each RT-TDDFT step and we computed the polarizability tensors from the induced dipole moments. Using the [FFTW](https://www.fftw.org/) library, we applied fast fourier transformation to the polarizability tensors. Using the "plain-128" algorithm, we applied Pade approximants to the polarizabilities in the frequency domain. We calculated the absorption spectra ($S(\omega)$) using the dynamic polarizabilities $(\alpha_{\alpha\beta}^{\textnormal{el, RT}}(\omega ))$ as follows:
 
+```math 
+S(\omega) = \frac{4\pi\omega}{3c}\textnormal{Tr}\left\{ \textnormal{Im}(\alpha_{\alpha\beta}^{\textnormal{el, RT}}(\omega ))\right\}  
+```
+where $c$ denotes the speed of light. 
 
+The upper plot (a) demonstrates the first absorption peak for naphthalene, generated from the RT-TDDFT trajectories of different simulation lengths. 121.0, 96.8, 72.6, 48.4 and 24.2 fs of simulation times correspond to 50000, 40000, 30000, 20000 and 10000 RT-TDDFT steps, respectively. It is clear that, especially in the spectrum of the 24.2 fs RT-TDDFT trajectory, the position of the absorption peak shifted to higher excitation energies due to lack of data points and low resolution in the data set. The lower plot (b) displays the absorption spectrum of naphthalene for the same excitation energy range, however, this time with the inclusion of the Padé approximants so that that the final number of data points is extended to 80000 in each spectrum. The results indicate that, thanks to the increased resolution, the use of Padé approximants allows reaching a converged absorption spectrum even with RT-TDDFT simulation times as short as 24.2 fs. This makes the total computation time $\approx$ 5 times shorter. 
+
+<div style="display:flex; justify-content: center; align-items: center;">
+  <div style="width: 900px;">
+  <img src="./img/absorption_naphthalene.png">
+  <br>
+  <div style="display: block; padding: 20px; color: gray; text-align: justify;">
+   Absorption spectrum of naphthalene molecule calculated from the RT-TDDFT trajectories of different simulation lengths a) without applying Padé approximants and b) applying Padé approximants using the "plain-128" algorithm.   
+  </div>
+  </div>
+</div>
 
 # Usage
 
