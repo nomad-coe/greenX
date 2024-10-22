@@ -11,8 +11,7 @@ This component of the GreenX library (GX-AC) implements the analytic continuatio
 <div style="display:flex; justify-content: center; align-items: center; padding-bottom: 20px; padding-top: 20px">
   <img src="./img/Analyticcontinuation_main.svg" width="700">
 </div>
-
-Analytic continuation is a common challenge in theoretical chemistry when you have a complex analytic function $f(z)$ defined in one domain but need it in another. This issue can be addressed using Padé approximants, which are fitted to the function in one domain (such as the imaginary axis) and then evaluated in a different domain (such as the real axis). These Padé approximants are rational functions of the form
+Analytic continuation (AC) is a popular mathematical technique used to extend the domain of a complex analytic function $f(z)$ beyond its original region of definition. For example, in many applications, a function initially defined on the imaginary axis can be analytically continued to the real axis. Such a continuation can be performed using methods like Padé approximants, which are fitted to the function in one domain (such as the imaginary axis) and then evaluated in another domain (such as the real axis).These Padé approximants are rational functions of the form
 ```math
  f(z) \approx T_{M}(z) = \frac{A_0 + A_1z + \cdots + A_pz^p + \cdots + A_{\frac{M-1}{2}}z^{\frac{M-1}{2}}}{1 + B_1z + \cdots + B_pz^p + \cdots + B_{\frac{M}{2}}z^{\frac{M}{2}}}.
  ```
@@ -35,19 +34,21 @@ a_i = g_i(z_i)\qquad i = 1, \;\dots,\; M
 g_p(z_i) = \begin{dcases}  f(z_i) & p=1 \\\;\\ \frac{g_{p-1}(z_{p-1})-g_{p-1}(z_i)}{(z_i - z_{p-1})g_{p-1}(z_i)} & p>1\end{dcases}
 ```
 
-Padé approximants are known to be [numerical instable](https://doi.org/10.1093/imamat/25.3.267). The GX-AC component uses two strategies to numerically stabilize the interpolation. 
-First, it incorporates a [greedy algorithm for Thiele Padé approximants](https://pubs.acs.org/doi/full/10.1021/acs.jctc.3c00555) that minimizes the numerical error by reordering of the reference points. A validation of the greedy algorithm can be found in this [reference](https://pubs.acs.org/doi/full/10.1021/acs.jctc.3c00555). Additionally it is possible to use the component with a  higher internal numerical floating point precision. This helps reducing the numerical noise caused by [catastrophic cancellation](https://doi.org/10.1145/103162.103163). Catastrophic cancellation occurs when rounding errors are amplified through the subtraction of rounded numbers, such as double-precision floating-point numbers commonly used in most programs. This is implemented using the [GNU Multiple Precision (GMP) library](https://gmplib.org/) which allows floating-point operations with customizable precision. Furthermore, it is possible to impose various symmetries onto the Padé model using the GX-AC component. To maximize performance, the evaluation of the Padé  model uses the [Wallis algorithm](https://numerical.recipes/book.html), which minimizes the number of divisions, an operation that is computationally expensive, especially for complex floating-point numbers and even more so for higher-precision complex numbers. The component also allows symmetry-constraint Padé models, for a full list of supported symmetries see the section "Usage". 
-
+Padé approximants are known to be [numerical unstable](https://doi.org/10.1093/imamat/25.3.267). The GX-AC component uses two strategies to numerically stabilize the interpolation. First, it incorporates a [greedy algorithm for Thiele Padé approximants](https://pubs.acs.org/doi/full/10.1021/acs.jctc.3c00555) that minimizes the numerical error by reordering of the reference points. A validation of the greedy algorithm can be found in this [reference](https://pubs.acs.org/doi/full/10.1021/acs.jctc.3c00555). Additionally it is possible to use the component with a  higher internal numerical floating point precision. This helps reducing the numerical noise caused by [catastrophic cancellation](https://doi.org/10.1145/103162.103163). Catastrophic cancellation occurs when rounding errors are amplified through the subtraction of rounded numbers, such as double-precision floating-point numbers commonly used in most programs. This is implemented using the [GNU Multiple Precision (GMP) library](https://gmplib.org/) which allows floating-point operations with customizable precision. Furthermore, it is possible to impose various symmetries onto the Padé model using the GX-AC component. To maximize performance, the evaluation of the Padé  model uses the [Wallis algorithm](https://numerical.recipes/book.html), which minimizes the number of divisions, an operation that is computationally expensive, especially for complex floating-point numbers and even more so for higher-precision complex numbers. The component also allows symmetry-constraint Padé models, for a full list of supported symmetries see the section [Usage](#Usage).
 
 # Benchmarks
 
-In this benchmark section, we first analyze the effect of various parameters by using simple model functions, providing insights into their behavior, and then demonstrate practical applications with GW and RT-TDDFT simulations. 
+In this benchmark section, we first analyze the effect of various parameters by using simple model functions, providing insights into their behavior, and then demonstrate practical applications in the field of ab initio electronic structure calculations. Specifically, we showcase the performance of our library for $GW$ calculations and real-time time-dependent density functional theory (RT-TDDFT) simulations.
 
 ## Model Functions
 This benchmark tests the numerical stability of the Padé interpolant of the GX-AC component using three model functions. In each case, a grid along the imaginary axis $z \in [0i, 1i]$  was used to determine the Padé parameters, followed by the evaluation of 1,000 function values on the real axis $z \in [0 + \eta i, 1 + \eta i]$ using the created Padé model. A small imaginary shift $\eta=0.01$ was introduced to avoid singularities in the tested pole models. The 1,000 computed points were then compared to the exact function values of the model functions to assess the mean absolute error.
 
 <div style="display:flex; justify-content: center; align-items: center;">
   <img src="./img/Analyticcontinuation_functions.svg"  width="1000">
+  <br>
+  <div style="display: block; padding: 20px; color: gray; text-align: justify;">
+  @Moritz: please add a caption
+  </div>
 </div>
 
 
