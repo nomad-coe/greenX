@@ -55,19 +55,24 @@ This benchmark tests the numerical stability of the Padé interpolant of the GX-
 ### Convergence with Number of Padé Parameters 
 The three model functions described above were tested with three different configurations of the GX-AC component:
 
-- `"plain-64"`:  Thiele Padé algorithm using double-precision floating-point representation.
-- `"greedy-64"`: Thiele Padé with a **greedy algorithm** and double-precision floating-point representation.
-- `"plain-128"`: Thiele Padé algorithm using **quadruple-precision** (128 bit) floating points (internally).
+- `"plain-64bit"`:  Thiele Padé algorithm using double-precision floating-point representation.
+- `"greedy-64bit"`: Thiele Padé with a **greedy algorithm** and double-precision floating-point representation.
+- `"plain-128bit"`: Thiele Padé algorithm using **quadruple-precision** (128 bit) floating points (internally).
 
-It was observed that the greedy algorithm with quadruple precision performed similarly to "plain-128". Therefore, this configuration was left out of the plot.
+We also performed tests with a fourth configuration, "greedy-128bit" (greedy algorithm and quadruple precision), but found that the performance is similar to "plain-128bit". Therefore, the fourth configuration is not reported in Fig. **XX**.
 
-The figure below illustrates how the number of parameters affects the error in analytic continuation. The error is defined as the residual sum between the values obtained from the Padé model and the exact analytic reference function.
+Figure **XX** (left column) shows the real part of the exact model functions and their corresponding Padé approximants, calculated with 128 parameters, for the three different configurations.
+The right column of Figure **XX** reports the error of the AC with respect to the number of Padé  parameters. **@Moritz can you just add the equation for the error?** The error is defined as the residual sum between the values obtained from the Padé model and the exact analytic reference function.
 
-On the left, the function along the real axis of $z$ is shown, comparing the analytic continuation of different 128-parameter Padé models with the exact reference function. On the right, the error from analytic continuation is plotted against the number of Padé parameters.
+Starting with the 2-pole model, the exact model is well reproduced by the Padé approximant with 128 parameters for all three AC configurations (Fig. **XX**, left). The plot of the MAE indicates that similar errors are achieved already with less than **10??**  parameters because the model is relatively simple with few features. The MAE plot also reveals that the different configurations impact the error. Compared to "plain-64bit", the "greedy-64bit" algorithm reduces the MAE by a factor 5 and the "plain-128bit" by roughly a factor of 10.
 
-For a simple 2-pole model, increasing the number of parameters does not reduce the error because all features are already well-represented with a small number of parameters. In more complex models (such as the 8-pole model or cosine function), the error decreases as more Padé parameters are used, indicating better representation of these feature-rich functions.
+Continuing with the 8-pole model, the Padé approximants accurately reproduce all features (Fig. **XX**, left). Since the model function has more complexity, we observe a stronger dependence on the number of Padé parameters compared to the 2-pole model. As shown in the right column, the MAE decreases until reaching 50–60 parameters, after which it levels off. The "plain-128bit" setting again yields the lowest error.
 
-For all three models, the 128-bit Padé approximant shows significantly lower error compared to the 64-bit version. Additionally, the greedy algorithm reduces the error further compared to the standard Thiele Padé method, particularly for the 2-pole model.
+Turning to the cosine function, the Padé approximant with 128 parameters visibly deviates from the model function for $\text{Re}z > 0.7$ (Fig. XX, left). The best agreement is achieved with the "plain-128bit" setting, which is also reflected in the MAE: it is an order of magnitude smaller compared to both "plain-64bit" and "greedy-64bit".
+
+In general, we can conclude that the AC error is primarily determined by the number of Padé parameters and can be further reduced by using more than double precision. In some cases, improvements are achieved with the greedy algorithm without the need to increase floating-point precision.
+
+
 
 
 <div style="display:flex; justify-content: center; align-items: center;">
