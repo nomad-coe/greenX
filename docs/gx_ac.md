@@ -53,13 +53,14 @@ This benchmark tests the numerical stability of the Padé interpolant of the GX-
 
 
 ### Convergence with Number of Padé Parameters 
-The three model functions described above were tested with three different configurations of the GX-AC component:
+The three model functions described above were tested with four different configurations of the GX-AC component:
 
 - `"plain-64bit"`:  Thiele Padé algorithm using double-precision floating-point representation.
 - `"greedy-64bit"`: Thiele Padé with a **greedy algorithm** and double-precision floating-point representation.
 - `"plain-128bit"`: Thiele Padé algorithm using **quadruple-precision** (128 bit) floating points (internally).
+- `"greedy-128bit"`: Thiele Padé with a **greedy algorithm** and **quadruple-precision** floating-point representation.
 
-We also performed tests with a fourth configuration, "greedy-128bit" (greedy algorithm and quadruple precision), but found that the performance is similar to "plain-128bit". Therefore, the fourth configuration is not reported in Fig. **XX**.
+We found that the performance of "greedy-128bit" is similar to "plain-128bit". Therefore, the fourth configuration is not reported in Fig. **XX**.
 
 Figure **XX** (left column) shows the real part of the exact model functions and their corresponding Padé approximants, calculated with 128 parameters, for the three different configurations.
 The right column of Figure **XX** reports the error of the AC with respect to the number of Padé  parameters. **@Moritz can you just add the equation for the error?** The error is defined as the residual sum between the values obtained from the Padé model and the exact analytic reference function.
@@ -85,28 +86,28 @@ In general, we can conclude that the AC error is primarily determined by the num
   </div>
 </div>
 
-### Performance 
-Creating the Padé model (calling `create_thiele_Padé()`) scales quadratically with the number of Padé parameters (see left side of the figure below). The model settings influence the runtime as well. Using a higher precision internally will result in a higher runtime. Additionally, using the greedy algorithm for parameter evaluation will also increase the runtime compared to the plain Thiele Padé algorithm.
+### Computational performance 
+Creating the Padé model (calling `create_thiele_Padé()`) scales quadratically with the number of Padé parameters (see left side of the figure below). The model settings influence the runtime as well. Using higher internal precision increases the computational cost and leads to a significantly longer runtime, with an increase of up to two orders of magnitude. Additionally, employing the greedy algorithm for parameter evaluation further increases the runtime compared to the plain Thiele-Padé algorithm, though this increase is limited to a factor of 3-4.
 
-Evaluating the Padé model (calling `evaluate_thiele_Padé_at()`) scales linear with the number of points that are evaluated (see left side of the figure below). The type of algorithm doesn't influence the runtime but using a higher precision internally will again result in a longer runtime.
+Evaluating the Padé model (calling `evaluate_thiele_Padé_at()`) scales linear with the number of points that are evaluated (see left side of the figure below). The type of algorithm doesn't influence the runtime but using a higher precision internally will again increase the run time by two order os of magnitude.
 
 <div style="display:flex; justify-content: center; align-items: center;">
   <div style="width: 800px;">
   <img src="./img/Analyticcontinuation_performance.svg" alt="Performance of the GX-AC component">
   <br>
   <div style="display: block; padding: 20px; color: gray; text-align: justify;">
-    Performance Benchmark of the GX-AC component using the 2-pole model function. Left: Runtime of obtaining the Padé parameters depending on how many parameters were used. Right: Runtime of evaluating function values using the pade model with 100 parameters.
+    Performance benchmark of the GX-AC component using the 2-pole model function. Left: Left: Runtime for obtaining the Padé parameters as a function of the number of parameters used. Right: Runtime for evaluating function values using the Padé model with 100 parameters.
   </div>
   </div>
 </div>
 
 ## Analytic Continuation in *GW*
 
-The [*GW* method](https://doi.org/10.3389/fchem.2019.00377) stems from many body pertubation theory and is used for calculating electronic excitations in photoemission spectroscopy. Padé approximants are used in *GW* to continue analytic functions like the [self energy](https://dx.doi.org/10.1088/1367-2630/14/5/053020) $\Sigma(\omega)$ or the [coulomb interaction](https://doi.org/10.1021/acs.jctc.3c00555) $W(\omega)$ from the imaginary to the real frequency axis. 
+The [*GW* approach](https://doi.org/10.3389/fchem.2019.00377) in many body pertubation theory is used for calculating electronic excitations in photoemission spectroscopy. Padé approximants are used in *GW* to continue analytic functions like the [self energy](https://dx.doi.org/10.1088/1367-2630/14/5/053020) $\Sigma(\omega)$ or the [coulomb interaction](https://doi.org/10.1021/acs.jctc.3c00555) $W(\omega)$ from the imaginary to the real frequency axis. Both, $\Sigma$ and $W$ exhibit poles on the real frequencies axis. Similarly as for the three model functions, we added a small broadening parameter $i\eta$ when plotting the functions in Fig. **XX**.
 
-In this test, we present GW calculations using [FHI-aims](https://fhi-aims.org/), where either the self energy or the screened interaction is interpolated using Padé approximants from the GX-AC component. The G<sub>0</sub>W<sub>0</sub>@PBE calculations use a NAO tier 1 basis set and 400 imaginary frequency points to obtain the Padé models. For comparison, we reference a G<sub>0</sub>W<sub>0</sub>@PBE calculation using the [contour deformation](https://doi.org/10.1021/acs.jctc.8b00458) (CD) approach to accurately obtain the self-energy and screened interaction on the real axis.
+In this test, we present $GW$ calculations using [FHI-aims](https://fhi-aims.org/) packages, which is an all-electron code based on numeric atom-centered orbitals (NAOs). The self energy or the screened interaction is interpolated using Padé approximants from the GX-AC component. The G<sub>0</sub>W<sub>0</sub> are performed on top of a preceding DFT calculations with the Perdew-Burke-Ernzerhof (PBE) function ($G_0W_0$@PBE). We used NAO basis sets of tier 1 quality and 400 imaginary frequency points to obtain the Padé models. For comparison, we reference a G<sub>0</sub>W<sub>0</sub>@PBE calculation using the [contour deformation](https://doi.org/10.1021/acs.jctc.8b00458) (CD) approach. The CD technique is more accurate than AC, as it evaluates $\Sigma$ and $W$ directly on the real frequency axis. See [The GW Compendium](https://www.frontiersin.org/journals/chemistry/articles/10.3389/fchem.2019.00377/full) for a comparison of different frequency integration techniques.
 
-The plot demonstrates that, regardless of the GX-AC component settings (greedy/non-greedy algorithm and floating-point precision), the self-energy and screened interaction can be accurately described using Padé approximants.
+Figure XX shows that, regardless of the GX-AC component settings (greedy/non-greedy algorithm and floating-point precision), the self-energy and screened interaction can be accurately described using Padé approximants. The error is dominated by the number of Padé parameters. 
 
 <div style="display:flex; justify-content: center; align-items: center;">
   <div style="width: 900px;">
