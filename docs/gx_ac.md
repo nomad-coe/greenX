@@ -11,10 +11,12 @@ This component of the GreenX library (GX-AC) implements the analytic continuatio
 <div style="display:flex; justify-content: center; align-items: center; padding-bottom: 20px; padding-top: 20px">
   <img src="./img/Analyticcontinuation_main.svg" width="700">
 </div>
-Analytic continuation (AC) is a popular mathematical technique used to extend the domain of a complex analytic function $f(z)$ beyond its original region of definition. For example, in many applications, a function initially defined on the imaginary axis can be analytically continued to the real axis. Such a continuation can be performed using methods like Padé approximants, which are fitted to the function in one domain (such as the imaginary axis) and then evaluated in another domain (such as the real axis).These Padé approximants are rational functions of the form
+
+Analytic continuation (AC) is a popular mathematical technique used to extend the domain of a complex analytic (holomorphic) function $f(z)$ beyond its original region of definition. For example, in many applications, a function initially defined on the imaginary axis can be analytically continued to the real axis. Such a continuation can be performed using interpolants like Padé functions, which are fitted to the function in one domain of the complex plain (such as the imaginary axis) and then evaluated in another domain (such as the real axis). This approach is rooted in the Identity Theorem, which states that if two analytic functions match on even a small part of their domain, they must be identical on the entire domain. These Padé approximants are rational functions of the form
+
 ```math
- f(z) \approx T_{M}(z) = \frac{A_0 + A_1z + \cdots + A_pz^p + \cdots + A_{\frac{M-1}{2}}z^{\frac{M-1}{2}}}{1 + B_1z + \cdots + B_pz^p + \cdots + B_{\frac{M}{2}}z^{\frac{M}{2}}}.
- ```
+f(z) \approx T_{M}(z) = \frac{A_0 + A_1z + \cdots + A_pz^p + \cdots + A_{\frac{M-1}{2}}z^{\frac{M-1}{2}}}{1 + B_1z + \cdots + B_pz^p + \cdots + B_{\frac{M}{2}}z^{\frac{M}{2}}}.
+```
 
 The GX-AC component uses the Thiele's reciprocal differences algorithm (A.B. George, Essentials of Padé Approximants, Elsevier 1975) to obtain the Padé parameters in a continued fraction form that is [equivalent](https://pubs.acs.org/doi/10.1021/acs.jctc.3c00555) to the rational functions form above
 ```math
@@ -41,13 +43,15 @@ Padé approximants are known to be [numerical unstable](https://doi.org/10.1093/
 In this benchmark section, we first analyze the effect of various parameters by using simple model functions, providing insights into their behavior, and then demonstrate practical applications in the field of ab initio electronic structure calculations. Specifically, we showcase the performance of our library for $GW$ calculations and real-time time-dependent density functional theory (RT-TDDFT) simulations.
 
 ## Model Functions
-This benchmark tests the numerical stability of the Padé interpolant of the GX-AC component using three model functions. In each case, a grid along the imaginary axis $z \in [0i, 1i]$  was used to determine the Padé parameters, followed by the evaluation of 1,000 function values on the real axis $z \in [0 + \eta i, 1 + \eta i]$ using the created Padé model. A small imaginary shift $\eta=0.01$ was introduced to avoid singularities in the tested pole models. The 1,000 computed points were then compared to the exact function values of the model functions to assess the mean absolute error.
+In this section we benchmark the numerical stability of the Padé interpolant of the GX-AC component using three model functions, a 2-pole model, an 8-pole model and the cosine function. A pole in the first two function refers to a singularity of the function on the real axis of $x$, e.g. the 2-pole model has two of these singularities. In each case, a grid along the imaginary axis $z \in [0i, 1i]$  was used to determine the Padé parameters, followed by the evaluation of 1,000 function values on the real axis $z \in [0 + \eta i, 1 + \eta i]$ using the created Padé model. A small imaginary shift $\eta=0.01$ was introduced to broaden the functions, this helps avoiding arbitrarily high function values or singularities in case of the pole models. The 1,000 computed points were then compared to the exact function values of the model functions to assess the mean absolute error.
 
 <div style="display:flex; justify-content: center; align-items: center;">
+  <div>
   <img src="./img/Analyticcontinuation_functions.svg"  width="1000">
   <br>
   <div style="display: block; padding: 20px; color: gray; text-align: justify;">
-  @Moritz: please add a caption
+    <b>Figure 1</b> The left plot depicts the location of points in the complex plain, that were used to obtain the Padé parameters (in red) and also the location of points where the analytic continuation was performed (in blue). The upper table gives the equations for the three model functions that were used in the Benchmark and the lower table includes the parameters of the 8-pole model.  
+  </div>
   </div>
 </div>
 
@@ -60,14 +64,17 @@ The three model functions described above were tested with four different config
 - `"plain-128bit"`: Thiele Padé algorithm using **quadruple-precision** (128 bit) floating points (internally).
 - `"greedy-128bit"`: Thiele Padé with a **greedy algorithm** and **quadruple-precision** floating-point representation.
 
-We found that the performance of "greedy-128bit" is similar to "plain-128bit". Therefore, the fourth configuration is not reported in Fig. **XX**.
+We found that the performance of "greedy-128bit" is similar to "plain-128bit". Therefore, the fourth configuration is not reported in Fig. 2.
 
-Figure **XX** (left column) shows the real part of the exact model functions and their corresponding Padé approximants, calculated with 128 parameters, for the three different configurations.
-The right column of Figure **XX** reports the error of the AC with respect to the number of Padé  parameters. **@Moritz can you just add the equation for the error?** The error is defined as the residual sum between the values obtained from the Padé model and the exact analytic reference function.
+Figure 2 (left column) shows the real part of the exact model functions and their corresponding Padé approximants, calculated with 128 parameters, for the three different configurations.
+The right column of Figure 2 reports the error of the AC with respect to the number of Padé  parameters.  The error is defined as the residual sum between the values obtained from the Padé model and the exact analytic reference function. 
+```math
+\text{MAE} = \frac{1}{N}\sum_{i=0}^{N} |f(x_i + \eta i) - T(x_i + \eta i)| 
+```
 
-Starting with the 2-pole model, the exact model is well reproduced by the Padé approximant with 128 parameters for all three AC configurations (Fig. **XX**, left). The plot of the MAE indicates that similar errors are achieved already with less than **10??**  parameters because the model is relatively simple with few features. The MAE plot also reveals that the different configurations impact the error. Compared to "plain-64bit", the "greedy-64bit" algorithm reduces the MAE by a factor 5 and the "plain-128bit" by roughly a factor of 10.
+Starting with the 2-pole model, the exact model is well reproduced by the Padé approximant with 128 parameters for all three AC configurations (Fig. 2, left). The plot of the MAE indicates that similar errors are achieved already with less than 10  parameters because the model is relatively simple with few features. The MAE plot also reveals that the different configurations impact the error. Compared to "plain-64bit", the "greedy-64bit" algorithm reduces the MAE by a factor 5 and the "plain-128bit" by roughly a factor of 10.
 
-Continuing with the 8-pole model, the Padé approximants accurately reproduce all features (Fig. **XX**, left). Since the model function has more complexity, we observe a stronger dependence on the number of Padé parameters compared to the 2-pole model. As shown in the right column, the MAE decreases until reaching 50–60 parameters, after which it levels off. The "plain-128bit" setting again yields the lowest error.
+Continuing with the 8-pole model, the Padé approximants accurately reproduce all features (Fig. 2, left). Since the model function has more complexity, we observe a stronger dependence on the number of Padé parameters compared to the 2-pole model. As shown in the right column, the MAE decreases until reaching 50–60 parameters, after which it levels off. The "plain-128bit" setting again yields the lowest error.
 
 Turning to the cosine function, the Padé approximant with 128 parameters visibly deviates from the model function for $\text{Re}z > 0.7$ (Fig. XX, left). The best agreement is achieved with the "plain-128bit" setting, which is also reflected in the MAE: it is an order of magnitude smaller compared to both "plain-64bit" and "greedy-64bit".
 
@@ -81,7 +88,7 @@ In general, we can conclude that the AC error is primarily determined by the num
   <img src="./img/Analyticcontinuation_model_functions.svg">
   <br>
   <div style="display: block; padding: 20px; color: gray; text-align: justify;">
-  Left: Comparison of the model function with the Padé interpolated function (128 parameters) along the real axis. Right: Mean absolute error between the correct model function and interpolated functions at 1,000 test points along the real axis.  
+  <b> Figure 2</b> Left: Comparison of the model function with the Padé interpolated function (128 parameters) along the real axis. No singularities (poles) are visible because a broadening of $\eta=0.01$ was used. Right: Mean absolute error between the correct model function and interpolated functions at 1,000 test points along the real axis.  
   </div>
   </div>
 </div>
@@ -89,32 +96,32 @@ In general, we can conclude that the AC error is primarily determined by the num
 ### Computational performance 
 Creating the Padé model (calling `create_thiele_Padé()`) scales quadratically with the number of Padé parameters (see left side of the figure below). The model settings influence the runtime as well. Using higher internal precision increases the computational cost and leads to a significantly longer runtime, with an increase of up to two orders of magnitude. Additionally, employing the greedy algorithm for parameter evaluation further increases the runtime compared to the plain Thiele-Padé algorithm, though this increase is limited to a factor of 3-4.
 
-Evaluating the Padé model (calling `evaluate_thiele_Padé_at()`) scales linear with the number of points that are evaluated (see left side of the figure below). The type of algorithm doesn't influence the runtime but using a higher precision internally will again increase the run time by two order os of magnitude.
+Evaluating the Padé model (calling `evaluate_thiele_Padé_at()`) scales linear with the number of points that are evaluated (see left side of the figure below). The type of algorithm doesn't influence the runtime but using a higher precision internally will again increase the run time by two orders of magnitude.
 
 <div style="display:flex; justify-content: center; align-items: center;">
   <div style="width: 800px;">
   <img src="./img/Analyticcontinuation_performance.svg" alt="Performance of the GX-AC component">
   <br>
   <div style="display: block; padding: 20px; color: gray; text-align: justify;">
-    Performance benchmark of the GX-AC component using the 2-pole model function. Left: Left: Runtime for obtaining the Padé parameters as a function of the number of parameters used. Right: Runtime for evaluating function values using the Padé model with 100 parameters.
+    <b>Figure 3</b> Performance benchmark of the GX-AC component using the 2-pole model function. Left: Left: Runtime for obtaining the Padé parameters as a function of the number of parameters used. Right: Runtime for evaluating function values using the Padé model with 100 parameters.
   </div>
   </div>
 </div>
 
 ## Analytic Continuation in *GW*
 
-The [*GW* approach](https://doi.org/10.3389/fchem.2019.00377) in many body pertubation theory is used for calculating electronic excitations in photoemission spectroscopy. Padé approximants are used in *GW* to continue analytic functions like the [self energy](https://dx.doi.org/10.1088/1367-2630/14/5/053020) $\Sigma(\omega)$ or the [coulomb interaction](https://doi.org/10.1021/acs.jctc.3c00555) $W(\omega)$ from the imaginary to the real frequency axis. Both, $\Sigma$ and $W$ exhibit poles on the real frequencies axis. Similarly as for the three model functions, we added a small broadening parameter $i\eta$ when plotting the functions in Fig. **XX**.
+The [*GW* approach](https://doi.org/10.3389/fchem.2019.00377) in many body pertubation theory is used for calculating electronic excitations in photoemission spectroscopy. Padé approximants are used in *GW* to continue analytic functions like the [self energy](https://dx.doi.org/10.1088/1367-2630/14/5/053020) $\Sigma(\omega)$ or the [coulomb interaction](https://doi.org/10.1021/acs.jctc.3c00555) $W(\omega)$ from the imaginary to the real frequency axis. Both, $\Sigma$ and $W$ exhibit poles on the real frequencies axis. Similarly as for the three model functions, we added a small broadening parameter $i\eta$ when plotting the functions in Fig. 4.
 
 In this test, we present $GW$ calculations using [FHI-aims](https://fhi-aims.org/) packages, which is an all-electron code based on numeric atom-centered orbitals (NAOs). The self energy or the screened interaction is interpolated using Padé approximants from the GX-AC component. The G<sub>0</sub>W<sub>0</sub> are performed on top of a preceding DFT calculations with the Perdew-Burke-Ernzerhof (PBE) function ($G_0W_0$@PBE). We used NAO basis sets of tier 1 quality and 400 imaginary frequency points to obtain the Padé models. For comparison, we reference a G<sub>0</sub>W<sub>0</sub>@PBE calculation using the [contour deformation](https://doi.org/10.1021/acs.jctc.8b00458) (CD) approach. The CD technique is more accurate than AC, as it evaluates $\Sigma$ and $W$ directly on the real frequency axis. See [The GW Compendium](https://www.frontiersin.org/journals/chemistry/articles/10.3389/fchem.2019.00377/full) for a comparison of different frequency integration techniques.
 
-Figure XX shows that, regardless of the GX-AC component settings (greedy/non-greedy algorithm and floating-point precision), the self-energy and screened interaction can be accurately described using Padé approximants. The error is dominated by the number of Padé parameters. 
+Figure 4 shows that, regardless of the GX-AC component settings (greedy/non-greedy algorithm and floating-point precision), the self-energy and screened interaction can be accurately described using Padé approximants. The error is dominated by the number of Padé parameters. 
 
 <div style="display:flex; justify-content: center; align-items: center;">
   <div style="width: 900px;">
   <img src="./img/Analyticcontinuation_gw.svg">
   <br>
   <div style="display: block; padding: 20px; color: gray; text-align: justify;">
-  Left: Analytic continuation (AC) of the self energy of the highest occupied molecular orbital (HOMO) from the imaginary to the real frequency axis  and comparison to contour deformation.  All Padé approximants use 400 parameters.   Right: Analytic continuation of the screened interaction of a core 1s state (benzene) from the imaginary to the real frequency axis.   
+  <b>Figure 4</b> Left: Analytic continuation (AC) of the self energy of the highest occupied molecular orbital (HOMO) from the imaginary to the real frequency axis  and comparison to contour deformation.  All Padé approximants use 400 parameters.   Right: Analytic continuation of the screened interaction of a core 1s state (benzene) from the imaginary to the real frequency axis.   
   </div>
   </div>
 </div>
@@ -129,18 +136,18 @@ S(\omega) = \frac{4\pi\omega}{3c}\textnormal{Tr}\left\{ \textnormal{Im}(\alpha_{
 ```
 where $c$ denotes the speed of light. 
 
-The resolution of $S(\omega)$ depends on the length of the RT-TDDFT trajectory and increases with longer simulation times, as shown in Figure **XX**a. RT-TDDFT calculations are therefore computationally demanding because obtaining a converged spectrum often requires long RT-TDDFT trajectories. [The use of Padé approximants](https://doi.org/10.1063/1.5051250) enables significantly shorter simulation times and higher resolution in the frequency domain.
+The resolution of $S(\omega)$ depends on the length of the RT-TDDFT trajectory and increases with longer simulation times, as shown in Figure 5(a). RT-TDDFT calculations are therefore computationally demanding because obtaining a converged spectrum often requires long RT-TDDFT trajectories. [The use of Padé approximants](https://doi.org/10.1063/1.5051250) enables significantly shorter simulation times and higher resolution in the frequency domain.
 
  We demonstrate this for the naphtalene molecule. We computed the absorption spectrum computed via RT-TDDFT using the [CP2K](https://www.cp2k.org/) program package. We employed the PBE functional, Goedecker–Teter–Hutter pseudopotentials and TZV2P-GTH basis set. We applied the initial perturbation in the form of a $\delta$-pulse and we set the field strength parameter to 0.001 au. The RT-TDDFT time step was set to 0.00242 fs and we ran the simulation for up to 121 fs. We calculated the dipole moments of the whole simulation cell via the Berry phase approach for each RT-TDDFT step and we computed the polarizability tensors from the induced dipole moments. Using the [FFTW](https://www.fftw.org/) library, we applied fast fourier transformation to the polarizability tensors. Using the "plain-128" algorithm, we applied Pade approximants to the polarizabilities in the frequency domain.
 
-Figure **XX**(a) shows the first absorption peak for naphthalene, generated from RT-TDDFT trajectories of different simulation lengths. RT-TDDFT trajectories with lengths of 121.0, 96.8, 72.6, 48.4, and 24.2 fs correspond to 50000, 40000, 30000, 20000, and 10000 RT-TDDFT steps, respectively. It is evident that, especially in the 24.2 fs trajectory, the absorption peak shifts to higher excitation energies due to insufficient data points and low resolution in the data set. The spectra seem to converge for simulation times greater than 100 fs. Figure **XX**(b) displays the absorption spectrum of naphthalene over the same excitation energy range, but this time with the inclusion of Padé approximants, extending the final number of data points to 80000 in each spectrum. The results indicate that, thanks to the increased resolution, the use of Padé approximants allows for a converged absorption spectrum even with RT-TDDFT simulation times as short as 24.2 fs, reducing the total computation time by approximately fivefold.
+Figure 5(a) shows the first absorption peak for naphthalene, generated from RT-TDDFT trajectories of different simulation lengths. RT-TDDFT trajectories with lengths of 121.0, 96.8, 72.6, 48.4, and 24.2 fs correspond to 50000, 40000, 30000, 20000, and 10000 RT-TDDFT steps, respectively. It is evident that, especially in the 24.2 fs trajectory, the absorption peak shifts to higher excitation energies due to insufficient data points and low resolution in the data set. The spectra seem to converge for simulation times greater than 100 fs. Figure 5(b) displays the absorption spectrum of naphthalene over the same excitation energy range, but this time with the inclusion of Padé approximants, extending the final number of data points to 80000 in each spectrum. The results indicate that, thanks to the increased resolution, the use of Padé approximants allows for a converged absorption spectrum even with RT-TDDFT simulation times as short as 24.2 fs, reducing the total computation time by approximately fivefold.
 
 <div style="display:flex; justify-content: center; align-items: center;">
   <div style="width: 500px;">
   <img src="./img/absorption_naphthalene.png">
   <br>
   <div style="display: block; padding: 20px; color: gray; text-align: justify;">
-   Absorption spectra of the naphthalene molecule calculated from the RT-TDDFT trajectories of different simulation lengths a) without applying Padé approximants and b) applying Padé approximants using the "plain-128" algorithm.   
+   <b>Figure 5</b> Absorption spectra of the naphthalene molecule calculated from the RT-TDDFT trajectories of different simulation lengths a) without applying Padé approximants and b) applying Padé approximants using the "plain-128" algorithm.   
   </div>
   </div>
 </div>
