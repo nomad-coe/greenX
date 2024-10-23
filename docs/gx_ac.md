@@ -88,7 +88,7 @@ In general, we can conclude that the AC error is primarily determined by the num
   <img src="./img/Analyticcontinuation_model_functions.svg">
   <br>
   <div style="display: block; padding: 20px; color: gray; text-align: justify;">
-  <b> Figure 2</b> Left: Comparison of the model function with the Padé interpolated function (128 parameters) along the real axis. No singularities (poles) are visible because a broadening of $\eta=0.01$ was used. Right: Mean absolute error between the correct model function and interpolated functions at 1,000 test points along the real axis.  
+  <b> Figure 2</b> Left column: Comparison of the model function with the Padé interpolated function (128 parameters) along the real axis. No singularities (poles) are visible because a broadening of $\eta=0.01$ was used. Right column: Mean absolute error between the correct model function and interpolated functions at 1,000 test points along the real axis.  
   </div>
   </div>
 </div>
@@ -114,7 +114,7 @@ The [*GW* approach](https://doi.org/10.3389/fchem.2019.00377) in many body pertu
 
 In this test, we present $GW$ calculations using [FHI-aims](https://fhi-aims.org/) packages, which is an all-electron code based on numeric atom-centered orbitals (NAOs). The self energy or the screened interaction is interpolated using Padé approximants from the GX-AC component. The G<sub>0</sub>W<sub>0</sub> are performed on top of a preceding DFT calculations with the Perdew-Burke-Ernzerhof (PBE) function ($G_0W_0$@PBE). We used NAO basis sets of tier 1 quality and 400 imaginary frequency points to obtain the Padé models. For comparison, we reference a G<sub>0</sub>W<sub>0</sub>@PBE calculation using the [contour deformation](https://doi.org/10.1021/acs.jctc.8b00458) (CD) approach. The CD technique is more accurate than AC, as it evaluates $\Sigma$ and $W$ directly on the real frequency axis. See [The GW Compendium](https://www.frontiersin.org/journals/chemistry/articles/10.3389/fchem.2019.00377/full) for a comparison of different frequency integration techniques.
 
-Figure 4 shows that, regardless of the GX-AC component settings (greedy/non-greedy algorithm and floating-point precision), the self-energy and screened interaction can be accurately described using Padé approximants. The error is dominated by the number of Padé parameters. 
+Figure 4 shows that, regardless of the GX-AC component settings (greedy/non-greedy algorithm and floating-point precision), the self-energy and screened interaction can be accurately described using Padé approximants. For the screened interaction (Fig. 4, left) the analytic continuation slightly deviates from the contour deformation because the error is dominated by the number of Padé parameters. In case of the screened interaction (Figure 4, right) all poles are well approximated by the analytic continuation. However, the 128 bit setting performs slightly better then the other ones when looking on the mean absolute error with respect to contour deformation (6.9 eV for 64 bit, 7.8 eV for 64 bit with greedy, 6.8 eV for 128 bit). 
 
 <div style="display:flex; justify-content: center; align-items: center;">
   <div style="width: 900px;">
