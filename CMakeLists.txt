@@ -101,6 +101,11 @@ if (${LBASIS_COMPONENT})
    add_subdirectory(GX-LocalizedBasis)
 endif()
 
+option (NAO_COMPONENT "Enable the localized basis component" ON) 
+if (${NAO_COMPONENT})
+   add_subdirectory(GX-NAOIntegrals)
+endif()
+
 # Elements to compile the libraries inside submodules
 option(COMPILE_SUBMODULES "Compile GreenX component contained inside submodules" ON)
 if (${COMPILE_SUBMODULES})

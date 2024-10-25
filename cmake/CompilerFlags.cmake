@@ -7,6 +7,7 @@ set(STD_FFLAGS
     -std='f2008'            # Fortran standard set to 2008
     -fimplicit-none         # Specify that no implicit typing is allowed
     -ffree-line-length-0    # No fixed line length
+    -fall-intrinsics        # enable all intrinsics (e.g. sizeof()) 
    )
 string(REPLACE ";" " " STD_FFLAGS "${STD_FFLAGS}")
 set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${STD_FFLAGS}")
