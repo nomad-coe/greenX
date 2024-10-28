@@ -30,7 +30,7 @@ bibliography: refs.bib
 
 Analytic continuation extends the domain of a given complex-valued function to a broader region in the complex plane. This technique is commonly used in many fields, for example in quantum mechanical methods such as the $GW$ method or real-time propagation algorithms, to continue a function from the imaginary axis to the real axis. 
 
-In this work, we present the analytic continuation component of the GreenX library (GX-AC), which provides a Fortran API for the use of Padé approximants with and without symmetry constrains. The component uses the Thiele Padé algorithm to create Padé approximants and uses multiple-precision floats in combination with a greedy algorithm to mitigate the numerical instabilities commonly associated with fitting Padé approximants. The GX-AC component is distributed under the Apache 2 license and freely available on GitHub.
+In this work, we present the analytic continuation component of the GreenX library (GX-AC), which provides a Fortran API for the use of Padé approximants with and without symmetry constraints. The component uses the Thiele Padé algorithm to create Padé approximants and uses multiple-precision floats in combination with a greedy algorithm to mitigate the numerical instabilities commonly associated with fitting Padé approximants. The GX-AC component is distributed under the Apache 2 license and freely available on GitHub.
 
 # Statement of need
 
