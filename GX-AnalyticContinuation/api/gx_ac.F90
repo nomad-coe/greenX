@@ -4,6 +4,30 @@
 !
 ! ***************************************************************************************************
 
+!>   The Pade approximants are a particular type of rational fraction
+!!   approximation to the value of a function. The idea is to match the Taylor
+!!   series expansion as far as possible.
+!!   Here, we Implemented the Pade approximant using Thiele's reciprocal-difference method.
+!!   This routine takes a function \f$f_n=f(x_n)\f$, considering complex \f$x_n\f$ which is
+!!   evaluated at an initial set of arguments, \f$(x_n)\f$
+!!   approximates the function with the help of Pade approximants, and evaluates (extrapolates/rotates)
+!!   this approximation at a given set of arguments \f$(x)\f$. The \f$N\f$-point Pade approximant
+!!   then reads
+!!   $$ f(x) \approx P_N(x)=
+!!     \cfrac{a_1}
+!!     {1+\cfrac{a_2(x-x_1)}{\cdots+\cfrac{a_n(x-x_{N-1})}{1+(x-x_N)g_{N+1}(x)}}}
+!!   $$
+!!   where
+!!   $$  g_n(x)=\frac{g_{n-1}(x_{n-1})-g_{n-1}(x)}
+!!                   {(x-x_{n-1})g_{n-1}(x)}, \; n \ge 2
+!!   $$
+!!   and
+!!   \f[  a_n=g_n(x_n)\\ g_1(x_n)=f_n\\ n=1,\ldots,N \f]
+!!
+!!   Expressions are taken from G. A. J. Baker, Essentials of Padé Approximants (Academic,New York, 1975).
+!!   See also:
+!!   PHYSICAL REVIEW B 94, 165109 (2016);
+!!   J. CHEM. THEORY COMPUT. 19, 16, 5450–5464 (2023)
 module gx_ac
    use kinds, only: dp
    use, intrinsic :: iso_c_binding, only: c_int, c_double_complex, c_ptr
@@ -11,26 +35,35 @@ module gx_ac
    implicit none
 
    private 
-   public :: thiele_pade_api, &
-             params, &
+   public :: params, &
              create_thiele_pade, &
              evaluate_thiele_pade_at, &
              free_params, &
-             arbitrary_precision_available
+             arbitrary_precision_available 
 
-   !> @brief store the parameters of the tiehle pade model 
-   !!!       (potentially in abitrary precision floats using GMP)
+
+   !> @brief store the parameters of the thiele pade model 
+   !!        (potentially in abitrary precision floats using GMP)
    type :: params 
-       logical    :: initialized = .false.
+       !> switch to check whether parameters are already initialized
+       logical    :: initialized = .false.          
+       !> number of pade parameters
        integer    :: n_par
+       !> internal float arithmetic precision
        integer    :: precision 
+       !> switch to check whether GMP was used for multi precision floats
        logical    :: multiprecision_used_internally
+       !> enforce symmetry of pade fit e.g. ("x", "y", "xy", "even", "none")
+       character(len=15) :: enforced_symmetry
+       !> switch to check wether greedy algorithm was used 
+       logical    :: use_greedy
 
-       ! for multiple precision arithmetic
+       !> pointer to c++ struct for multiple precision arithmetic
        type(c_ptr) :: params_ptr
 
-       ! for double precision arithmetic
+       !> reference points (used in fortran double precision routines)
        complex(kind=dp), dimension(:), allocatable :: x_ref
+       !> pade parameters (used in fortran double precision routines)
        complex(kind=dp), dimension(:), allocatable :: a_par
    end type params 
 
@@ -51,13 +84,14 @@ module gx_ac
       !! @param[in] y_ref - array of the reference function values
       !! @param[in] do_greedy - whether to use the default greedy algorithm or the naive one
       !! @return - pointer to abstract type to store all parameters
-      function thiele_pade_mp_aux(n_par, x_ref, y_ref, do_greedy, precision) bind(C, name="thiele_pade_mp")
+      function thiele_pade_mp_aux(n_par, x_ref, y_ref, do_greedy, precision, symmetry) bind(C, name="thiele_pade_mp")
          import :: c_double_complex, c_int, c_ptr
          integer(c_int), value                    :: n_par
          complex(c_double_complex), dimension(*)  :: x_ref
          complex(c_double_complex), dimension(*)  :: y_ref
          integer(c_int), value                    :: do_greedy
          integer(c_int), value                    :: precision
+         integer(c_int), value                    :: symmetry
          type(c_ptr)                              :: thiele_pade_mp_aux
       end function thiele_pade_mp_aux
 
@@ -87,42 +121,6 @@ module gx_ac
 
 contains
 
-   !> @brief API function to compute Thiele-Pade approximations of a meromorphic 
-   !!        function
-   !!
-   !! @param[in] n_par - order of the interpolant
-   !! @param[in] x_ref - array of the reference points
-   !! @param[in] y_ref - array of the reference function values
-   !! @param[in] x_query - array of points where the function needs to be evaluated
-   !! @param[in] do_greedy - whether to use the default greedy algorithm or the naive one
-   !! @param[out] y_query - array of the interpolated values at x_query
-   subroutine thiele_pade_api(n_par, x_ref, y_ref, x_query, y_query, do_greedy)
-      integer, intent(in)                         :: n_par
-      complex(kind=dp), dimension(:), intent(in)  :: x_ref, y_ref, x_query
-      complex(kind=dp), dimension(:), intent(out) :: y_query
-      logical, optional, intent(in)               :: do_greedy
-
-      ! Internal variables
-      integer                                     :: i, num_query
-      complex(kind=dp), dimension(size(x_ref))    :: x_ref_local
-      complex(kind=dp), dimension(n_par)          :: a_par
-
-      ! Compute the coefficients a_par
-      x_ref_local(:) = x_ref
-      call thiele_pade(n_par, x_ref_local, y_ref, a_par, do_greedy)
-
-      ! Compute the number of query points
-      num_query = size(x_query)
-
-      ! Evaluate the Thiele-Pade approximation at the query points
-      do i = 1, num_query
-         call evaluate_thiele_pade(n_par, x_ref_local, x_query(i), a_par, y_query(i))
-      end do
-
-   end subroutine thiele_pade_api
-
-
-
    !> @brief API function to compute Thiele-Pade parameters 
    !!        (potentially using arbitrary precision arithmetic)
    !!
@@ -131,21 +129,24 @@ contains
    !! @param[in] y     - array of the reference function values
    !! @param[in] do_greedy - whether to use the default greedy algorithm or the naive one
    !! @param[in] precision - precision in bits (!! not bytes !!)
+   !! @param[in] enforce_symmetry - force the model to have a certain symmetry ("even", "odd", "conjugate", "none", ...)
    !! @return    params - abstract type to store all parameters in arb. prec. representation
-   type(params) function create_thiele_pade(n_par, x, y, do_greedy, precision) result(par)
+   type(params) function create_thiele_pade(n_par, x, y, do_greedy, precision, enforce_symmetry) result(par)
       integer, intent(in)                        :: n_par
       complex(kind=dp), dimension(:), intent(in) :: x, y
       logical, optional, intent(in)              :: do_greedy
       integer, optional, intent(in)              :: precision 
+      character(*), optional, intent(in)         :: enforce_symmetry
 
       ! Internal variables
-      integer                                         :: local_do_greedy = 1
+      integer :: c_do_greedy
+      integer :: c_symmetry_label
 
       ! initialize type
       par%initialized = .true.
       par%n_par = n_par
 
-      ! precision of arithmetic internally
+      ! precision of internal arithmetic
       if (present(precision)) then 
         if (precision .eq. 64) then 
             ! double precision case
@@ -174,29 +175,65 @@ contains
 #endif
       end if 
 
+      ! Symmetry consistency check
+      if (present(enforce_symmetry)) then 
+          ! character for fortran
+          par%enforced_symmetry = enforce_symmetry
+          ! integer for c
+          select case (enforce_symmetry)
+              case ("mirror_real")
+                  c_symmetry_label = 1
+              case ("mirror_imag")
+                  c_symmetry_label = 2
+              case ("mirror_both")
+                  c_symmetry_label = 3
+              case ("even")
+                  c_symmetry_label = 4
+              case ("odd")
+                  c_symmetry_label = 5
+              case ("conjugate")
+                  c_symmetry_label = 6
+              case ("anti-conjugate")
+                  c_symmetry_label = 7
+              case ("none")
+                  c_symmetry_label = 0
+              case default 
+                  print *, "*** create_thiele_pade: enorce_symmetry=", enforce_symmetry, &
+                           " not known or not supported! Aborting..."
+                  stop
+          end select 
+      else 
+          par%enforced_symmetry = "none"
+          c_symmetry_label = 0
+      end if 
+
+      ! greedy algorithm
+      if (present(do_greedy)) then 
+          ! actual bool for fortran
+          par%use_greedy = do_greedy
+          ! use integer bools for interoperability with C
+          if (do_greedy) then 
+            c_do_greedy = 1
+          else 
+            c_do_greedy = 0
+          end if 
+      else 
+          par%use_greedy = .true.
+          c_do_greedy = 0
+      end if 
+
+      ! create the pade model 
       if (.not. par%multiprecision_used_internally) then 
-
-        allocate(par%a_par(n_par))
-        allocate(par%x_ref(size(x)))
-
-        ! compute the coefficients 
-        par%x_ref(:) = x
-        call thiele_pade(n_par, par%x_ref, y, par%a_par, do_greedy)
-
+          allocate(par%a_par(n_par))
+          allocate(par%x_ref(size(x)))
+          par%x_ref(:) = x
+          call thiele_pade(n_par, par%x_ref, y, par%a_par, &
+                           par%use_greedy, par%enforced_symmetry)
       elseif (par%multiprecision_used_internally) then 
-
-        ! use integer bools for interoperability with C
-        if (present(do_greedy)) then
-            if (do_greedy) then
-                local_do_greedy = 1
-            else
-                local_do_greedy = 0
-            end if
-        end if
 #ifdef GMPXX_FOUND
-        par%params_ptr = thiele_pade_mp_aux(n_par, x, y, local_do_greedy, par%precision)
+          par%params_ptr = thiele_pade_mp_aux(n_par, x, y, c_do_greedy, &
+                                              par%precision, c_symmetry_label)
 #endif
-
       end if 
 
    end function create_thiele_pade 
@@ -231,7 +268,8 @@ contains
       do i = 1, num_query
 
         if (.not. par%multiprecision_used_internally) then 
-            call evaluate_thiele_pade(par%n_par, par%x_ref, x(i), par%a_par, y(i))
+            call evaluate_thiele_pade(par%n_par, par%x_ref, x(i), par%a_par, &
+                                      y(i), par%enforced_symmetry)
         elseif (par%multiprecision_used_internally) then 
 #ifdef GMPXX_FOUND
             y(i) = evaluate_thiele_pade_mp_aux(x(i), par%params_ptr)

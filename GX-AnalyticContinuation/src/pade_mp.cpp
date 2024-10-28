@@ -6,7 +6,7 @@
 
 #include "pade_mp.h"
 
-#include <complex>
+//#include <complex>
 #include <iostream>
 #include <optional>
 #include <vector>
@@ -69,8 +69,11 @@ std::complex<double> evaluate_thiele_pade_mp(const std::complex<double> x,
                                              pade_model *params) {
     mpf_set_default_prec(params->precision);
 
+    // projection of input x to enforce symmetry in pade 
+    std::complex<double> x_projected = params->symmetry.apply_sym_x(x);
+
     // conversion from double to gmp
-    ComplexGMP x_mp(x);
+    ComplexGMP x_mp(x_projected);
 
     // Define constants
     const ComplexGMP c_one(std::complex<double>(1.0, 0.0));
@@ -93,8 +96,12 @@ std::complex<double> evaluate_thiele_pade_mp(const std::complex<double> x,
         }
     }
 
-    return std::complex<double>(acoef[params->n_par - 1] /
-                                bcoef[params->n_par - 1]);
+    // evalueate projected y
+    std::complex<double> y = std::complex<double>(acoef[params->n_par - 1] /
+                                                  bcoef[params->n_par - 1]);
+    // project y back to get symmetric pade interpolant
+    std::complex<double> y_projected_back = params->symmetry.apply_sym_y(x, y);
+    return y_projected_back;
 }
 
 /// @brief Gets the Pade approximant of a meromorphic function F
@@ -103,11 +110,26 @@ std::complex<double> evaluate_thiele_pade_mp(const std::complex<double> x,
 /// @param y_ref array of the reference function values
 /// @param do_greedy whether to use the default greedy algorithm or the naive
 /// @param precision floating point arythmetic precision in bits (!! not bytes!!)
+/// @param symmetry symmetry label as int
 /// @return a pointer to the struct holding all model parameters
 pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
-                           const std::complex<double> *y_ref, int do_greedy, int precision) {
+                           const std::complex<double> *y_ref, int do_greedy, 
+                           int precision, int symmetry) {
     // set floating point precision of GMP lib
     mpf_set_default_prec(precision);
+
+    // store settings in struct
+    pade_model *params = new pade_model;
+    params->n_par = n_par;
+    params->precision = precision;
+    params->symmetry.set_symmetry(symmetry);
+
+    // apply projection to enforce symmetry of pade model 
+    std::vector<std::complex<double>> x_projected(n_par), y_projected(n_par);
+    for (int i_par = 0; i_par < n_par; i_par++) {
+        x_projected[i_par] = params->symmetry.apply_sym_x(x_ref[i_par]);
+        y_projected[i_par] = params->symmetry.apply_sym_y(x_ref[i_par], y_ref[i_par]);
+    }
 
     // Define constants
     const ComplexGMP c_one(std::complex<double>(1.0, 0.0));
@@ -129,9 +151,9 @@ pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
 
     // initialize variables
     for (int i_par = 0; i_par < n_par; i_par++) {
-        x_ref_mp[i_par] = x_ref[i_par];
-        x[i_par] = x_ref[i_par];
-        y_ref_mp.push_back(y_ref[i_par]);
+        x_ref_mp[i_par] = x_projected[i_par];
+        x[i_par] = x_projected[i_par];
+        y_ref_mp.push_back(y_projected[i_par]);
         g_func.push_back(std::vector<ComplexGMP>());
         a_par_mp[i_par] = ComplexGMP();
         n_rem_idx.push_back(i_par);
@@ -260,11 +282,8 @@ pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
         }
     }
 
-    // Create pointer to the parameter struct
-    pade_model *params = new pade_model;
+    // store the parameters for later evaluations 
     params->a_par = a_par_mp;
-    params->precision = precision;
-    params->n_par = n_par;
     params->xref = x_ref_mp;
 
     // Clean-up
@@ -272,3 +291,6 @@ pade_model *thiele_pade_mp(int n_par, const std::complex<double> *x_ref,
 
     return params;
 }
+
+
+
