@@ -15,7 +15,7 @@ This component of the GreenX library (GX-AC) implements the analytic continuatio
 
 Analytic continuation (AC) is a popular mathematical technique used to extend the domain of a complex analytic (holomorphic) function \\(f(z)\\) beyond its original region of definition. For example, in many applications, a function initially defined on the imaginary axis can be analytically continued to the real axis. Such a continuation can be performed by approximating the function with a rational function, because if two analytic functions match on even a small part of their domain, they must be identical on the entire domain, according to the identity theorem. Two common choices of rational functions that are used in this context are the [two-pole model](https://doi.org/10.1103/PhysRevLett.74.1827) and [Padé approximants](https://books.google.de/books?id=LFCzdo4_20EC&printsec=frontcover&hl=de). Two-pole models are characterized by five parameters and their creation is straight-forward but they prove to be [inaccurate for approximating more complicated functions]((https://doi.org/10.3389/fchem.2019.00377)). In contrast, Padé apoproximants are the [method of choice]((https://doi.org/10.3389/fchem.2019.00377)) for approximating functions with a complicated pole structure due to their flexibility. These functions can take the form
 
-$$ f(z) \approx T_{M}(z) = \frac{A_0 + A_1z + \cdots + A_pz^p + \cdots + A_{\frac{M-1}{2}}z^{\frac{M-1}{2}}}{1 + B_1z + \cdots + B_pz^p + \cdots + B_{\frac{M}{2}}z^{\frac{M}{2}}}. $$
+<div> $$ f(z) \approx T_{M}(z) = \frac{A_0 + A_1z + \cdots + A_pz^p + \cdots + A_{\frac{M-1}{2}}z^{\frac{M-1}{2}}}{1 + B_1z + \cdots + B_pz^p + \cdots + B_{\frac{M}{2}}z^{\frac{M}{2}}}. $$ </div>
 
 The GX-AC component uses the Thiele's reciprocal differences algorithm (A.B. George, Essentials of Padé Approximants, Elsevier 1975) to obtain the Padé parameters in a continued fraction form that is [equivalent](https://pubs.acs.org/doi/10.1021/acs.jctc.3c00555) to the rational functions form above
 
@@ -23,19 +23,13 @@ The GX-AC component uses the Thiele's reciprocal differences algorithm (A.B. Geo
 
 where $\{z_i\}$ are a set of reference points that are used to create the Padé model.  The following relation holds for every reference point:
 
-$$
- f(z_i) = T_M(z_i)\qquad i = 1, \;\dots,\; M
-$$
+<div> $$ f(z_i) = T_M(z_i)\qquad i = 1, \;\dots,\; M $$ </div>
 
 the parameters $a_i$ are obtained by recursion:
 
-$$
-a_i = g_i(z_i)\qquad i = 1, \;\dots,\; M 
-$$
+<div> $$ a_i = g_i(z_i)\qquad i = 1, \;\dots,\; M $$ </div>
 
-$$
-g_p(z_i) = \begin{dcases}  f(z_i) & p=1 \\\\ \frac{g_{p-1}(z_{p-1})-g_{p-1}(z_i)}{(z_i - z_{p-1})g_{p-1}(z_i)} & p>1\end{dcases}
-$$
+<div> $$ g_p(z_i) = \begin{dcases}  f(z_i) & p=1 \\\\ \frac{g_{p-1}(z_{p-1})-g_{p-1}(z_i)}{(z_i - z_{p-1})g_{p-1}(z_i)} & p>1\end{dcases} $$ </div>
 
 Padé approximants are known to be [numerical unstable](https://doi.org/10.1093/imamat/25.3.267). The GX-AC component uses two strategies to numerically stabilize the interpolation. First, it incorporates a [greedy algorithm for Thiele Padé approximants](https://pubs.acs.org/doi/full/10.1021/acs.jctc.3c00555) that minimizes the numerical error by reordering of the reference points. A validation of the greedy algorithm can be found in this [reference](https://pubs.acs.org/doi/full/10.1021/acs.jctc.3c00555). Additionally it is possible to use the component with a  higher internal numerical floating point precision. This helps reducing the numerical noise caused by [catastrophic cancellation](https://doi.org/10.1145/103162.103163). Catastrophic cancellation occurs when rounding errors are amplified through the subtraction of rounded numbers, such as double-precision floating-point numbers commonly used in most programs. This is implemented using the [GNU Multiple Precision (GMP) library](https://gmplib.org/) which allows floating-point operations with customizable precision. Furthermore, it is possible to impose various symmetries onto the Padé model using the GX-AC component. To maximize performance, the evaluation of the Padé  model uses the [Wallis algorithm](https://numerical.recipes/book.html), which minimizes the number of divisions, an operation that is computationally expensive, especially for complex floating-point numbers and even more so for higher-precision complex numbers. The component also allows symmetry-constraint Padé models, for a full list of supported symmetries see the section [Usage](#Usage).
 
@@ -70,9 +64,7 @@ We found that the performance of "greedy-128bit" is similar to "plain-128bit". T
 Figure 2 (left column) shows the real part of the exact model functions and their corresponding Padé approximants, calculated with 128 parameters, for the three different configurations.
 The right column of Figure 2 reports the error of the AC with respect to the number of Padé  parameters.  The error is defined as the residual sum between the values obtained from the Padé model and the exact analytic reference function.
 
-$$
-\text{MAE} = \frac{1}{N}\sum_{i=0}^{N} \text{abs}(f(x_i + \eta i) - T(x_i + \eta i)) 
-$$
+<div> $$ \text{MAE} = \frac{1}{N}\sum_{i=0}^{N} \text{abs}(f(x_i + \eta i) - T(x_i + \eta i)) $$ </div>
 
 Starting with the 2-pole model, the exact model is well reproduced by the Padé approximant with 128 parameters for all three AC configurations (Fig. 2(a)). The plot of the MAE (Fig. 2(b)) indicates that similar errors are achieved already with less than 10  parameters because the model is relatively simple with few features. The MAE plot also reveals that the different configurations impact the error. Compared to "plain-64bit", the "greedy-64bit" algorithm reduces the MAE by a factor 5 and the "plain-128bit" by roughly a factor of 10.
 
@@ -133,9 +125,7 @@ Figure 4 shows that, regardless of the GX-AC component settings (greedy/non-gree
 
 [RT-TDDFT](https://doi.org/10.1021/acs.chemrev.0c00223) is one of the most popular and computationally efficient methods to simulate electron dynamics. RT-TDDFT relies on the propagation of the electron density in the time-domain under external perturbation. The response properties, such as the dynamic polarizability tensor $\alpha^{\text{el, RT}}(t)$, can be used to simulate the absorption and/or resonance raman spectroscopies. $\alpha^{\text{el, RT}}(t)$ is computed from the induced dipole moment as the difference between the dipole moment of the perturbed system at RT-TDDFT time step $t$ and that of the unperturbed system. A single Fourier transformation of $\alpha^{\text{el, RT}}(t)$ yields $\alpha^{\text{el, RT}}(\omega)$, from which we can compute the absorption spectrum  $S(\omega)$ according to
 
-$$
-S(\omega) = \frac{4\pi\omega}{3c}\text{Tr}\left\{ \text{Im}(\alpha_{\alpha\beta}^{\text{el, RT}}(\omega ))\right\}  
-$$
+<div> $$ S(\omega) = \frac{4\pi\omega}{3c}\text{Tr}\left\{ \text{Im}(\alpha_{\alpha\beta}^{\text{el, RT}}(\omega ))\right\} $$ </div>
 
 where $c$ denotes the speed of light. 
 
