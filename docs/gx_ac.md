@@ -20,18 +20,24 @@ f(z) \approx T_{M}(z) = \frac{A_0 + A_1z + \cdots + A_pz^p + \cdots + A_{\frac{M
 $$
 
 The GX-AC component uses the Thiele's reciprocal differences algorithm (A.B. George, Essentials of Padé Approximants, Elsevier 1975) to obtain the Padé parameters in a continued fraction form that is [equivalent](https://pubs.acs.org/doi/10.1021/acs.jctc.3c00555) to the rational functions form above
+
 $$
 T_M(z) = \cfrac{a_1}{1+ \cfrac{a_2(z - z_1)}{\quad\ddots\quad 1+ \cfrac{a_p(z-z_{p-1})}{1+\cfrac{a_{p+1}(z-z_p)}{\quad\ddots\quad 1+a_M(z-z_{M-1})}}}}
 $$
 
 where $\{z_i\}$ are a set of reference points that are used to create the Padé model.  The following relation holds for every reference point:
+
 $$
  f(z_i) = T_M(z_i)\qquad i = 1, \;\dots,\; M
 $$
 
 the parameters $a_i$ are obtained by recursion:
+
 $$
-a_i = g_i(z_i)\qquad i = 1, \;\dots,\; M \\\\
+a_i = g_i(z_i)\qquad i = 1, \;\dots,\; M 
+$$
+
+$$
 g_p(z_i) = \begin{dcases}  f(z_i) & p=1 \\\\ \frac{g_{p-1}(z_{p-1})-g_{p-1}(z_i)}{(z_i - z_{p-1})g_{p-1}(z_i)} & p>1\end{dcases}
 $$
 
@@ -69,14 +75,14 @@ Figure 2 (left column) shows the real part of the exact model functions and thei
 The right column of Figure 2 reports the error of the AC with respect to the number of Padé  parameters.  The error is defined as the residual sum between the values obtained from the Padé model and the exact analytic reference function.
 
 $$
-\text{MAE} = \frac{1}{N}\sum_{i=0}^{N} |f(x_i + \eta i) - T(x_i + \eta i)| 
+\text{MAE} = \frac{1}{N}\sum_{i=0}^{N} \text{abs}(f(x_i + \eta i) - T(x_i + \eta i)) 
 $$
 
 Starting with the 2-pole model, the exact model is well reproduced by the Padé approximant with 128 parameters for all three AC configurations (Fig. 2(a)). The plot of the MAE (Fig. 2(b)) indicates that similar errors are achieved already with less than 10  parameters because the model is relatively simple with few features. The MAE plot also reveals that the different configurations impact the error. Compared to "plain-64bit", the "greedy-64bit" algorithm reduces the MAE by a factor 5 and the "plain-128bit" by roughly a factor of 10.
 
 Continuing with the 8-pole model, the Padé approximants accurately reproduce all features (Fig. 2(c)). Since the model function has more complexity, we observe a stronger dependence on the number of Padé parameters compared to the 2-pole model. As shown in Fig. 2(d), the MAE decreases until reaching 50–60 parameters, after which it levels off. The "plain-128bit" setting again yields the lowest error.
 
-Turning to the cosine function, the Padé approximant with 128 parameters visibly deviates from the model function for $\text{Re}z > 0.7$ (Fig. 2(e)). The best agreement is achieved with the "plain-128bit" setting, which is also reflected in the MAE: it is an order of magnitude smaller compared to both "plain-64bit" and "greedy-64bit".
+Turning to the cosine function, the Padé approximant with 128 parameters visibly deviates from the model function for $\text{Re}(z) > 0.7$ (Fig. 2(e)). The best agreement is achieved with the "plain-128bit" setting, which is also reflected in the MAE: it is an order of magnitude smaller compared to both "plain-64bit" and "greedy-64bit".
 
 In general, we can conclude that the AC error is primarily determined by the number of Padé parameters and can be further reduced by using more than double precision. In some cases, improvements are achieved with the greedy algorithm without the need to increase floating-point precision.
 
@@ -129,11 +135,12 @@ Figure 4 shows that, regardless of the GX-AC component settings (greedy/non-gree
 
 ## Analytic Continuation in RT-TDDFT 
 
-[RT-TDDFT](https://doi.org/10.1021/acs.chemrev.0c00223) is one of the most popular and computationally efficient methods to simulate electron dynamics. RT-TDDFT relies on the propagation of the electron density in the time-domain under external perturbation. The response properties, such as the dynamic polarizability tensor $\alpha^{\textnormal{el, RT}}(t)$, can be used to simulate the absorption and/or resonance raman spectroscopies. $\alpha^{\textnormal{el, RT}}(t)$ is computed from the induced dipole moment as the difference between the dipole moment of the perturbed system at RT-TDDFT time step $t$ and that of the unperturbed system. A single Fourier transformation of $\alpha^{\textnormal{el, RT}}(t)$ yields $\alpha^{\textnormal{el, RT}}(\omega)$, from which we can compute the absorption spectrum  $S(\omega)$ according to
+[RT-TDDFT](https://doi.org/10.1021/acs.chemrev.0c00223) is one of the most popular and computationally efficient methods to simulate electron dynamics. RT-TDDFT relies on the propagation of the electron density in the time-domain under external perturbation. The response properties, such as the dynamic polarizability tensor $\alpha^{\text{el, RT}}(t)$, can be used to simulate the absorption and/or resonance raman spectroscopies. $\alpha^{\text{el, RT}}(t)$ is computed from the induced dipole moment as the difference between the dipole moment of the perturbed system at RT-TDDFT time step $t$ and that of the unperturbed system. A single Fourier transformation of $\alpha^{\text{el, RT}}(t)$ yields $\alpha^{\text{el, RT}}(\omega)$, from which we can compute the absorption spectrum  $S(\omega)$ according to
 
-```math 
-S(\omega) = \frac{4\pi\omega}{3c}\textnormal{Tr}\left\{ \textnormal{Im}(\alpha_{\alpha\beta}^{\textnormal{el, RT}}(\omega ))\right\}  
-```
+$$
+S(\omega) = \frac{4\pi\omega}{3c}\text{Tr}\left\{ \text{Im}(\alpha_{\alpha\beta}^{\text{el, RT}}(\omega ))\right\}  
+$$
+
 where $c$ denotes the speed of light. 
 
 The resolution of $S(\omega)$ depends on the length of the RT-TDDFT trajectory and increases with longer simulation times, as shown in Figure 5(a). RT-TDDFT calculations are therefore computationally demanding because obtaining a converged spectrum often requires long RT-TDDFT trajectories. [The use of Padé approximants](https://doi.org/10.1063/1.5051250) enables significantly shorter simulation times and higher resolution in the frequency domain.
@@ -187,7 +194,7 @@ allocate(x_ref(n_par), y_ref(n_par))
 allocate(x_query(n_fit), y_return(n_fit)) 
 
 ! initialize x_ref, y_ref and x_quer
-...
+! ...
 
 ! create the Padé interpolation model and store it in struct
 params_thiele = create_thiele_pade(n_par, x_ref, y_ref)
