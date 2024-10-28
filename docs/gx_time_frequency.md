@@ -3,6 +3,7 @@ layout: default
 title: Time-Frequency Component
 tagline: GreenX Time-Frequency
 description: Minimax time and frequency grids for low-scaling RPA and GW
+mathjax: true
 ---
 # General
 
