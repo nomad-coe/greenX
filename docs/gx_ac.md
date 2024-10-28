@@ -15,15 +15,11 @@ This component of the GreenX library (GX-AC) implements the analytic continuatio
 
 Analytic continuation (AC) is a popular mathematical technique used to extend the domain of a complex analytic (holomorphic) function \\(f(z)\\) beyond its original region of definition. For example, in many applications, a function initially defined on the imaginary axis can be analytically continued to the real axis. Such a continuation can be performed by approximating the function with a rational function, because if two analytic functions match on even a small part of their domain, they must be identical on the entire domain, according to the identity theorem. Two common choices of rational functions that are used in this context are the [two-pole model](https://doi.org/10.1103/PhysRevLett.74.1827) and [Padé approximants](https://books.google.de/books?id=LFCzdo4_20EC&printsec=frontcover&hl=de). Two-pole models are characterized by five parameters and their creation is straight-forward but they prove to be [inaccurate for approximating more complicated functions]((https://doi.org/10.3389/fchem.2019.00377)). In contrast, Padé apoproximants are the [method of choice]((https://doi.org/10.3389/fchem.2019.00377)) for approximating functions with a complicated pole structure due to their flexibility. These functions can take the form
 
-$$
-f(z) \approx T_{M}(z) = \frac{A_0 + A_1z + \cdots + A_pz^p + \cdots + A_{\frac{M-1}{2}}z^{\frac{M-1}{2}}}{1 + B_1z + \cdots + B_pz^p + \cdots + B_{\frac{M}{2}}z^{\frac{M}{2}}}.
-$$
+$$ f(z) \approx T_{M}(z) = \frac{A_0 + A_1z + \cdots + A_pz^p + \cdots + A_{\frac{M-1}{2}}z^{\frac{M-1}{2}}}{1 + B_1z + \cdots + B_pz^p + \cdots + B_{\frac{M}{2}}z^{\frac{M}{2}}}. $$
 
 The GX-AC component uses the Thiele's reciprocal differences algorithm (A.B. George, Essentials of Padé Approximants, Elsevier 1975) to obtain the Padé parameters in a continued fraction form that is [equivalent](https://pubs.acs.org/doi/10.1021/acs.jctc.3c00555) to the rational functions form above
 
-$$
-T_M(z) = \cfrac{a_1}{1+ \cfrac{a_2(z - z_1)}{\quad\ddots\quad 1+ \cfrac{a_p(z-z_{p-1})}{1+\cfrac{a_{p+1}(z-z_p)}{\quad\ddots\quad 1+a_M(z-z_{M-1})}}}}
-$$
+<div> $$ T_M(z) = \cfrac{a_1}{1+ \cfrac{a_2(z - z_1)}{\quad\ddots\quad 1+ \cfrac{a_p(z-z_{p-1})}{1+\cfrac{a_{p+1}(z-z_p)}{\quad\ddots\quad 1+a_M(z-z_{M-1})}}}} $$ </div>
 
 where $\{z_i\}$ are a set of reference points that are used to create the Padé model.  The following relation holds for every reference point:
 
