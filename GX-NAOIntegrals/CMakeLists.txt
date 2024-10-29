@@ -23,6 +23,7 @@ target_sources(LibGXNAO PRIVATE
     src/wigner.f90 
     src/gaunt.f90 
     src/spline.f90
+    src/gauss_quadrature.f90
 )
 target_link_libraries(LibGXNAO GXCommon)
 

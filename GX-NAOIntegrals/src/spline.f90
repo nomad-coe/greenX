@@ -29,7 +29,7 @@ module spline
         procedure :: evaluate_batch => evaluate_cubic_spline_batch
         procedure :: finalize => deallocate_cubic_spline_arrays
 
-    end type
+    end type cubic_spline
     
 
     contains 
