@@ -19,7 +19,11 @@ set_target_properties(LibGXNAO
 
 target_include_directories(LibGXNAO PUBLIC src/)
 
-target_sources(LibGXNAO PRIVATE src/wigner.f90 src/gaunt.f90)
+target_sources(LibGXNAO PRIVATE 
+    src/wigner.f90 
+    src/gaunt.f90 
+    src/spline.f90
+)
 target_link_libraries(LibGXNAO GXCommon)
 
 # -----------------------------------------------
