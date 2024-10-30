@@ -24,6 +24,7 @@ target_sources(LibGXNAO PRIVATE
     src/gaunt.f90 
     src/spline.f90
     src/gauss_quadrature.f90
+    src/legendre_polynomial.f90
 )
 target_link_libraries(LibGXNAO GXCommon)
 

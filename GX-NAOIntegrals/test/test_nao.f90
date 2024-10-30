@@ -4,6 +4,7 @@ program test
     use gaunt, only: r_gaunt
     use spline, only: cubic_spline
     use gauss_quadrature, only: get_gauss_legendre_grid, gauss_legendre_integrator
+    use legendre_polynomial, only: evaluate_legendre_polinomial_batch
 
     implicit none 
 
@@ -20,24 +21,32 @@ program test
 
     !a = r_gaunt(10, 10, 10, 0, 0, 0)
 
-    call get_grid_function(0.0001d0, 10.0d0, 200, r_grid, slater)
-    call my_spline%create(r_grid, slater)
-    !call get_grid_function(0.01d0, 9.0d0, 122, r_grid_out, slater_out)
-    !call my_spline%evaluate_batch(r_grid_out, y_out)
-    !do i = 1, 122
-    !    !a = my_spline%evaluate(r_grid_out(i))
-    !    print *, i, r_grid_out(i), slater_out(i), y_out(i), slater_out(i) - y_out(i)
-    !end do 
+    ! test splines
+    !   call get_grid_function(0.0001d0, 10.0d0, 200, r_grid, slater)
+    !   call my_spline%create(r_grid, slater)
+    !   call get_grid_function(0.01d0, 9.0d0, 122, r_grid_out, slater_out)
+    !   call my_spline%evaluate_batch(r_grid_out, y_out)
+    !   do i = 1, 122
+    !       !a = my_spline%evaluate(r_grid_out(i))
+    !       print *, i, r_grid_out(i), slater_out(i), y_out(i), slater_out(i) - y_out(i)
+    !   end do 
 
 
-    call get_gauss_legendre_grid(n, 0.001d0, 10.0d0, gauleg_grid, gauleg_weight)
-    call my_spline%evaluate_batch(gauleg_grid, gauleg_func)
-    do i = 1, n 
-        gauleg_func(i) = (gauleg_func(i)*gauleg_grid(i))**2
-        print *, i, gauleg_grid(i), gauleg_weight(i), gauleg_func(i)
-    end do 
-    a = gauss_legendre_integrator(n, gauleg_weight, gauleg_func)
-    print *, a
+    ! test gauss integration
+    !   call get_grid_function(0.0001d0, 10.0d0, 200, r_grid, slater)
+    !   call my_spline%create(r_grid, slater)
+    !   call get_gauss_legendre_grid(n, 0.001d0, 10.0d0, gauleg_grid, gauleg_weight)
+    !   call my_spline%evaluate_batch(gauleg_grid, gauleg_func)
+    !   do i = 1, n 
+    !       gauleg_func(i) = (gauleg_func(i)*gauleg_grid(i))**2
+    !       print *, i, gauleg_grid(i), gauleg_weight(i), gauleg_func(i)
+    !   end do 
+    !   a = gauss_legendre_integrator(n, gauleg_weight, gauleg_func)
+    !   print *, a
+
+    
+    ! test the legendre polinomials
+    call test_legendre_polinomials()
 
 
     contains 
@@ -68,6 +77,36 @@ program test
             end do 
 
         end subroutine
+
+        subroutine test_legendre_polinomials()
+            
+            integer, parameter :: n = 7 
+            integer, parameter :: n_points = 300
+            real(kind=8) :: p(n_points, n+1), x(n_points)
+
+            real(kind=8), parameter :: r_start = -1.0d0
+            real(kind=8), parameter :: r_end = 1.0d0
+
+            real(kind=8) :: step 
+            integer :: i, j
+
+            step = (r_end - r_start)/(n_points-1)
+            do i = 1, n_points
+                x(i) = r_start + (i-1) * step 
+            end do 
+
+            call evaluate_legendre_polinomial_batch(n, n_points, x, p)
+
+            do i = 1, n_points
+                do j = 1, n+1
+                    write(*, "(E20.8)", advance="no") p(i, j) 
+                    write(*, "(A)", advance="no") " "
+                end do 
+                print *
+            end do 
+
+            
+        end subroutine test_legendre_polinomials
 
 
 end program test 
