@@ -5,6 +5,7 @@ program test
     use spline, only: cubic_spline
     use gauss_quadrature, only: get_gauss_legendre_grid, gauss_legendre_integrator
     use legendre_polynomial, only: evaluate_legendre_polinomial_batch
+    use log_grid, only: create_log_grid
 
     implicit none 
 
@@ -44,9 +45,12 @@ program test
     !   a = gauss_legendre_integrator(n, gauleg_weight, gauleg_func)
     !   print *, a
 
-    
+
     ! test the legendre polinomials
-    call test_legendre_polinomials()
+    !call test_legendre_polinomials()
+
+    ! test log_grid 
+    call test_log_grid()
 
 
     contains 
@@ -107,6 +111,28 @@ program test
 
             
         end subroutine test_legendre_polinomials
+
+        subroutine test_log_grid()
+            integer, parameter :: n = 100
+            real(kind=8), dimension(n) :: r_grid, func 
+            real(kind=8), dimension(n) :: r_grid_out
+            type(cubic_spline) :: my_spline
+            integer :: i 
+
+            call create_log_grid(50.0d0, n, r_grid)
+            do i = 1, n 
+                func(i) = slater_function(r_grid(i))
+            end do
+            call my_spline%create(r_grid, func)
+            print *, r_grid
+
+            call create_log_grid(40.0d0, n, r_grid_out)
+            do i = 5, n 
+                 print *, r_grid_out(i), slater_function(r_grid_out(i)), my_spline%evaluate(r_grid_out(i)), &
+                          slater_function(r_grid_out(i)) -  my_spline%evaluate(r_grid_out(i))
+            end do
+
+        end subroutine test_log_grid
 
 
 end program test 
