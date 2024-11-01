@@ -6,16 +6,17 @@ program test
     use gauss_quadrature, only: get_gauss_legendre_grid, gauss_legendre_integrator
     use legendre_polynomial, only: evaluate_legendre_polinomial_batch
     use log_grid, only: create_log_grid
+    use codensity_radial_function, only: calculate_codensity_radial_function
 
     implicit none 
 
-    integer :: i
-    integer, parameter :: n = 40
-    real(kind=8) :: a 
-    type(cubic_spline) :: my_spline
-    real(kind=8), dimension(200) :: r_grid, slater 
-    real(kind=8), dimension(122) :: r_grid_out, slater_out, y_out
-    real(kind=8), dimension(n) :: gauleg_grid, gauleg_weight, gauleg_func
+    !integer :: i
+    !integer, parameter :: n = 40
+    !real(kind=8) :: a 
+    !type(cubic_spline) :: my_spline
+    !real(kind=8), dimension(200) :: r_grid, slater 
+    !real(kind=8), dimension(122) :: r_grid_out, slater_out, y_out
+    !real(kind=8), dimension(n) :: gauleg_grid, gauleg_weight, gauleg_func
 
     !call threej_table_init(2, 40)
     !a =  threej_lookup(4, 4, 4, 0, 0, 0)
@@ -50,8 +51,10 @@ program test
     !call test_legendre_polinomials()
 
     ! test log_grid 
-    call test_log_grid()
+    !call test_log_grid()
 
+    ! test codensity radial function
+    call test_codensity_radial_function()
 
     contains 
 
@@ -59,13 +62,29 @@ program test
             real(kind=8), intent(in) :: r 
 
             ! internal variables 
+            integer :: n
+            real(kind=8) :: zeta
+            real(kind=8) :: normc
+            n = 1
+            zeta = 3.0d0
+            normc = (2*zeta)**n * sqrt(2*zeta/fact(2*n))
+            y = normc * r**(n-1) * exp(-zeta*r)
+
+        end function slater_function
+
+        subroutine slater_function_batch(r, degree, y)
+            real(kind=8), dimension(:), intent(in) :: r 
+            integer, intent(in) :: degree
+            real(kind=8), dimension(:), intent(out) :: y
+
+            ! internal variables 
             real(kind=8) :: zeta
             real(kind=8) :: normc
             zeta = 3.0d0
-            normc = 2*zeta  * sqrt(2*zeta/2.0d0)
-            y = normc * exp(-zeta*r)
+            normc = (2*zeta)**degree * sqrt(2*zeta/fact(2*degree))
+            y(:) = normc * r(:)**(degree-1) * exp(-zeta*r(:))
 
-        end function slater_function
+        end subroutine slater_function_batch
 
         subroutine get_grid_function(r_start, r_end, n, grid, func)
             real(kind=8) :: r_start, r_end
@@ -81,6 +100,38 @@ program test
             end do 
 
         end subroutine
+
+
+
+        subroutine get_grid(r_start, r_end, n, grid)
+            real(kind=8), intent(in) :: r_start, r_end 
+            integer, intent(in) :: n
+            real(kind=8), dimension(n), intent(out) :: grid
+
+            ! internal variables 
+            real(kind=8) :: step 
+            integer :: i
+
+            step = (r_end - r_start)/dble(n-1)
+            do i = 1, n 
+                grid(i) = r_start + (i - 1) * step 
+            end do  
+
+        end subroutine get_grid
+
+
+
+        real(kind=8) function fact(n)
+            integer, intent(in) :: n
+
+            integer :: i
+
+            if (n < 0) error stop 'factorial is singular for negative integers'
+            fact = 1.0d0
+            do i = 2, n
+                fact = fact * i
+            enddo
+        end function fact
 
         subroutine test_legendre_polinomials()
             
@@ -133,6 +184,33 @@ program test
             end do
 
         end subroutine test_log_grid
+
+        subroutine test_codensity_radial_function()
+            integer, parameter :: n = 200 
+            real(kind=8), dimension(n) :: r_grid, orb1, orb2 
+            type(cubic_spline) :: orb1_sp, orb2_sp 
+            integer :: i
+            integer, parameter :: kappa = 20
+            type(cubic_spline), dimension(kappa+1) :: g_sp
+            real(kind=8), dimension(200) :: norm_grid, g_out
+
+            call create_log_grid(50.0d0, n, r_grid)
+            call slater_function_batch(r_grid, 2, orb1)
+            call slater_function_batch(r_grid, 4, orb2)
+            call orb1_sp%create(r_grid, orb1)
+            call orb2_sp%create(r_grid, orb2)
+
+            call calculate_codensity_radial_function(orb1_sp, orb2_sp, 0.3d0, 0.7d0, kappa, 50, g_sp)
+
+            call get_grid(0.01d0, 10.0d0, 200, norm_grid)
+
+            do i = 1, kappa +1
+                call g_sp(i)%evaluate_batch(norm_grid, g_out)
+                print *, g_out
+            end do
+
+
+        end subroutine test_codensity_radial_function
 
 
 end program test 
