@@ -27,6 +27,7 @@ target_sources(LibGXNAO PRIVATE
     src/legendre_polynomial.f90
     src/log_grid.f90
     src/codensity_radial_function.f90
+    src/spherical_harmonics.f90
 )
 target_link_libraries(LibGXNAO GXCommon ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 

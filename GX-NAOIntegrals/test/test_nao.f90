@@ -7,6 +7,8 @@ program test
     use legendre_polynomial, only: evaluate_legendre_polinomial_batch
     use log_grid, only: create_log_grid
     use codensity_radial_function, only: calculate_codensity_radial_function
+    use spherical_harmonics, only: eval_spheric_harmonic
+    use constants, only: pi
 
     implicit none 
 
@@ -54,7 +56,10 @@ program test
     !call test_log_grid()
 
     ! test codensity radial function
-    call test_codensity_radial_function()
+    !call test_codensity_radial_function()
+
+    ! test spherical harmonics 
+    call test_spherical_harmonic()
 
     contains 
 
@@ -211,6 +216,33 @@ program test
 
 
         end subroutine test_codensity_radial_function
+
+
+        subroutine test_spherical_harmonic() 
+            integer, parameter :: l_max = 2
+            integer, parameter :: n_points = 180
+            integer :: m, l, i_theta, i_phi
+            real(kind=8) :: theta(n_points), phi(2*n_points), spher_harm(2*n_points, n_points) 
+
+            theta = 0.0d0
+            phi = 0.0d0
+
+            call get_grid(0.0d0, pi, n_points, theta)
+            call get_grid(0.0d0, 2.0d0*pi, 2*n_points, phi)
+
+            l = 18
+            m = 7
+            do i_theta = 1, n_points
+                do i_phi = 1, 2*n_points
+                    spher_harm(i_phi, i_theta) = eval_spheric_harmonic(l, m, theta(i_theta), phi(i_phi))
+                    !print *, l, m, theta(i_theta), phi(i_phi), spher_harm
+                end do 
+            end do 
+
+            do i_theta =  1, n_points
+                print *, spher_harm(:, i_theta)
+            end do 
+        end subroutine test_spherical_harmonic
 
 
 end program test 
