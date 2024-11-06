@@ -4,7 +4,7 @@ program test
     use gaunt, only: r_gaunt
     use spline, only: cubic_spline
     use gauss_quadrature, only: get_gauss_legendre_grid, gauss_legendre_integrator
-    use legendre_polynomial, only: evaluate_legendre_polinomial_batch
+    use legendre_polynomial, only: evaluate_legendre_polinomial_batch, evaluate_legendre_polinomial
     use log_grid, only: create_log_grid
     use codensity_radial_function, only: calculate_codensity_radial_function
     use spherical_harmonics, only: eval_spheric_harmonic
@@ -59,7 +59,10 @@ program test
     !call test_codensity_radial_function()
 
     ! test spherical harmonics 
-    call test_spherical_harmonic()
+    !call test_spherical_harmonic()
+
+    ! test radial expansion
+    call test_radial_expansion()
 
     contains 
 
@@ -137,6 +140,35 @@ program test
                 fact = fact * i
             enddo
         end function fact
+
+        subroutine cartesian_to_spherical(cartesian, r, theta, phi)
+            implicit none
+            real(kind=8), intent(in) :: cartesian(3)  ! Input Cartesian coordinates (x, y, z)
+            real(kind=8), intent(out) :: r            ! Radial distance
+            real(kind=8), intent(out) :: theta        ! Polar angle
+            real(kind=8), intent(out) :: phi          ! Azimuthal angle
+            ! Local variables
+            real(kind=8) :: x, y, z
+            ! Assign Cartesian components
+            x = cartesian(1)
+            y = cartesian(2)
+            z = cartesian(3)
+            ! Compute the radial distance
+            r = sqrt(x**2 + y**2 + z**2)
+            ! Compute the polar angle (theta)
+            if (r > 0.0d0) then
+                theta = acos(z / r)
+            else
+                theta = 0.0d0  ! Define theta as 0 if the vector has zero length
+            end if
+            ! Compute the azimuthal angle (phi)
+            if (x == 0.0d0 .and. y == 0.0d0) then
+                phi = 0.0d0  ! Define phi as 0 if x and y are both zero
+            else
+                !phi = atan2(y, x)
+                phi = sign(1.0d0, y)*acos(x/sqrt(x**2 + y**2))
+            end if
+        end subroutine cartesian_to_spherical
 
         subroutine test_legendre_polinomials()
             
@@ -243,6 +275,114 @@ program test
                 print *, spher_harm(:, i_theta)
             end do 
         end subroutine test_spherical_harmonic
+
+        subroutine test_radial_expansion()
+            ! test if the product of the radial functions can be expandet 
+            ! correctly into codensity radial functions
+
+            integer :: l_max, i
+            integer :: l, m, n_grid_points, n_int_points
+            real(kind=8), dimension(3) :: r1, r2, r_eval, r_projection
+            real(kind=8) :: theta_eval, phi_eval, radius_eval
+            real(kind=8) :: theta_middle, phi_middle, radius_middle
+            real(kind=8) :: r_a, r_b, alpha 
+            real(kind=8) :: phi1, phi2
+            real(kind=8) :: r_norm_grid(200)
+            real(kind=8) :: sphere_harm1, sphere_harm2, harm_sum, total_sum
+            real(kind=8) :: leg_p(40), cos_theta
+            real(kind=8), allocatable :: func_tmp(:), grid(:)
+            type(cubic_spline) :: slater1, slater2
+            type(cubic_spline), dimension(:), allocatable :: spline_g
+
+            ! center 1
+            r1 = (/-1.0d0, 0.0d0, 0.0d0/)
+            ! center 2
+            r2 = (/1.0d0, 0.0d0, 0.0d0/)
+            ! where on the line segment should the center lie? r_c = alpha*r1 + (1-alpha)*r2
+            alpha = 0.5d0
+
+            ! other settings
+            l_max = 10
+            n_int_points =  50
+            n_grid_points = 200
+            
+            ! create radial part of functions
+            allocate(grid(n_grid_points), func_tmp(n_grid_points))
+            call create_log_grid(40d0, n_grid_points, grid)
+            call slater_function_batch(grid, 5, func_tmp)
+            call slater1%create(grid, func_tmp)
+            call slater_function_batch(grid, 10, func_tmp)
+            call slater2%create(grid, func_tmp)
+
+
+            ! project 
+            r_projection = alpha*r1 + (1.0d0-alpha)*r2 
+            r1 = r1 - r_projection
+            r2 = r2 - r_projection
+
+
+            ! length from centers to new origin (center of expansion)
+            r_a = sqrt(r1(1)**2 + r1(2)**2 + r1(3)**2)
+            r_b = sqrt(r2(1)**2 + r2(2)**2 + r2(3)**2)
+
+            ! mirror point of origin in line segment between a and b in spherical coordinates
+            call cartesian_to_spherical(r2, radius_middle, theta_middle, phi_middle)
+
+            !print *, r_a, r1
+            !print *, r_b, r2
+            !print *, radius_middle, r2 + r1
+            !stop
+
+
+
+            ! get the codensity radial function 
+            allocate(spline_g(l_max +1))
+            call calculate_codensity_radial_function(slater1, slater2, r_a, r_b, l_max, n_int_points, spline_g)
+
+            
+            ! evaluation point in spherical coordinates
+            call get_grid(-4.1d0, 4.1d0, 200, r_norm_grid)
+            do i = 1, 200
+                ! point where the function should be evaluated 
+                r_eval =(/r_norm_grid(i), 0.0d0, 0.0d0/)
+                r_eval = r_eval - r_projection
+                call cartesian_to_spherical(r_eval, radius_eval, theta_eval, phi_eval)
+                cos_theta = dot_product(r_eval, r2) /(r_b * radius_eval)
+                ! get the expansion
+                total_sum = 0.0d0
+                call evaluate_legendre_polinomial(l_max, cos_theta, leg_p(1:l_max+1))
+                do l = 0, l_max 
+                    harm_sum = 0.0d0 
+                    do m = -l, l 
+                        sphere_harm1 = eval_spheric_harmonic(l, m, theta_eval, phi_eval)
+                        !print *, l, m, theta_eval, phi_eval, sphere_harm1
+                        sphere_harm2 = eval_spheric_harmonic(l, m, theta_middle, phi_middle)
+                        harm_sum = harm_sum +  sphere_harm1*sphere_harm2
+                        !print *, l, m, theta_eval, phi_eval, sphere_harm1
+                    end do 
+                    !harm_sum = leg_p(l+1) * (2.0d0*l + 1.0d0)
+                    total_sum = total_sum + harm_sum * spline_g(l+1)%evaluate(radius_eval)
+                end do 
+                total_sum = total_sum * 4.0d0 * pi 
+
+                call cartesian_to_spherical(r1 - r_eval, radius_eval, theta_eval, phi_eval)
+                phi1 = slater1%evaluate(radius_eval)
+                call cartesian_to_spherical(r2 - r_eval, radius_eval, theta_eval, phi_eval)
+                phi2 = slater2%evaluate(radius_eval)
+
+                print *, r_norm_grid(i), total_sum, phi1, phi2, phi1*phi2
+            end do
+
+
+            ! calculate the actual thing 
+            call cartesian_to_spherical(r1 - r_eval, radius_eval, theta_eval, phi_eval)
+            phi1 = slater1%evaluate(radius_eval)
+            call cartesian_to_spherical(r2 - r_eval, radius_eval, theta_eval, phi_eval)
+            phi2 = slater2%evaluate(radius_eval)
+            !print *, phi1*phi2
+
+
+        end subroutine test_radial_expansion
 
 
 end program test 
