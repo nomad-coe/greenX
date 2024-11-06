@@ -35,7 +35,7 @@ module legendre_polynomial
         p(1) = 1.0_dp 
         p(2) = x
         do i = 2, n 
-            p(i+1) = (2.0_dp*n-1.0_dp)/dble(n) * x * p(i) - (n-1.0_dp)/dble(n) * p(i-1)
+            p(i+1) = (2.0_dp*i-1.0_dp)/dble(i) * x * p(i) - (i-1.0_dp)/dble(i) * p(i-1)
         end do 
 
     end subroutine evaluate_legendre_polinomial
@@ -67,7 +67,7 @@ module legendre_polynomial
         p(:, 1) = 1.0_dp 
         p(:, 2) = x(:)
         do i = 2, n 
-            p(:, i+1) = (2.0_dp*n-1.0_dp)/dble(n) * x(:) * p(:, i) - (n-1.0_dp)/dble(n) * p(:, i-1)
+            p(:, i+1) = (2.0_dp*i-1.0_dp)/dble(i) * x(:) * p(:, i) - (i-1.0_dp)/dble(i) * p(:, i-1)
         end do 
 
     end subroutine evaluate_legendre_polinomial_batch 
