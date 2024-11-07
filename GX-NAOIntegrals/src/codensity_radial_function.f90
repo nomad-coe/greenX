@@ -156,7 +156,7 @@ module codensity_radial_function
         real(kind=dp), dimension(n_sp_g, kappa+1), intent(out) :: cod_rad_fun
 
         ! internal variables
-        integer :: i_gauss_grid, i_kappa, i, i_r_grid_sp
+        integer :: i_gauss_grid, i_kappa, i_r_grid_sp
         real(kind=dp), dimension(n_sp_g) :: a_1, a_2 
         real(kind=dp), dimension(n_sp_g, n_int_points) :: s, t
         real(kind=dp), dimension(n_int_points) :: gauleg_grid, gauleg_weights, x_leg_pol

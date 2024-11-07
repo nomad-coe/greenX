@@ -4,14 +4,14 @@
 !! and  Homeier, H. H. H.; Steinborn, E. O. JMol Struct (THEOCHEM) 1996, 368, 31.
 module gaunt
 
-    use wigner, only: threej
     use kinds, only: dp
+    use wigner, only: threej
     use constants, only: pi
 
     implicit none
 
     private
-    public :: r_gaunt
+    public :: r_gaunt, wigner_3j, solid_harm_prefactor, alpha_function
 
     contains
 
@@ -54,6 +54,11 @@ module gaunt
                     * alpha_function(l1_aux, l2_aux, l3_aux)        &
                     * wigner_3j(l1_aux, l2_aux, l3_aux, 0, m2_aux, -m3_aux)
         else 
+            if (m3_abs .ne. (m1_abs+m2_abs)) then 
+                !print *, "inconsistency in R-Gaunt routine ", coeff
+                coeff = 0.0_dp
+                return
+            end if 
             if (m1_aux+m2_aux+m3_aux .gt. 0) then 
                 sign = 1
             else 
@@ -65,11 +70,6 @@ module gaunt
                     * solid_harm_prefactor(l3_aux)          &
                     * alpha_function(l1_aux, l2_aux, l3_aux)        &
                     * wigner_3j(l1_aux, l2_aux, l3_aux, -m1_abs, -m2_abs, m3_abs)
-            ! consistency check 
-            if (m3_abs .ne. (m1_abs+m2_abs)) then 
-                print *, "inconsistency in R-Gaunt routine"
-                stop
-            end if 
         end if 
 
     end function r_gaunt
@@ -94,8 +94,8 @@ module gaunt
         m_tmp = (/m1, m2, m3/)
         m_abs_tmp = (/m1_abs, m2_abs, m3_abs/)
 
-        max_idx = maxval(m_abs_tmp)
-        min_idx = minval(m_abs_tmp)
+        max_idx = maxloc(m_abs_tmp, dim=1)
+        min_idx = minloc(m_abs_tmp, dim=1)
         mid_idx = 6 - (max_idx + min_idx)
 
         l1 = l_tmp(min_idx)
@@ -112,6 +112,8 @@ module gaunt
     end subroutine order_for_m_abs
 
     !> @brief returns the prefactor of a solid harmonic function Y_lm
+    !!
+    !! \rho_l in the Talman 2011 paper
     !!
     !! @param[in] l -- angular quantum number
     !! @result         prefator

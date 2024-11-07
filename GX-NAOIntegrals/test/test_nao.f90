@@ -9,6 +9,8 @@ program test
     use codensity_radial_function, only: calculate_codensity_radial_function
     use spherical_harmonics, only: eval_spheric_harmonic
     use constants, only: pi
+    use codensity_expansion, only: beta_coefficient, capital_a_coefficient, sigma_coefficient, &
+                                   codensity_expansion_coefficient
 
     implicit none 
 
@@ -62,7 +64,10 @@ program test
     !call test_spherical_harmonic()
 
     ! test radial expansion
-    call test_radial_expansion()
+    !call test_radial_expansion()
+
+    ! test codensity expansion coefficients 
+    call test_expansion_coefficients()
 
     contains 
 
@@ -288,6 +293,7 @@ program test
             real(kind=8) :: r_a, r_b, alpha 
             real(kind=8) :: phi1, phi2
             real(kind=8) :: r_norm_grid(200)
+            real(kind=8), allocatable :: expansion(:)
             real(kind=8) :: sphere_harm1, sphere_harm2, harm_sum, total_sum
             real(kind=8) :: leg_p(40), cos_theta
             real(kind=8), allocatable :: func_tmp(:), grid(:)
@@ -299,27 +305,25 @@ program test
             ! center 2
             r2 = (/1.0d0, 0.0d0, 0.0d0/)
             ! where on the line segment should the center lie? r_c = alpha*r1 + (1-alpha)*r2
-            alpha = 0.5d0
+            alpha = 0.7d0
 
             ! other settings
-            l_max = 10
+            l_max = 16
             n_int_points =  50
             n_grid_points = 200
             
             ! create radial part of functions
             allocate(grid(n_grid_points), func_tmp(n_grid_points))
             call create_log_grid(40d0, n_grid_points, grid)
-            call slater_function_batch(grid, 5, func_tmp)
+            call slater_function_batch(grid, 3, func_tmp)
             call slater1%create(grid, func_tmp)
-            call slater_function_batch(grid, 10, func_tmp)
+            call slater_function_batch(grid, 7, func_tmp)
             call slater2%create(grid, func_tmp)
-
 
             ! project 
             r_projection = alpha*r1 + (1.0d0-alpha)*r2 
             r1 = r1 - r_projection
             r2 = r2 - r_projection
-
 
             ! length from centers to new origin (center of expansion)
             r_a = sqrt(r1(1)**2 + r1(2)**2 + r1(3)**2)
@@ -327,21 +331,14 @@ program test
 
             ! mirror point of origin in line segment between a and b in spherical coordinates
             call cartesian_to_spherical(r2, radius_middle, theta_middle, phi_middle)
-
-            !print *, r_a, r1
-            !print *, r_b, r2
-            !print *, radius_middle, r2 + r1
-            !stop
-
-
-
+            
             ! get the codensity radial function 
             allocate(spline_g(l_max +1))
             call calculate_codensity_radial_function(slater1, slater2, r_a, r_b, l_max, n_int_points, spline_g)
-
             
             ! evaluation point in spherical coordinates
             call get_grid(-4.1d0, 4.1d0, 200, r_norm_grid)
+            allocate(expansion(l_max+1))
             do i = 1, 200
                 ! point where the function should be evaluated 
                 r_eval =(/r_norm_grid(i), 0.0d0, 0.0d0/)
@@ -362,27 +359,36 @@ program test
                     end do 
                     !harm_sum = leg_p(l+1) * (2.0d0*l + 1.0d0)
                     total_sum = total_sum + harm_sum * spline_g(l+1)%evaluate(radius_eval)
+                    expansion(l+1) = total_sum * 4.0d0 * pi
                 end do 
                 total_sum = total_sum * 4.0d0 * pi 
 
+                ! calculate the correct result 
                 call cartesian_to_spherical(r1 - r_eval, radius_eval, theta_eval, phi_eval)
                 phi1 = slater1%evaluate(radius_eval)
                 call cartesian_to_spherical(r2 - r_eval, radius_eval, theta_eval, phi_eval)
                 phi2 = slater2%evaluate(radius_eval)
 
-                print *, r_norm_grid(i), total_sum, phi1, phi2, phi1*phi2
+                print *, r_norm_grid(i), phi1, phi2, phi1*phi2, expansion(:)
             end do
 
-
-            ! calculate the actual thing 
-            call cartesian_to_spherical(r1 - r_eval, radius_eval, theta_eval, phi_eval)
-            phi1 = slater1%evaluate(radius_eval)
-            call cartesian_to_spherical(r2 - r_eval, radius_eval, theta_eval, phi_eval)
-            phi2 = slater2%evaluate(radius_eval)
-            !print *, phi1*phi2
-
-
         end subroutine test_radial_expansion
+
+        subroutine test_expansion_coefficients()
+            real(kind=8) :: test
+            real(kind=8), dimension(3) :: r1, r2
+            ! center 1
+            r1 = (/-1.0d0, 0.0d0, 0.0d0/)
+            ! center 2
+            r2 = (/1.0d0, 0.0d0, 0.0d0/)
+
+            !test = beta_coefficient(16, 18, 5)
+            !test = capital_a_coefficient(4, 3, 5, 1, 1.0d0, 1.5d0, 1.5d0, 8)
+            !test = sigma_coefficient(2, 2, 0, r1, r2, 1, -1, 1, 1, 7)
+            test = codensity_expansion_coefficient(3, 3, 3, 1, r1, r2, 1, -1, 1, 1, 10)
+
+            print *, test
+        end subroutine test_expansion_coefficients
 
 
 end program test 

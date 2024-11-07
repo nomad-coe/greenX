@@ -20,6 +20,7 @@ set_target_properties(LibGXNAO
 target_include_directories(LibGXNAO PUBLIC src/)
 
 target_sources(LibGXNAO PRIVATE 
+    src/math.f90
     src/wigner.f90 
     src/gaunt.f90 
     src/spline.f90
@@ -28,6 +29,7 @@ target_sources(LibGXNAO PRIVATE
     src/log_grid.f90
     src/codensity_radial_function.f90
     src/spherical_harmonics.f90
+    src/codensity_expansion.f90
 )
 target_link_libraries(LibGXNAO GXCommon ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 
