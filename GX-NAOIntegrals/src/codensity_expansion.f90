@@ -6,17 +6,76 @@ module codensity_expansion
     
     use kinds, only: dp 
     use constants, only: pi
+    use spline, only: cubic_spline
     use math, only: double_factorial, cart_to_sphere
     use gaunt, only: r_gaunt, solid_harm_prefactor, alpha_function, wigner_3j
     use spherical_harmonics, only: eval_spheric_harmonic
+    use codensity_radial_function, only: calculate_codensity_radial_function
 
     implicit none 
 
     private
     public :: beta_coefficient, capital_a_coefficient, sigma_coefficient, &
-              codensity_expansion_coefficient
+              codensity_expansion_coefficient, expand_codensity
 
     contains 
+
+
+    subroutine expand_codensity(func_1, R1, l1, m1, func_2, R2, l2, m2, l_max, R_eval, expansion)
+        type(cubic_spline),          intent(in) :: func_1
+        real(kind=dp), dimension(3), intent(in) :: R1 
+        integer,                     intent(in) :: l1
+        integer,                     intent(in) :: m1
+        type(cubic_spline),          intent(in) :: func_2
+        real(kind=dp), dimension(3), intent(in) :: R2
+        integer,                     intent(in) :: l2
+        integer,                     intent(in) :: m2
+        integer,                     intent(in) :: l_max
+        real(kind=dp), dimension(3), intent(in) :: R_eval
+        real(kind=dp),               intent(out):: expansion
+
+        ! internal variables 
+        real(kind=dp), parameter :: alpha = 0.5_dp
+        integer, parameter :: n_int_points = 50 
+        integer, parameter :: n_sp_points = 200
+        real(kind=dp), dimension(3) :: r_project, R1_proj, R2_proj, R_eval_proj
+        integer :: i_l, i_kappa, i_sigma, i_sigma_m
+        real(kind=dp) :: rad1, rad2 
+        real(kind=dp) :: rad_eval, theta_eval, phi_eval
+        type(cubic_spline), dimension(l_max+1) :: spline_g
+
+        ! place the origin on the line segment between R1 and R2
+        r_project = alpha * R1 + (1.0_dp-alpha) * R2
+        R1_proj = R1 - r_project 
+        R2_proj = R2 - r_project 
+        R_eval_proj = R_eval - r_project 
+
+        ! length from centers to new origin (center of expansion)
+        rad1 = sqrt(R1_proj(1)**2 + R1_proj(2)**2 + R1_proj(3)**2)
+        rad2 = sqrt(R2_proj(1)**2 + R2_proj(2)**2 + R2_proj(3)**2)
+        
+        ! get the expansion of the radial functions
+        call calculate_codensity_radial_function(func_1, func_2, rad1, rad2, l_max, n_int_points, spline_g)
+
+        ! convert evaluation point to spherical coordinates
+        call cart_to_sphere(R_eval_proj, rad_eval, theta_eval, phi_eval)
+
+        ! do the expansion 
+        expansion = 0.0_dp 
+        do i_l = 0, l_max
+            do i_kappa = 0, l_max 
+                do i_sigma = 0, l_max 
+                    do i_sigma_m = -i_sigma, i_sigma 
+                        expansion = expansion + codensity_expansion_coefficient(i_l, i_kappa, i_sigma, i_sigma_m, R1_proj, R2_proj, l1, m1, l2, m2, l_max) &
+                                    * rad_eval**i_l * spline_g(i_kappa+1)%evaluate(rad_eval) &
+                                    * eval_spheric_harmonic(i_sigma, i_sigma_m, theta_eval, phi_eval)
+                        print *, i_l, i_kappa, i_sigma, expansion
+                    end do 
+                end do 
+            end do 
+        end do
+
+    end subroutine expand_codensity
 
     !> @brief get the coefficients for the codensity expansion X_{l\kappa\Sigma\Sigma_m}
     !!

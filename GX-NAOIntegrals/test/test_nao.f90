@@ -10,7 +10,7 @@ program test
     use spherical_harmonics, only: eval_spheric_harmonic
     use constants, only: pi
     use codensity_expansion, only: beta_coefficient, capital_a_coefficient, sigma_coefficient, &
-                                   codensity_expansion_coefficient
+                                   codensity_expansion_coefficient, expand_codensity
 
     implicit none 
 
@@ -67,7 +67,10 @@ program test
     !call test_radial_expansion()
 
     ! test codensity expansion coefficients 
-    call test_expansion_coefficients()
+    !call test_expansion_coefficients()
+
+    ! test complete expansion
+    call test_total_expansion()
 
     contains 
 
@@ -374,6 +377,8 @@ program test
 
         end subroutine test_radial_expansion
 
+
+
         subroutine test_expansion_coefficients()
             real(kind=8) :: test
             real(kind=8), dimension(3) :: r1, r2
@@ -389,6 +394,45 @@ program test
 
             print *, test
         end subroutine test_expansion_coefficients
+
+
+
+        subroutine test_total_expansion()
+            type(cubic_spline) :: slater1, slater2
+            real(kind=8), dimension(3) :: r1, r2, r_eval
+            real(kind=8), allocatable :: func_tmp(:), grid(:)
+            integer :: n_grid_points
+            real(kind=8) :: expansion
+            real(kind=8) :: phi1, phi2, r, theta, phi
+
+            n_grid_points = 200
+
+            ! center 1
+            r1 = (/-1.0d0, 0.0d0, 0.0d0/)
+            ! center 2
+            r2 = (/1.0d0, 0.0d0, 0.0d0/)
+            r_eval = (/0.3d0, 0.1d0, 0.0d0/)
+
+            ! create radial part of functions
+            allocate(grid(n_grid_points), func_tmp(n_grid_points))
+            call create_log_grid(40d0, n_grid_points, grid)
+            call slater_function_batch(grid, 3, func_tmp)
+            call slater1%create(grid, func_tmp)
+            call slater_function_batch(grid, 3, func_tmp)
+            call slater2%create(grid, func_tmp)
+
+            call expand_codensity(slater1, r1, 0, 0, slater2, r2, 0, 0, 5, r_eval, expansion)
+            print *, expansion
+
+            ! correct result
+            call cartesian_to_spherical(r_eval-r1, r, theta, phi)
+            phi1 = slater1%evaluate(r) * eval_spheric_harmonic(0, 0, theta, phi)
+            call cartesian_to_spherical(r_eval-r2, r, theta, phi)
+            phi2 = slater2%evaluate(r) * eval_spheric_harmonic(0, 0, theta, phi)
+            print *, phi1*phi2
+
+
+        end subroutine test_total_expansion
 
 
 end program test 
