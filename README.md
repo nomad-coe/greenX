@@ -236,3 +236,8 @@ create_unit_test_executable(TARGET_TEST_DIR ${UNIT_TEST_DIR}
 
 For multiple tests, one could call `create_unit_test_executable` in a loop over 
 a list of modules.
+
+
+## Contribute
+
+Contributions to GreenX are highly appreciated! If you consider contributing [check out CONTRIBUTING.md](https://github.com/nomad-coe/greenX/blob/main/CONTRIBUTING.md).
