@@ -50,7 +50,8 @@ contains
   subroutine gx_minimax_grid(num_points, e_min, e_max, &
        tau_points, tau_weights, omega_points, omega_weights, &
        cosft_wt, cosft_tw, sinft_wt, &
-       max_errors, cosft_duality_error, ierr, bare_cos_sin_weights)
+       max_errors, cosft_duality_error, ierr,&
+       bare_cos_sin_weights, regularization)
 
     integer, intent(in)                               :: num_points
     real(kind=dp), intent(in)                         :: e_min, e_max
@@ -61,8 +62,9 @@ contains
     real(kind=dp), allocatable, dimension(:, :), &
          intent(out)                                  :: cosft_wt, cosft_tw, sinft_wt
     real(kind=dp), intent(out)                        :: max_errors(3), cosft_duality_error
-    logical, intent(in), optional                     :: bare_cos_sin_weights
     integer, intent(out)                              :: ierr
+    logical, intent(in), optional                     :: bare_cos_sin_weights
+    real(kind=dp), intent(in), optional               :: regularization
 
     ! Internal variables
     logical                                           :: my_bare_cos_sin_weights
@@ -70,6 +72,7 @@ contains
     integer, parameter                                :: cos_w_to_cos_t = 2
     integer, parameter                                :: sin_t_to_sin_w = 3
     integer                                           :: i_point, j_point
+    real(kind=dp)                                     :: my_regularization
     real(kind=dp)                                     :: e_range, scaling
     real(kind=dp), dimension(:), allocatable          :: x_tw
     real(kind=dp), dimension(:, :), allocatable       :: mat
@@ -78,6 +81,11 @@ contains
     my_bare_cos_sin_weights = .false.
     if (present(bare_cos_sin_weights)) then
        my_bare_cos_sin_weights = bare_cos_sin_weights
+    endif
+
+    my_regularization = 0.0_dp
+    if (present(regularization)) then
+       my_regularization = regularization
     endif
 
     ! Begin work
@@ -126,17 +134,17 @@ contains
 
     ! get the weights for the cosine transform W^c(it) -> W^c(iw)
     call get_transformation_weights(num_points, tau_points, omega_points, cosft_wt, e_min, e_max, &
-         max_errors(1), cos_t_to_cos_w, ierr)
+         max_errors(1), cos_t_to_cos_w, my_regularization, ierr)
     if (ierr /= 0) return
 
     ! get the weights for the cosine transform W^c(iw) -> W^c(it)
     call get_transformation_weights(num_points, tau_points, omega_points, cosft_tw, e_min, e_max, &
-         max_errors(2), cos_w_to_cos_t, ierr)
+         max_errors(2), cos_w_to_cos_t, my_regularization, ierr)
     if (ierr /= 0) return
 
     ! get the weights for the sine transform Sigma^sin(it) -> Sigma^sin(iw) (PRB 94, 165109 (2016), Eq. 71)
     call get_transformation_weights(num_points, tau_points, omega_points, sinft_wt, e_min, e_max, &
-         max_errors(3), sin_t_to_sin_w, ierr)
+         max_errors(3), sin_t_to_sin_w, my_regularization, ierr)
     if (ierr /= 0) return
 
     ! Compute the actual weights used for the inhomogeneous cosine/ FT and check whether
@@ -235,7 +243,7 @@ contains
   !!                                : 3 the sine transform   sin(it) -> sin(iw)
   !! @param[in] ierr: exit status
   subroutine get_transformation_weights(num_points, tau_points, omega_points, weights, e_min, e_max, &
-       max_error, transformation_type, ierr)
+       max_error, transformation_type, regularization,ierr)
 
     integer, intent(in)                                :: num_points
     real(kind=dp), allocatable, dimension(:), &
@@ -247,6 +255,7 @@ contains
     real(kind=dp), intent(in)                          :: e_min, e_max
     real(kind=dp), intent(inout)                       :: max_error
     integer, intent(in)                                :: transformation_type
+    real(kind=dp)                                      :: regularization
     integer, intent(out)                               :: ierr
 
     ! Internal variables
@@ -318,7 +327,9 @@ contains
        ! 1) V * Sigma^-1
        do j_point = 1, num_points
           do k_point = 1, num_points
-             mat_VT_s(k_point, j_point) = mat_VT(j_point, k_point)/vec_S(j_point)
+             !mat_VT_s(k_point, j_point) = mat_VT(j_point, k_point)/vec_S(j_point)
+             mat_VT_s(k_point, j_point) = mat_VT(j_point, k_point)*vec_S(j_point)&
+                                          /(regularization**2+vec_S(j_point)**2)
           end do ! k_point
        end do ! j_point
 
