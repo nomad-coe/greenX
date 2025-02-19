@@ -29,7 +29,7 @@ def fortran_binary(get_binary, greenx_build_root):
 def get_AC_residual_sum(fortran_binary):
     """ run the AC component"""
     # Run test
-    runner = BinaryRunner(fortran_binary, BuildType.serial, args=["greedy", "64", "none"])
+    runner = BinaryRunner(fortran_binary, BuildType.serial, args=["greedy", "64", "none", "normal"])
     results = runner.run()
     assert results.success, f"Execution of {fortran_binary} failed"
 

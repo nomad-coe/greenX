@@ -57,6 +57,8 @@ module gx_ac
        character(len=15) :: enforced_symmetry
        !> switch to check wether greedy algorithm was used 
        logical    :: use_greedy
+       !> switch that handles the edge case of all function values being 0
+       logical    :: zero_everywhere
 
        !> pointer to c++ struct for multiple precision arithmetic
        type(c_ptr) :: params_ptr
@@ -141,6 +143,8 @@ contains
       ! Internal variables
       integer :: c_do_greedy
       integer :: c_symmetry_label
+      integer :: i_y 
+      logical :: all_y_0
 
       ! initialize type
       par%initialized = .true.
@@ -222,6 +226,22 @@ contains
           c_do_greedy = 0
       end if 
 
+      ! edge case: all function values are exactly zero 
+      ! different behaviour of GMP and fortran so we catch that issue here
+      all_y_0 = .true.
+      do i_y = 1, size(y)
+        if ((y(i_y)%re /= 0.0_dp) .or. (y(i_y)%im /= 0.0_dp)) then
+            all_y_0 = .false.
+            par%zero_everywhere = .false.
+            exit 
+        end if 
+      end do  
+      if (all_y_0) then 
+        par%zero_everywhere = .true.
+        return 
+      end if 
+
+
       ! create the pade model 
       if (.not. par%multiprecision_used_internally) then 
           allocate(par%a_par(n_par))
@@ -257,9 +277,16 @@ contains
       ! initialized?
       if (par%initialized .eqv. .false.) then 
           print *, "WARNING: pade parameters not initialized"
-          y(:) = 0.0d0 
+          y(:) = cmplx(0.0d0, 0.0d0, kind=8) 
           return 
       end if 
+
+      ! reference function was 0 everywhere?
+      if (par%zero_everywhere) then 
+          y(:) = cmplx(0.0d0, 0.0d0, kind=8) 
+          return 
+      end if 
+
 
       ! Compute the number of query points
       num_query = size(x)
@@ -293,7 +320,7 @@ contains
        if (allocated(par%a_par)) deallocate(par%a_par)
        if (allocated(par%x_ref)) deallocate(par%x_ref)
 
-       if (par%multiprecision_used_internally) then 
+       if (par%multiprecision_used_internally .and. .not.par%zero_everywhere) then 
 #ifdef GMPXX_FOUND
          call free_pade_model(par%params_ptr)
 #endif
