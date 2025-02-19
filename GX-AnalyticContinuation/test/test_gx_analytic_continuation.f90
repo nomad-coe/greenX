@@ -7,9 +7,9 @@
 !> @brief tests the thiele pade approximation using a model function 
 !!          
 !!      usage: 
-!!                  ./test_gx_analytic_continuation <no_greedy/greedy:str> <precision:int>
+!!                  ./test_gx_analytic_continuation <no_greedy/greedy:str> <precision:int> <symmetry> <test_0>
 !!      e.g. non-greedy algorithm and double precision: 
-!!                  ./test_gx_analytic_continuation no_greedy 64
+!!                  ./test_gx_analytic_continuation no_greedy 64 none normal
 !!
 !!      reference function:     y = (x - 0.25)^{-1} + (x - 0.75)^{-1} - 50
 !!
@@ -32,6 +32,7 @@ program test_gx_analytic_continuation
     logical                 :: do_greedy                    ! whether greedy algorithm is used in pade approximation
     integer                 :: precision                    ! internal floating point precision of pade fit
     character(15)           :: symmetry                     ! enforced symmetry of the pade model
+    logical                 :: test_0                       ! test for the case that the function is zero everywhere
 
     type(params)                               :: params_thiele
     complex(kind=8), dimension(:), allocatable :: x_query
@@ -45,7 +46,7 @@ program test_gx_analytic_continuation
     allocate(x_query(n_points), y_return(n_points), y_correct(n_points)) 
 
     ! get settings
-    call parse_settings(do_greedy, precision, symmetry)
+    call parse_settings(do_greedy, precision, symmetry, test_0)
     if (symmetry .eq. "none") then 
         imag_shift = 0.001d0
     else 
@@ -57,6 +58,7 @@ program test_gx_analytic_continuation
     call create_complex_grid(n_parameters, x_ref, constant_along="real", shift=0.0d0)
     ! evaluate function values along imaginary axis 
     call evaluate_two_pole_model(n_parameters, x_ref, y_ref)
+    if (test_0) y_ref = cmplx(0.0d0, 0.0d0, kind=8) 
     ! create a grid along the real axis where analytically continued function 
     !    values will be evaluated by pade
     call create_complex_grid(n_points, x_query, constant_along="imag", shift=imag_shift)
@@ -76,6 +78,7 @@ program test_gx_analytic_continuation
 
     ! compare the analytic continuation with the correct function values
     call evaluate_two_pole_model(n_points, x_query, y_correct)
+    if (test_0) y_correct = cmplx(0.0d0, 0.0d0, kind=8) 
     residual_sum = calculate_residual_sum(n_points, y_return, y_correct)
     call print_residual_sum_to_file("residual_sum.txt", residual_sum)
 
@@ -96,10 +99,13 @@ program test_gx_analytic_continuation
         !!
         !! @param[out] do_greedy -- whether greedy algorithm is used in pade fit
         !! @param[out] precision -- internal floating point precision
-        subroutine parse_settings(do_greedy, precision, symmetry)
+        !! @param[out] symmetry -- symmetry specifyer
+        !! @param[out] test_0 -- test for function is zero everywhere
+        subroutine parse_settings(do_greedy, precision, symmetry, test_0)
             logical, intent(out) :: do_greedy 
             integer, intent(out) :: precision 
             character(15), intent(out) :: symmetry
+            logical, intent(out) :: test_0
 
             ! internal variables 
             character(10) :: tmp 
@@ -123,6 +129,18 @@ program test_gx_analytic_continuation
             ! which symmetry?
             call get_command_argument(3, symmetry)
             symmetry = trim(symmetry)
+
+            ! function 0 everywhere?
+            call get_command_argument(4, tmp)
+            select case (trim(tmp))
+                case ("normal")
+                    test_0 = .false.
+                case ("test_0")
+                    test_0 = .true.
+                case default
+                    print *, "option ", trim(tmp), " not known!"
+                    stop 
+            end select
 
         end subroutine parse_settings
 

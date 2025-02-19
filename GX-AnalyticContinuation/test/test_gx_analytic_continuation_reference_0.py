@@ -29,7 +29,7 @@ def fortran_binary(get_binary, greenx_build_root):
 def get_AC_residual_sum(fortran_binary):
     """ run the AC component"""
     # Run test
-    runner = BinaryRunner(fortran_binary, BuildType.serial, args=["no_greedy", "64", "conjugate", "normal"])
+    runner = BinaryRunner(fortran_binary, BuildType.serial, args=["no_greedy", "64", "none", "test_0"])
     results = runner.run()
     assert results.success, f"Execution of {fortran_binary} failed"
 
@@ -41,8 +41,8 @@ def get_AC_residual_sum(fortran_binary):
 
 def test_get_rirs_overlap_error(fortran_binary): 
     """ test the AC component """
-    ref =  0.50958909E-05                         # reference value
+    ref =  0.0                                    # reference value
     res_sum = get_AC_residual_sum(fortran_binary) # comupte actual value
     print(f"comparing ref:{ref}, out:{res_sum}")
-    assert np.allclose(res_sum, ref, atol=1.e-8)
+    assert (res_sum == ref)
 
