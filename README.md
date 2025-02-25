@@ -53,37 +53,37 @@ configure with:
 cmake ../ -DBUILD_SHARED_LIBS=OFF
 ```
 
-Specific shared libraries can be disable, e.g to disable the Projector-Augmented Wave (PAW) component of GreenX, run CMake configure with: 
+Specific shared libraries can be disabled or enabled, e.g to enable the Projector-Augmented Wave (PAW) component of GreenX, run CMake configure with: 
 
 ```bash
-cmake ../ -DPAW_COMPONENT=OFF
+cmake ../ -DPAW_COMPONENT=ON
 ```
 
 Available options to disable one or more components
 
-| Component                              | CMake configure                    |
-|----------------------------------------|------------------------------------|
-| Analytical Continuation component      | `cmake .. -DAC_COMPONENT=OFF`      |
-| Minimax Time-Frequency grids component | `cmake .. -DMINIMAX_COMPONENT=OFF` |
-| Localized Basis component              | `cmake .. -DLBASIS_COMPONENT=OFF`  |
-| Projector-Augmented Wave component     | `cmake .. -DPAW_COMPONENT=OFF`     |
+| Component                              | CMake configure                    | Default |
+|----------------------------------------|------------------------------------|---------|
+| Analytical Continuation component      | `-DAC_COMPONENT`      | `ON`  |
+| Minimax Time-Frequency grids component | `-DMINIMAX_COMPONENT` | `ON`  |
+| Localized Basis component              | `-DLBASIS_COMPONENT`  | `OFF` |
+| Projector-Augmented Wave component     | `-DPAW_COMPONENT`     | `OFF` |
 
-GreenX uses GNU Multiple Precision Arithmetic Library by default in the Analytical Continuation component, you can disable it without any harm by runing CMake configure with:
+GreenX uses GNU Multiple Precision Arithmetic Library by default in the Analytical Continuation component, you can disable it without any harm by running CMake configure with:
 
 ```bash
 cmake ../ -DENABLE_GNU_GMP=OFF
 ```
 
-GreenX uses submodules and they are built by default. You can obtained them by executing:
+To build GreenX with submodules (they are turned off by default), one can configure with:
+
+```bash
+cmake ../ -DCOMPILE_SUBMODULES=ON
+```
+
+You can obtained them by executing:
 
 ```bash
 git submodule update --init --recursive
-```
-
-To build GreenX without the submodules, one can configure with:
-
-```bash
-cmake ../ -DCOMPILE_SUBMODULES=OFF
 ```
 
 If all requirements are found, build and install the project:
@@ -96,14 +96,15 @@ make install
 Minimal example to build and install only the Time-Frequency component of GreenX:
 
  ```bash
-cmake .. -DAC_COMPONENT=OFF -DLBASIS_COMPONENT=OFF -DPAW_COMPONENT=OFF -DCOMPILE_SUBMODULES=OFF
+cmake .. -DAC_COMPONENT=OFF 
 make -j
 make install
  ```
 
 
-## Running the Tests
+## Regression Tests
 
+### Running Regression Tests
 GreenX uses pytest as its regression testing framework, in conjunction with 
 the custom python module `pygreenx`. First, one must ensure that `pygreenx`
 is installed. From the GreenX root directory:
@@ -130,43 +131,67 @@ cd build
 ctest
  ```
 
-## Building Documentation
+#### Adding Regression Tests 
 
-GreenX is documented using Doxygen, and documentation support is disabled by
-default. To enable CMake looking for Doxygen, configure with:
 
-```bash
-cmake ../ -DENABLE_GREENX_DOCS=ON
-```
+ 1. Add a New Test Source File: Create a test file in the `test/` directory of the component. If testing a Fortran function, create a file like `test_new_feature.f90` with the necessary test logic.
 
-To build the document, type in the build directory:
+ 2. Update `CMakeLists.txt`: Modify `CMakeLists.txt` in the component directory to include the new test:
+    - Add the source file to the test executable
+        ```cmake
+        # Define the new test target
+        add_executable(test_gx_new_feature)
 
-```bash
-make docs
-```
+        # Set binary name
+        set_target_properties(test_gx_new_feature
+            PROPERTIES
+            RUNTIME_OUTPUT_NAME test_gx_new_feature.exe)
 
-Documentation is built in `documentation` and can be viewed by opening
-`html/index.html` in a browser.
+        # Add source file for the new test
+        target_sources(test_gx_new_feature
+            PRIVATE
+            test/test_new_feature.f90
+        )
 
-When adding new files with documentation, please ensure the directory is listed 
-in the `INPUT` tag of Doxyfile.
+        # Link the test executable to the necessary libraries
+        target_link_libraries(test_gx_new_feature
+            PUBLIC
+            LibGXNewFeature
+        )
 
-For more information and benchmark examples see also the [GreenX website](https://nomad-coe.github.io/greenX/).
+        # Specify the runtime output directory
+        set_target_properties(test_gx_new_feature
+            PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_Fortran_BIN_DIRECTORY})
+        ```
 
-## Unit Testing
+    - Copy Python test files. If the test involves Python, ensure the test scripts are copied to the build directory:
+        ```cmake
+        add_custom_command(
+            TARGET LibGXNewFeature POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+                    ${CMAKE_CURRENT_SOURCE_DIR}/test/test_new_feature.py
+                    ${PROJECT_BINARY_DIR}/test/new_feature/)
+        ```
+
+    - Add the new test to CTest
+        ```cmake
+        add_test(
+            NAME test_gx_new_feature
+            COMMAND pytest -s test_new_feature.py --build-dir ${CMAKE_BINARY_DIR}
+            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/new_feature
+        )
+        ```
 
 ### Running Unit Tests
 
-Unit tests require the unit-testing framework [Zofu](https://github.com/acroucher/zofu). This library is build together with Greenx when `ENABLE_GREENX_UNIT_TESTS=ON`: 
+The GX-q=0 component of GreenX uses the unit-testing framework [Zofu](https://github.com/acroucher/zofu). This library is build together with Greenx when `ENABLE_GREENX_UNIT_TESTS=ON`: 
 
 ```bash 
 cmake -DENABLE_GREENX_UNIT_TESTS=ON ../
 ```
 Unit tests are run with the application tests, using ctest. Simply type `ctest`
 in the build directory.
-
-
-### Installing the Unit-Testing Framework manually
 
 It is also possible to compile Zofu manually. To build Zofu, from GreenX's root (noting that one must define `$GX_ROOT`):
 
@@ -194,48 +219,29 @@ make install
 ```
 Again, typing `ctest` in the GreenX build directory starts the unit tests together with the application tests.
 
-### Adding Unit Tests
 
-For an example of writing a unit test, see `GX-AnalyticContinuation/src/test_pade_approximant.f90`.
-A unit test is a module and follows the naming convention `test_MODULENAME.f90`.
-The unit test itself is a module containing subroutines which set up some data,
-call the routine under test, and make some assertions on the resulting data.
-Zofu provides the object with which to make the assertions and carry the result.
-One should write a separate test module for each fortran module they wish to test.
+## Building Documentation
 
-Unit tests are added to the build system straightforwardly:
+GreenX is documented using Doxygen, and documentation support is disabled by
+default. To enable CMake looking for Doxygen, configure with:
 
-1. Create a directory in the build folder that will contain the test binary.
-A good convention is `unit_tests/sublibrary_name`:
-
-```cmake
-set(UNIT_TEST_DIR "${PROJECT_BINARY_DIR}/unit_tests/analytic-continuation")
-file(MAKE_DIRECTORY ${UNIT_TEST_DIR})
-message("-- Analytic continuation unit tests written to: ${UNIT_TEST_DIR}")
+```bash
+cmake ../ -DENABLE_GREENX_DOCS=ON
 ```
 
-Noting one is free to choose any name for `UNIT_TEST_DIR`.
+To build the document, type in the build directory:
 
-2. Create a list of libraries which your  unit tests depend upon. Typically
-the library associated with that subfolder, for which the module is a part of.
-
-```cmake
-# Libraries on which the unit tests depend
-set(LIBS_FOR_UNIT_TESTS LibGXAC)
+```bash
+make docs
 ```
 
-Noting one is free to choose any name for `LIBS_FOR_UNIT_TESTS`.
+Documentation is built in `documentation` and can be viewed by opening
+`html/index.html` in a browser.
 
-3. Call the function `create_unit_test_executable` to define the unit test:
+When adding new files with documentation, please ensure the directory is listed 
+in the `INPUT` tag of Doxyfile.
 
-```cmake
-create_unit_test_executable(TARGET_TEST_DIR ${UNIT_TEST_DIR}
-                            TEST_NAME "test_pade_approximant"
-                            REQUIRED_LIBS ${LIBS_FOR_UNIT_TESTS})
-```
-
-For multiple tests, one could call `create_unit_test_executable` in a loop over 
-a list of modules.
+For more information and benchmark examples see also the [GreenX website](https://nomad-coe.github.io/greenX/).
 
 
 ## Contribute

@@ -90,13 +90,13 @@ if (${MINIMAX_COMPONENT})
    add_subdirectory(GX-TimeFrequency)
 endif ()
 
-option (LBASIS_COMPONENT "Enable the localized basis component" ON) 
+option (LBASIS_COMPONENT "Enable the localized basis component" OFF) 
 if (${LBASIS_COMPONENT})
    add_subdirectory(GX-LocalizedBasis)
 endif()
 
 # Elements to compile the libraries inside submodules
-option(COMPILE_SUBMODULES "Compile GreenX component contained inside submodules" ON)
+option(COMPILE_SUBMODULES "Compile GreenX component contained inside submodules" OFF)
 if (${COMPILE_SUBMODULES})
   # zofu is needed for IDieL regression tests
   if (${ENABLE_GREENX_UNIT_TESTS})
@@ -133,7 +133,7 @@ if (${COMPILE_SUBMODULES})
 endif()
 
 # Install libpaw
-option(PAW_COMPONENT "Enable the PAW component" ON)
+option(PAW_COMPONENT "Enable the PAW component" OFF)
 if (${PAW_COMPONENT})
    set(LIBPAW_SOURCE "${PROJECT_SOURCE_DIR}/GX-PAW/")
    ExternalProject_Add(LIBPAW

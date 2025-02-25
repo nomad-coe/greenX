@@ -13,8 +13,7 @@ The analytic continuation component (GX-AC) provides routines to interpolate fun
 If you want to compile only the Analytic Continuation (AC) component of Greenx, change to the GreenX root, then type:
 ```bash
 mkdir build && cd build 
-cmake -DMINIMAX_COMPONENT=OFF -DLBASIS_COMPONENT=OFF \
-      -DPAW_COMPONENT=OFF -DCOMPILE_SUBMODULES=OFF ../
+cmake -DMINIMAX_COMPONENT=OFF ..
 make -j 
 make install 
 
