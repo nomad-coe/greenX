@@ -42,6 +42,10 @@ jobs:
           mkdir -p build
           cd build
           cmake -DENABLE_GREENX_UNIT_TESTS=ON \
+                -DAC_COMPONENT=ON \
+                -DMINIMAX_COMPONENT=ON \
+                -DLBASIS_COMPONENT=ON \
+                -DPAW_COMPONENT=ON \
                 -DGMPXX_INCLUDE_DIR=/usr/include/ \
                 -DGMPXX_LIBRARY=/usr/lib/x86_64-linux-gnu/libgmpxx.so ../
           make -j$(nproc)
