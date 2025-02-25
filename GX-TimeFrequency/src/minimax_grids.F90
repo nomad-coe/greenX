@@ -47,6 +47,7 @@ contains
   !! @param[out] cosft_duality_error. Max_{ij} |AB - I| where A and B are the cosft_wt and cosft_tw matrices.
   !! @param[out] ierr: Exit status
   !! @param[in] bare_cos_sin_weights: whether the cosine and sine weights are multiplied by cos and sin term, optional
+  !! @param[in] regularization: Tikhonov regularization of cosine and sine weights, optional
   subroutine gx_minimax_grid(num_points, e_min, e_max, &
        tau_points, tau_weights, omega_points, omega_weights, &
        cosft_wt, cosft_tw, sinft_wt, &
@@ -241,9 +242,10 @@ contains
   !! @param[in] transformation type : 1 the cosine transform cos(it) -> cos(iw)
   !!                                : 2 the cosine transform cos(iw) -> cos(it)
   !!                                : 3 the sine transform   sin(it) -> sin(iw)
+  !! @param[in] regularization: Tikhonov regularization of cosine and sine weights
   !! @param[in] ierr: exit status
   subroutine get_transformation_weights(num_points, tau_points, omega_points, weights, e_min, e_max, &
-       max_error, transformation_type, regularization,ierr)
+       max_error, transformation_type, regularization, ierr)
 
     integer, intent(in)                                :: num_points
     real(kind=dp), allocatable, dimension(:), &
