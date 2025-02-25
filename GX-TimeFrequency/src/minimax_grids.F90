@@ -327,7 +327,6 @@ contains
        ! 1) V * Sigma^-1
        do j_point = 1, num_points
           do k_point = 1, num_points
-             !mat_VT_s(k_point, j_point) = mat_VT(j_point, k_point)/vec_S(j_point)
              mat_VT_s(k_point, j_point) = mat_VT(j_point, k_point)*vec_S(j_point)&
                                           /(regularization**2+vec_S(j_point)**2)
           end do ! k_point
