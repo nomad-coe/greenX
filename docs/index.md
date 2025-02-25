@@ -12,7 +12,7 @@ An open-source library that supports exascale implementations of Green's-functio
 Currently, our library supports the following electronic structure methods:
 
 - conventional and low-scaling RPA
-- low-scaling \\(GW\\)
+- low-scaling *GW*
 - Laplace-transformed direct MP2
 
 # Components
