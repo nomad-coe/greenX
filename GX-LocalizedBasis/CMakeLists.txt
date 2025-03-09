@@ -24,7 +24,16 @@ set_target_properties(LibGXLBasis
         )
 
 # Add include directories to the LibGXMiniMax
-target_include_directories(LibGXLBasis PUBLIC src/ api/)
+#target_include_directories(LibGXLBasis PUBLIC src/ api/)
+target_include_directories(LibGXLBasis 
+    PUBLIC
+        # Build-time includes (point to actual source dirs)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
+
+        # Install-time includes (point to the location where headers/modules land when installed)
+        $<INSTALL_INTERFACE:include>
+)
 
 # Define source that comprise LibGXLBasis
 target_sources(LibGXLBasis PRIVATE
@@ -43,8 +52,10 @@ target_link_libraries(LibGXLBasis GXCommon ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}
 # Install library
 # Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in top-level CMake
 install(TARGETS LibGXLBasis
+        EXPORT greenXTargets
         ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib)
+        LIBRARY DESTINATION lib
+)
 
 # Install modules
 # Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in top-level CMake
@@ -60,7 +71,11 @@ include(../cmake/testFunctions.cmake)
 # Set name of test sub-directory in the build directory
 set(TEST_TARGET_DIR "localized_basis")
 
-target_include_directories(LibGXLBasis PUBLIC test/)
+#target_include_directories(LibGXLBasis PUBLIC test/)
+target_include_directories(LibGXLBasis 
+         PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test>
+)
 
 # Set pytest conftest for Localized basis library tests
 add_custom_command(
