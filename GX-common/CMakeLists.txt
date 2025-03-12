@@ -17,7 +17,7 @@ set_target_properties(GXCommon
 target_include_directories(GXCommon
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>  # used when building in the source tree
-        $<INSTALL_INTERFACE:include>                        # used after 'make install'
+        $<INSTALL_INTERFACE:include/modules>                        # used after 'make install'
 )
 
 target_sources(GXCommon PRIVATE

@@ -21,7 +21,7 @@ set_target_properties(LibGXAC
 target_include_directories(LibGXAC
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:include/modules>
 )
 if(GMPXX_FOUND)
   add_definitions(-DGMPXX_FOUND)

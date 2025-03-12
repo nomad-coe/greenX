@@ -32,7 +32,7 @@ target_include_directories(LibGXLBasis
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
 
         # Install-time includes (point to the location where headers/modules land when installed)
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:include/modules>
 )
 
 # Define source that comprise LibGXLBasis

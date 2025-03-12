@@ -29,7 +29,7 @@ target_include_directories(LibGXMiniMax
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/utilities>
 
         # Install-time includes (point to the location where headers/modules land when installed)
-        $<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:include/modules>
 )
 # Define source that comprise LibGXMiniMax
 target_sources(LibGXMiniMax PRIVATE
