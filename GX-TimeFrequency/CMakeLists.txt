@@ -20,8 +20,17 @@ set_target_properties(LibGXMiniMax
         )
 
 # Add include directories to the LibGXMiniMax
-target_include_directories(LibGXMiniMax PUBLIC src/ api/ utilities/)
+#target_include_directories(LibGXMiniMax PUBLIC src/ api/ utilities/)
+target_include_directories(LibGXMiniMax
+    PUBLIC
+        # Build-time includes (point to actual source dirs)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/utilities>
 
+        # Install-time includes (point to the location where headers/modules land when installed)
+        $<INSTALL_INTERFACE:include/modules>
+)
 # Define source that comprise LibGXMiniMax
 target_sources(LibGXMiniMax PRIVATE
         src/gx_common.h
@@ -65,8 +74,10 @@ target_link_libraries(GXTabulateGrids
 # Install library
 # Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in top-level CMake
 install(TARGETS LibGXMiniMax
+        EXPORT greenXTargets
         ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib)
+        LIBRARY DESTINATION lib
+)
 
 # Install modules
 # Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in top-level CMake
@@ -86,7 +97,10 @@ include(../cmake/testFunctions.cmake)
 # Set name of test sub-directory in the build directory
 set(TEST_TARGET_DIR "time-frequency")
 
-target_include_directories(LibGXMiniMax PUBLIC test/)
+target_include_directories(LibGXMiniMax 
+         PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test>
+)
 
 # Set pytest conftest for Time-Frequency library tests
 add_custom_command(

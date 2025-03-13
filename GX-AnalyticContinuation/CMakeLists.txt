@@ -17,7 +17,12 @@ set_target_properties(LibGXAC
   ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY}
   LIBRARY_OUTPUT_DIRECTORY ${CMAKE_Fortran_LIB_DIRECTORY})
 
-target_include_directories(LibGXAC PUBLIC src/)
+#target_include_directories(LibGXAC PUBLIC src/)
+target_include_directories(LibGXAC
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<INSTALL_INTERFACE:include/modules>
+)
 if(GMPXX_FOUND)
   add_definitions(-DGMPXX_FOUND)
   target_sources(LibGXAC PRIVATE src/pade_approximant.f90 src/ComplexGMP.cpp src/Symmetry_pade.cpp src/pade_mp.cpp api/gx_ac.F90)
@@ -33,7 +38,7 @@ endif()
 # -----------------------------------------------
 # Install library
 # Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in top-level CMake
-install(TARGETS LibGXAC ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
+install(TARGETS LibGXAC EXPORT greenXTargets ARCHIVE DESTINATION lib LIBRARY DESTINATION lib)
 
 # Install modules
 # Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in top-level CMake
@@ -50,8 +55,10 @@ include(../cmake/testFunctions.cmake)
 # Set name of test sub-directory in the build directory
 set(TEST_TARGET_DIR "analytic_continuation")
 
-target_include_directories(LibGXAC PUBLIC test/)
-
+target_include_directories(LibGXAC
+         PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test>
+)
 # Set pytest conftest for Localized basis library tests
 add_custom_command(
 	TARGET LibGXAC POST_BUILD

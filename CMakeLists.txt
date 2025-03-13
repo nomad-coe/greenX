@@ -169,3 +169,15 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     CACHE STRING "Choose the installation directory. Default location is ${default_install_prefix}"
     FORCE)
 endif()
+
+install(
+    EXPORT      greenXTargets
+    NAMESPACE   greenX::
+    FILE        greenXTargets.cmake
+    DESTINATION lib/cmake/greenX
+)
+
+install(
+    FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/greenXConfig.cmake"
+    DESTINATION lib/cmake/greenX
+)
