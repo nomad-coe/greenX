@@ -97,7 +97,6 @@ include(../cmake/testFunctions.cmake)
 # Set name of test sub-directory in the build directory
 set(TEST_TARGET_DIR "time-frequency")
 
-#target_include_directories(LibGXMiniMax PUBLIC test/)
 target_include_directories(LibGXMiniMax 
          PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test>

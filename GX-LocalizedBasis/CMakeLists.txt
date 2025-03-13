@@ -71,7 +71,6 @@ include(../cmake/testFunctions.cmake)
 # Set name of test sub-directory in the build directory
 set(TEST_TARGET_DIR "localized_basis")
 
-#target_include_directories(LibGXLBasis PUBLIC test/)
 target_include_directories(LibGXLBasis 
          PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test>

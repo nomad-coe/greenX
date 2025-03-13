@@ -55,7 +55,6 @@ include(../cmake/testFunctions.cmake)
 # Set name of test sub-directory in the build directory
 set(TEST_TARGET_DIR "analytic_continuation")
 
-#target_include_directories(LibGXAC PUBLIC test/)
 target_include_directories(LibGXAC
          PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test>
