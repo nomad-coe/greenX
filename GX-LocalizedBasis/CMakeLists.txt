@@ -44,7 +44,7 @@ target_sources(LibGXLBasis PRIVATE
         )
 
 # Link external libraries and lower-level GX lib dependency
-target_link_libraries(LibGXLBasis GXCommon ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+target_link_libraries(LibGXLBasis GXCommon LibGXMiniMax ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 
 # -----------------------------------------------
 # Library Installation

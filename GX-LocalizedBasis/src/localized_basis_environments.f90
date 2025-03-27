@@ -8,8 +8,12 @@
 module localized_basis_environments
 
    use kinds,                 only: dp
-   use localized_basis_types, only: separable_ri_types
+   use error_handling,    only: register_exc   
+   use localized_basis_types, only: separable_ri_types, &
+                                    screened_coulomb_types
    use lapack_interfaces,     only: dgemm, dsyevx
+   use gx_minimax,            only: gx_minimax_grid
+   
 
 
    implicit none
@@ -45,6 +49,36 @@ module localized_basis_environments
    end if
    
    end subroutine initialization
+
+! *********************************************************************
+!> brief allocate the minimax time-frequency grids 
+!  o ri_rs --  separable resolution-of-the identity environment
+! *********************************************************************
+   subroutine initialize_minimax_grids(w_pq)
+
+     type(screened_coulomb_types)               :: w_pq
+
+     ! Hard coded (change later) 
+     w_pq%minimax%n_points = 6
+
+     if (.not.allocated(w_pq%minimax%cos_tf)) then
+        allocate(w_pq%minimax%cos_tf(w_pq%minimax%n_points, w_pq%minimax%n_points))
+     end if
+
+     if (.not.allocated(w_pq%minimax%omega)) then
+        allocate(w_pq%minimax%omega(w_pq%minimax%n_points))
+     end if
+
+     if (.not.allocated(w_pq%minimax%tau)) then
+        allocate(w_pq%minimax%tau(w_pq%minimax%n_points))
+     end if
+
+     if (.not.allocated(w_pq%minimax%weights)) then
+        allocate(w_pq%minimax%weights(w_pq%minimax%n_points))
+     end if
+
+   end subroutine initialize_minimax_grids
+     
 
   !> \brief Deallocate the ri_rs types.
   !! @param[inout] ri_rs: type for the separable ri   
@@ -100,6 +134,62 @@ module localized_basis_environments
    safe_minimum = dlamch ('S') 
 
    end subroutine get_machine_precision
+
+! **********************************************************************
+!> brief get frequency-time minimax grids 
+!  o w_pq --  Screened Coulomb environment
+! **********************************************************************
+  subroutine get_minimax_grids(w_pq)
+
+    type(screened_coulomb_types)               :: w_pq
+
+    !Local variables
+
+    integer                                   :: info, n_points
+    real(kind=8)                              :: e_tran_max, e_tran_min, duality_error
+    real(kind=8), dimension(3)                :: max_errors
+    real(kind=8), dimension(:),   allocatable :: freq_mesh, freq_weights
+    real(kind=8), dimension(:),   allocatable :: tau_mesh, tau_weights
+    real(kind=8), dimension(:,:), allocatable :: cos_tau_to_freq_weights
+    real(kind=8), dimension(:,:), allocatable :: cos_freq_to_tau_weights
+    real(kind=8), dimension(:,:), allocatable :: sinft_tau_to_freq_weights
+
+    ! Initialization
+
+    call initialize_minimax_grids(w_pq)    
+
+    n_points = w_pq%minimax%n_points
+
+    ! Get the transition energies
+
+    ! call get_minimal_maximal_transition_energy(e_tran_min, e_tran_max)
+      ! Hard coded for now
+      e_tran_max = 0.260
+      e_tran_min = 31.725
+
+    if (e_tran_min .le. 0.d0) then
+       call register_exc("Detected metal system, not supported in minimax grid")
+       return
+    end if
+
+    ! Get imaginary time and frequency points and transformations matrices
+
+    call gx_minimax_grid(n_points, e_tran_min, e_tran_max, &
+         tau_mesh, tau_weights, freq_mesh, freq_weights, &
+         cos_tau_to_freq_weights, cos_freq_to_tau_weights, &
+         sinft_tau_to_freq_weights, max_errors, duality_error, info)
+    if (info /= 0) then
+        call register_exc("Error in getting the minimax grid")
+       return
+    end if
+
+    w_pq%minimax%cos_tf(1: n_points,1: n_points) = cos_tau_to_freq_weights(1: n_points,1: n_points)
+    w_pq%minimax%omega(1: n_points)= freq_mesh(1: n_points)
+    w_pq%minimax%tau(1: n_points) = tau_mesh (1: n_points)
+    w_pq%minimax%weights(1: n_points) = freq_weights(1: n_points)
+
+  end subroutine get_minimax_grids
+   
 
   !> \brief Compute the power of a matrix using the lapack diagonalization
   !! @param[inout] matrix: working array

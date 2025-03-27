@@ -51,8 +51,8 @@ module localized_basis_types
       real(kind=8), dimension(:,:),   allocatable :: chi_kk         ! Polarizability (r_k)
       real(kind=8), dimension(:,:),   allocatable :: green_forward  ! Green function (tau)
       real(kind=8), dimension(:,:),   allocatable :: green_backward ! Green function (-tau)
-      real(kind=8), dimension(:,:),   allocatable :: pi_pq_tau      ! Polarizability (tau)
-      real(kind=8), dimension(:,:,:), allocatable :: pi_pq_omega    ! Polarizability (omega)
+      real(kind=8), dimension(:,:),   allocatable :: tau            ! Polarizability (tau)
+      real(kind=8), dimension(:,:,:), allocatable :: omega          ! Polarizability (omega)
       real(kind=8), dimension(:,:),   allocatable :: rirs_coeff     ! RI-RS Coeff M_{mu k}  
    end type polarizabily_types
 
@@ -79,7 +79,7 @@ module localized_basis_types
       
       type(minimax_types)                         :: minimax
       type(kohn_sham_types)                       :: ks
-      type(polarizabily_types)                    :: pi_pq
+      type(polarizabily_types)                    :: pi
 
       real(kind=8), dimension(:,:,:), allocatable :: matrix 
 
