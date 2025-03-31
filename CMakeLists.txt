@@ -90,7 +90,7 @@ if (${MINIMAX_COMPONENT})
    add_subdirectory(GX-TimeFrequency)
 endif ()
 
-option (LBASIS_COMPONENT "Enable the localized basis component" ON) 
+option (LBASIS_COMPONENT "Enable the localized basis component" OFF) 
 if (${LBASIS_COMPONENT})
    add_subdirectory(GX-LocalizedBasis)
 endif()
