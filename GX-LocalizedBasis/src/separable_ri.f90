@@ -53,6 +53,35 @@ module separable_ri
 
    end subroutine gx_rirs_coefficients
 
+  !> brief Compute the least square coefficients (M_Pk) of the separable 
+  !> resolution of the identity for the evaluation of the RPA polarizability   
+  !! param[inout] ri_rs:  Separable resolution-of-the identity environment 
+  !! param[in] ovlp_3fn:  real array, the three-center overlap integral over two
+  !!                       NAO basis functions and one auxiliary basis function.
+  !! @param[in] n_basis_pairs: Number of orbital basis pairs (dimension 1 of ovlp3fn array)
+  !! @param[in] n_loc_basbas: Number of auxiliary basis fuctions (dimension 2 of ovlp3fn array)
+  subroutine get_rirs_coefficients(ri_rs, n_basis_pairs,n_loc_basbas,n_rk_points, &
+                                    ovlp2fn, ovlp3fn)
+
+   type(separable_ri_types) :: ri_rs
+
+   integer                                              :: n_basis_pairs, n_loc_basbas, n_rk_points
+
+   real(kind=dp), dimension(n_basis_pairs,n_rk_points)  :: ovlp2fn
+   real(kind=dp), dimension(n_basis_pairs,n_loc_basbas) :: ovlp3fn
+
+   call initialization(ri_rs)
+
+   ! Copy of the overlap matrix
+   ri_rs%ovlp2fn(:,:) = ovlp2fn(:,:)
+
+   ! Compute the z coefficients 
+   call get_coeff_zrs(ri_rs, n_basis_pairs, n_loc_basbas, ovlp3fn)
+
+   call deallocations(ri_rs,.true.)
+
+   end subroutine get_rirs_coefficients
+
   !> brief Compute the the three-center overlap integral (O_mn^P) using 
   !>        the separable resulution of identity method  
   !! param[inout] ri_rs:  Separable resolution-of-the identity environment 

@@ -8,13 +8,10 @@
 module localized_basis_environments
 
    use kinds,                 only: dp
-   use error_handling,    only: register_exc   
+   use error_handling,        only: register_exc   
    use localized_basis_types, only: separable_ri_types, &
-                                    screened_coulomb_types
+                                    polarizability_types
    use lapack_interfaces,     only: dgemm, dsyevx
-   use gx_minimax,            only: gx_minimax_grid
-   
-
 
    implicit none
 
@@ -28,13 +25,12 @@ module localized_basis_environments
 
    type(separable_ri_types) :: ri_rs
 
-   ri_rs%basis%n_basbas=303
-   ri_rs%basis%n_basis = 58 
-   ri_rs%basis%n_loc_basbas=303
-   ri_rs%basis%n_basis_pairs=1711
-   ri_rs%n_points = 638
-
-   ri_rs%error = 0.d0
+   ri_rs%basis%n_basbas      =303
+   ri_rs%basis%n_basis       = 58 
+   ri_rs%basis%n_loc_basbas  = 303
+   ri_rs%basis%n_basis_pairs = 1711
+   ri_rs%n_points            = 638
+   ri_rs%error               = 0.d0
 
    if (.not.allocated(ri_rs%ovlp2fn)) then
       allocate(ri_rs%ovlp2fn(ri_rs%basis%n_basis_pairs,ri_rs%n_points))
@@ -50,49 +46,188 @@ module localized_basis_environments
    
    end subroutine initialization
 
-! *********************************************************************
-!> brief allocate the minimax time-frequency grids 
-!  o ri_rs --  separable resolution-of-the identity environment
-! *********************************************************************
-   subroutine initialize_minimax_grids(w_pq)
+  ! **********************************************************************
+  !> \brief Initialize kohn sham array
+  !  param[inout] pi_pq:  polarizability environment
+  ! **********************************************************************   
+   subroutine initialize_kohn_sham (pi_pq)
 
-     type(screened_coulomb_types)               :: w_pq
+     type(polarizability_types)               :: pi_pq
 
-     ! Hard coded (change later) 
-     w_pq%minimax%n_points = 6
-
-     if (.not.allocated(w_pq%minimax%cos_tf)) then
-        allocate(w_pq%minimax%cos_tf(w_pq%minimax%n_points, w_pq%minimax%n_points))
+     if (.not.allocated(pi_pq%ks%eigenvalues)) then
+        allocate(pi_pq%ks%eigenvalues(pi_pq%ks%n_states, 1))
      end if
 
-     if (.not.allocated(w_pq%minimax%omega)) then
-        allocate(w_pq%minimax%omega(w_pq%minimax%n_points))
+     if (.not.allocated(pi_pq%ks%eigenvectors)) then
+        allocate(pi_pq%ks%eigenvectors(pi_pq%ks%n_basis, pi_pq%ks%n_states, 1))
      end if
 
-     if (.not.allocated(w_pq%minimax%tau)) then
-        allocate(w_pq%minimax%tau(w_pq%minimax%n_points))
+     if (.not.allocated(pi_pq%ks%wave)) then
+        allocate(pi_pq%ks%wave(pi_pq%ks%n_basis, pi_pq%ri_rs%n_points, 1))
      end if
 
-     if (.not.allocated(w_pq%minimax%weights)) then
-        allocate(w_pq%minimax%weights(w_pq%minimax%n_points))
+   end subroutine initialize_kohn_sham        
+
+  ! *********************************************************************
+  !> brief allocate the minimax time-frequency grids 
+  !  param[inout] pi_pq:  polarizability environment
+  ! *********************************************************************
+   subroutine initialize_minimax_grids(pi_pq)
+
+     type(polarizability_types)               :: pi_pq
+
+     !Local variables
+     integer                                  :: n_points
+
+     ! Hard coded (change later)
+     n_points = 6
+
+     if (.not.allocated(pi_pq%minimax%cos_tf)) then
+        allocate(pi_pq%minimax%cos_tf(n_points, n_points))
      end if
 
-   end subroutine initialize_minimax_grids
+     if (.not.allocated(pi_pq%minimax%omega)) then
+        allocate(pi_pq%minimax%omega(n_points))
+     end if
+
+     if (.not.allocated(pi_pq%minimax%tau)) then
+        allocate(pi_pq%minimax%tau(n_points))
+     end if
+
+     if (.not.allocated(pi_pq%minimax%weights)) then
+        allocate(pi_pq%minimax%weights(n_points))
+     end if
+
+     pi_pq%minimax%n_points    = n_points
+     pi_pq%minimax%cos_tf(:,:) = 0.d0
+     pi_pq%minimax%omega(:)    = 0.d0
+     pi_pq%minimax%tau(:)      = 0.d0
+     pi_pq%minimax%weights(:)  = 0.d0
      
 
+   end subroutine initialize_minimax_grids
+
+  ! **********************************************************************
+  !> \brief Initalize polarizability array   
+  !  param[inout] pi_pq:  polarizability environment
+  ! **********************************************************************   
+   subroutine initialize_polarizability(pi_pq)
+
+     type(polarizability_types)               :: pi_pq
+
+     ! Initialize polarizability arrays
+     if (.not.allocated(pi_pq%tau)) then
+        allocate(pi_pq%tau(pi_pq%ri_rs%basis%n_basbas,pi_pq%ri_rs%basis%n_loc_basbas))
+     end if
+
+     if (.not.allocated(pi_pq%omega)) then
+        allocate(pi_pq%omega(pi_pq%ri_rs%basis%n_basbas,pi_pq%ri_rs%basis%n_loc_basbas, &
+                             pi_pq%minimax%n_points))
+     end if
+
+     if (.not.allocated(pi_pq%chi%matrix)) then
+        allocate(pi_pq%chi%matrix(pi_pq%ri_rs%n_points,pi_pq%ri_rs%n_points))
+     end if
+
+     pi_pq%chi%matrix(:,:) = 0.d0
+     pi_pq%omega(:,:,:)    = 0.d0
+     pi_pq%tau(:,:)        = 0.d0  
+
+   end subroutine initialize_polarizability        
+     
   !> \brief Deallocate the ri_rs types.
   !! @param[inout] ri_rs: type for the separable ri   
-   subroutine deallocations(ri_rs)
+   subroutine deallocations(ri_rs, keep_coeff)
 
    type(separable_ri_types) :: ri_rs
+
+   logical, optional        :: keep_coeff
+
+   ! Local variables 
+   logical                  ::  my_keep_coeff
+
+   if (present(keep_coeff)) then
+      my_keep_coeff = keep_coeff
+   else
+      my_keep_coeff = .false.
+   end if
 
    if (allocated(ri_rs%ovlp2fn)) deallocate(ri_rs%ovlp2fn)
 
    if (allocated(ri_rs%ovlp3fn)) deallocate(ri_rs%ovlp3fn)
 
-   if (allocated(ri_rs%z_coeff)) deallocate(ri_rs%z_coeff)   
+   if (.not.my_keep_coeff) then 
+      if (allocated(ri_rs%z_coeff)) deallocate(ri_rs%z_coeff)
+   end if
 
    end subroutine deallocations
+
+  ! **********************************************************************
+  !> \brief Deallocate minimax array   
+  !  param[inout] pi_pq:  polarizability environment
+  ! **********************************************************************
+   subroutine deallocate_minimax_grids(pi_pq)
+
+     type(polarizability_types)               :: pi_pq
+
+     if (allocated(pi_pq%minimax%cos_tf))  deallocate(pi_pq%minimax%cos_tf)
+
+     if (allocated(pi_pq%minimax%omega))    deallocate(pi_pq%minimax%omega)
+
+     if (allocated(pi_pq%minimax%tau))     deallocate(pi_pq%minimax%tau)
+     
+     if (allocated(pi_pq%minimax%weights)) deallocate(pi_pq%minimax%weights)
+
+   end subroutine deallocate_minimax_grids
+
+    ! **********************************************************************
+  !> \brief Deallocate kohn sham arrays
+  !  param[inout] pi_pq:  polarizability environment
+  ! **********************************************************************   
+   subroutine deallocate_kohn_sham (pi_pq)
+
+     type(polarizability_types)               :: pi_pq
+
+     if (allocated(pi_pq%ks%eigenvalues))  deallocate(pi_pq%ks%eigenvalues)
+
+     if (allocated(pi_pq%ks%eigenvectors)) deallocate(pi_pq%ks%eigenvectors)
+
+     if (allocated(pi_pq%ks%wave))          deallocate(pi_pq%ks%wave)
+
+   end subroutine deallocate_kohn_sham
+
+  ! **********************************************************************
+  !> \brief Initalize polarizability array   
+  !  param[inout] pi_pq:  polarizability environment
+  ! **********************************************************************   
+   subroutine deallocate_polarizability(pi_pq, keep_pi)
+
+     type(polarizability_types) :: pi_pq
+
+     logical, optional          :: keep_pi
+
+     ! Local variables 
+     logical                    ::  my_keep_pi
+
+     if (present(keep_pi)) then
+        my_keep_pi = keep_pi
+     else
+        my_keep_pi = .false.
+     end if
+
+     call deallocate_minimax_grids(pi_pq)
+
+     call deallocate_kohn_sham (pi_pq)
+
+     if (allocated(pi_pq%tau))        deallocate(pi_pq%tau)
+
+     if(.not.my_keep_pi) then
+       if (allocated(pi_pq%omega))      deallocate(pi_pq%omega)
+     end if
+
+     if (allocated(pi_pq%chi%matrix)) deallocate(pi_pq%chi%matrix)
+
+   end subroutine deallocate_polarizability   
 
   !> \brief Compute the error between the RI-V and RI-RS three center overlap coefficients
   !! @param[in] ri_rs: Type for the separable ri
@@ -134,62 +269,6 @@ module localized_basis_environments
    safe_minimum = dlamch ('S') 
 
    end subroutine get_machine_precision
-
-! **********************************************************************
-!> brief get frequency-time minimax grids 
-!  o w_pq --  Screened Coulomb environment
-! **********************************************************************
-  subroutine get_minimax_grids(w_pq)
-
-    type(screened_coulomb_types)               :: w_pq
-
-    !Local variables
-
-    integer                                   :: info, n_points
-    real(kind=8)                              :: e_tran_max, e_tran_min, duality_error
-    real(kind=8), dimension(3)                :: max_errors
-    real(kind=8), dimension(:),   allocatable :: freq_mesh, freq_weights
-    real(kind=8), dimension(:),   allocatable :: tau_mesh, tau_weights
-    real(kind=8), dimension(:,:), allocatable :: cos_tau_to_freq_weights
-    real(kind=8), dimension(:,:), allocatable :: cos_freq_to_tau_weights
-    real(kind=8), dimension(:,:), allocatable :: sinft_tau_to_freq_weights
-
-    ! Initialization
-
-    call initialize_minimax_grids(w_pq)    
-
-    n_points = w_pq%minimax%n_points
-
-    ! Get the transition energies
-
-    ! call get_minimal_maximal_transition_energy(e_tran_min, e_tran_max)
-      ! Hard coded for now
-      e_tran_max = 0.260
-      e_tran_min = 31.725
-
-    if (e_tran_min .le. 0.d0) then
-       call register_exc("Detected metal system, not supported in minimax grid")
-       return
-    end if
-
-    ! Get imaginary time and frequency points and transformations matrices
-
-    call gx_minimax_grid(n_points, e_tran_min, e_tran_max, &
-         tau_mesh, tau_weights, freq_mesh, freq_weights, &
-         cos_tau_to_freq_weights, cos_freq_to_tau_weights, &
-         sinft_tau_to_freq_weights, max_errors, duality_error, info)
-    if (info /= 0) then
-        call register_exc("Error in getting the minimax grid")
-       return
-    end if
-
-    w_pq%minimax%cos_tf(1: n_points,1: n_points) = cos_tau_to_freq_weights(1: n_points,1: n_points)
-    w_pq%minimax%omega(1: n_points)= freq_mesh(1: n_points)
-    w_pq%minimax%tau(1: n_points) = tau_mesh (1: n_points)
-    w_pq%minimax%weights(1: n_points) = freq_weights(1: n_points)
-
-  end subroutine get_minimax_grids
-   
 
   !> \brief Compute the power of a matrix using the lapack diagonalization
   !! @param[inout] matrix: working array

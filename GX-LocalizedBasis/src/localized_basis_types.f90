@@ -40,21 +40,28 @@ module localized_basis_types
    end type minimax_types
 
    type kohn_sham_types
-      real(kind=8), dimension(:,:,:), allocatable :: wave         ! KS wave function
+
+      integer                                     :: n_basis     
+      integer                                     :: n_homo
+      integer                                     :: n_lumo
+      integer                                     :: n_occ
+      integer                                     :: n_states
+      integer                                     :: n_spin
+      integer                                     :: n_virt
+      integer                                     :: e_fermi
+
+      real(kind=8), dimension(:,:),   allocatable :: eigenvalues  ! KS eigenvalues
+      real(kind=8), dimension(:,:,:), allocatable :: eigenvectors ! KS eigenvectors
       real(kind=8), dimension(:,:),   allocatable :: occupied     ! occ wave function
       real(kind=8), dimension(:,:),   allocatable :: virtual      ! virt wave function
-      real(kind=8), dimension(:,:,:), allocatable :: eigenvector  ! KS eigenvectors
-      real(kind=8), dimension(:,:),   allocatable :: eigenvalue   ! KS eigenvalues
+      real(kind=8), dimension(:,:,:), allocatable :: wave         ! KS wave function      
    end type kohn_sham_types
 
-   type polarizabily_types
-      real(kind=8), dimension(:,:),   allocatable :: chi_kk         ! Polarizability (r_k)
+   type real_space_chi_types
+      real(kind=8), dimension(:,:),   allocatable :: matrix         ! Polarizability (r_k)
       real(kind=8), dimension(:,:),   allocatable :: green_forward  ! Green function (tau)
       real(kind=8), dimension(:,:),   allocatable :: green_backward ! Green function (-tau)
-      real(kind=8), dimension(:,:),   allocatable :: tau            ! Polarizability (tau)
-      real(kind=8), dimension(:,:,:), allocatable :: omega          ! Polarizability (omega)
-      real(kind=8), dimension(:,:),   allocatable :: rirs_coeff     ! RI-RS Coeff M_{mu k}  
-   end type polarizabily_types
+   end type real_space_chi_types
 
    ! Global types
 
@@ -72,17 +79,18 @@ module localized_basis_types
      type(species_types)                         :: species
    end type separable_ri_types
 
+   type polarizability_types
+ 
+      real(kind=8), dimension(:,:),   allocatable :: tau     ! Polarizability (tau)
+      real(kind=8), dimension(:,:,:), allocatable :: omega   ! Polarizability (omega)
 
-   type screened_coulomb_types
-
-      real(kind=8)                                :: error
-      
-      type(minimax_types)                         :: minimax
+      type(basis_types)                           :: basis
+      type(real_space_chi_types)                  :: chi
       type(kohn_sham_types)                       :: ks
-      type(polarizabily_types)                    :: pi
+      type(minimax_types)                         :: minimax
+      type(separable_ri_types)                    :: ri_rs
 
-      real(kind=8), dimension(:,:,:), allocatable :: matrix 
 
-   end type screened_coulomb_types 
+   end type polarizability_types
 
 end module localized_basis_types
