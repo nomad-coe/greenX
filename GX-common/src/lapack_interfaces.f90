@@ -36,12 +36,11 @@ module lapack_interfaces
      end subroutine dgesdd
   end interface
 
-  !interface num_prec
-  !   real(kind=dp) function dlamch(cmach)
-  !     implicit none             
-  !     character(len=1), intent(in) :: cmach
-  !   end function dlamch 
-  !end interface
+  interface presicion
+     double precision function dlamch(cmach)
+       character(len=1), intent(in) :: cmach
+     end function dlamch 
+  end interface
 
   interface diag
      subroutine dsyevx(jobz, range, uplo, n, a, lda, vl, vu, il, iu, abstol, &
@@ -57,5 +56,17 @@ module lapack_interfaces
        real(kind=dp), intent(inout) :: a(lda, *), w(*), work(*), z(ldz,*)
      end subroutine dsyevx
   end interface
+
+  interface unitary
+     subroutine dlaset(uplo, m, n, alpha, beta, a, lda) 
+       use kinds, only: dp
+
+       character(len=1), intent(in) :: uplo
+       integer, intent(in)          :: m, n, lda
+       real(kind=dp), intent(in)    :: alpha, beta
+       real(kind=dp), intent(in)    :: a(lda, *)
+     end subroutine dlaset
+
+  end interface unitary
 
 end module lapack_interfaces 
