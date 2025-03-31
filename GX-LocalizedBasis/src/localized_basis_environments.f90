@@ -10,8 +10,10 @@ module localized_basis_environments
    use kinds,                 only: dp
    use error_handling,        only: register_exc   
    use localized_basis_types, only: separable_ri_types, &
-                                    polarizability_types
-   use lapack_interfaces,     only: dgemm, dsyevx
+                                    polarizability_types, &
+                                    w_engine_types 
+   use lapack_interfaces,     only: dgemm, dsyevx, dlaset, &
+                                    dlamch
 
    implicit none
 
@@ -133,10 +135,35 @@ module localized_basis_environments
      pi_pq%omega(:,:,:)    = 0.d0
      pi_pq%tau(:,:)        = 0.d0  
 
-   end subroutine initialize_polarizability        
-     
+   end subroutine initialize_polarizability
+
+  ! **********************************************************************
+  !> \brief Initalize w engine arrays
+  !  param[inout] we: w_engine environment
+  ! ********************************************************************** 
+  subroutine initialize_w_engine(we)
+
+     type(w_engine_types)               :: we          
+
+     if (.not.allocated(we%omega)) then
+        allocate(we%omega(we%pi_pq%ri_rs%basis%n_basbas, we%pi_pq%ri_rs%basis%n_basbas, & 
+                 we%pi_pq%minimax%n_points))
+     end if
+
+     if (.not.allocated(we%work)) then
+        allocate(we%work(we%pi_pq%ri_rs%basis%n_basbas,we%pi_pq%ri_rs%basis%n_basbas))             
+     end if
+
+     we%omega(:,:,:) = 0.0_dp
+     call dlaset("full", we%pi_pq%ri_rs%basis%n_basbas, we%pi_pq%ri_rs%basis%n_basbas, & 
+                 1.0_dp, 0.0_dp, we%work, we%pi_pq%ri_rs%basis%n_basbas)
+
+  end subroutine initialize_w_engine   
+  
+  ! *********************************************************************
   !> \brief Deallocate the ri_rs types.
-  !! @param[inout] ri_rs: type for the separable ri   
+  !! @param[inout] ri_rs: type for the separable ri
+  ! *********************************************************************
    subroutine deallocations(ri_rs, keep_coeff)
 
    type(separable_ri_types) :: ri_rs
@@ -227,7 +254,21 @@ module localized_basis_environments
 
      if (allocated(pi_pq%chi%matrix)) deallocate(pi_pq%chi%matrix)
 
-   end subroutine deallocate_polarizability   
+   end subroutine deallocate_polarizability
+
+  ! **********************************************************************
+  !> \brief Initalize polarizability array   
+  !  param[inout] pi_pq:  polarizability environment
+  ! **********************************************************************   
+   subroutine deallocate_w_engine(we)
+
+     type(w_engine_types) :: we
+
+     if (allocated(we%omega)) deallocate(we%omega)
+
+     if (allocated(we%work)) deallocate(we%work)     
+
+   end subroutine deallocate_w_engine   
 
   !> \brief Compute the error between the RI-V and RI-RS three center overlap coefficients
   !! @param[in] ri_rs: Type for the separable ri
@@ -264,7 +305,6 @@ module localized_basis_environments
    subroutine get_machine_precision(safe_minimum)
 
    real(kind=dp) :: safe_minimum
-   real(kind=dp), external ::  dlamch
 
    safe_minimum = dlamch ('S') 
 

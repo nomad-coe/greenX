@@ -41,6 +41,7 @@ target_sources(LibGXLBasis PRIVATE
         src/localized_basis_types.f90
 	src/localized_basis_environments.f90
 	src/polarizability.f90
+	src/w_engine.f90
 	api/gx_localized_basis.f90
         )
 

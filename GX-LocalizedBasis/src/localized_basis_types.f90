@@ -32,11 +32,11 @@ module localized_basis_types
    end type
 
    type minimax_types
-      integer                                   :: n_points ! number of points
-      real(kind=8), dimension(:,:), allocatable :: cos_tf   ! transformation
-      real(kind=8), dimension(:),   allocatable :: omega    ! frequency points
-      real(kind=8), dimension(:),   allocatable :: tau      ! time points
-      real(kind=8), dimension(:),   allocatable :: weights  ! rpa weights
+      integer                                    :: n_points ! number of points
+      real(kind=8), dimension(:,:), allocatable  :: cos_tf   ! transformation
+      real(kind=8), dimension(:),   allocatable  :: omega    ! frequency points
+      real(kind=8), dimension(:),   allocatable  :: tau      ! time points
+      real(kind=8), dimension(:),   allocatable  :: weights  ! rpa weights
    end type minimax_types
 
    type kohn_sham_types
@@ -66,31 +66,40 @@ module localized_basis_types
    ! Global types
 
    type separable_ri_types
-     integer                                     :: n_points
 
-     real(kind=8)                                :: error
+     integer                                      :: n_points
 
-     real(kind=8), dimension(:,:), allocatable   :: ovlp2fn
-     real(kind=8), dimension(:,:), allocatable   :: ovlp3fn
-     real(kind=8), dimension(:,:), allocatable   :: z_coeff
+     real(kind=8)                                 :: error
 
-     type(basis_types)                           :: basis
-     type(grids_types)                           :: grids
-     type(species_types)                         :: species
+     real(kind=8), dimension(:,:), allocatable    :: ovlp2fn
+     real(kind=8), dimension(:,:), allocatable    :: ovlp3fn
+     real(kind=8), dimension(:,:), allocatable    :: z_coeff
+
+     type(basis_types)                            :: basis
+     type(grids_types)                            :: grids
+     type(species_types)                          :: species
+
    end type separable_ri_types
 
    type polarizability_types
  
-      real(kind=8), dimension(:,:),   allocatable :: tau     ! Polarizability (tau)
-      real(kind=8), dimension(:,:,:), allocatable :: omega   ! Polarizability (omega)
+      real(kind=8), dimension(:,:),   allocatable :: tau
+      real(kind=8), dimension(:,:,:), allocatable :: omega
 
-      type(basis_types)                           :: basis
       type(real_space_chi_types)                  :: chi
       type(kohn_sham_types)                       :: ks
       type(minimax_types)                         :: minimax
       type(separable_ri_types)                    :: ri_rs
 
-
    end type polarizability_types
+
+   type w_engine_types
+
+      type(polarizability_types)                  :: pi_pq
+
+     real(kind=8), dimension(:,:,:), allocatable  :: omega
+     real(kind=8), dimension(:,:), allocatable    :: work
+
+   end type w_engine_types
 
 end module localized_basis_types

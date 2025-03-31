@@ -1,10 +1,22 @@
+! **************************************************************************************************
+!  Copyright (C) 2020-2024 GreenX library
+!  This file is distributed under the terms of the APACHE2 License.
+!
+! **************************************************************************************************
+!> \brief This module contains the subroutines for the localized basis set component of the library
+! ***************************************************************************************************
 module polarizability 
 
   use kinds,                        only: dp
+  use error_handling,               only: register_exc  
   use lapack_interfaces,            only: dgemm
-  use localized_basis_environments
+  use localized_basis_types,        only: polarizability_types
+  use localized_basis_environments, only: initialize_kohn_sham, &
+                                          initialize_minimax_grids, &
+                                          initialize_polarizability, &
+                                          deallocate_polarizability
   use separable_ri,                 only: get_rirs_coefficients
-  use gx_minimax,            only: gx_minimax_grid
+  use gx_minimax,                   only: gx_minimax_grid
   
 
   implicit none
@@ -29,17 +41,17 @@ module polarizability
   !! param[out] error: real number, maximum error between Coulomb and real-space resolution of
   !!                   the identity fitting coefficients.          
   subroutine gx_rirs_polarizability(n_basis, n_basis_pairs, n_basbas, n_rk_points, n_states, &
-                                     eigenvalues, eigenvectors, ovlp2fn, ovlp3fn, wave, error)
+                                    eigenvalues, eigenvectors, ovlp2fn, ovlp3fn, wave, error)
 
-   integer                                              :: n_basis, n_basis_pairs, & 
-                                                           n_basbas, n_states, n_rk_points 
+    integer                                              :: n_basis, n_basis_pairs, & 
+                                                            n_basbas, n_states, n_rk_points 
 
-   real(kind=dp)                                        :: error
-   real(kind=dp), dimension(n_states)                   :: eigenvalues
-   real(kind=dp), dimension(n_basis, n_states)          :: eigenvectors
-   real(kind=dp), dimension(n_basis_pairs, n_rk_points) :: ovlp2fn
-   real(kind=dp), dimension(n_basis_pairs, n_basbas)    :: ovlp3fn
-   real(kind=dp), dimension(n_states, n_rk_points)      :: wave
+    real(kind=dp)                                        :: error
+    real(kind=dp), dimension(n_states)                   :: eigenvalues
+    real(kind=dp), dimension(n_basis, n_states)          :: eigenvectors
+    real(kind=dp), dimension(n_basis_pairs, n_rk_points) :: ovlp2fn
+    real(kind=dp), dimension(n_basis_pairs, n_basbas)    :: ovlp3fn
+    real(kind=dp), dimension(n_states, n_rk_points)      :: wave
                              
 
     type(polarizability_types) :: pi_pq
@@ -62,11 +74,71 @@ module polarizability
     call evaluate_polarizability(pi_pq)    
     
     ! Deallocate working arrays
-    call deallocate_polarizability(pi_pq, .true.)
+    call deallocate_polarizability(pi_pq)
 
-    error=0.d0
+    error=0.0_dp
 
   end subroutine gx_rirs_polarizability
+
+  !> brief Compute the irreducible polarizability [PI(iw)]_PQ using 
+  !>       the separable resolution of the identity method
+  !! param[inout] pi_pq: polarizability environment  
+  !! @param[in] n_basis: Number of orbital basis (dimension 1 of eigenvectors array) 
+  !! @param[in] n_basis_pairs: Number of orbital basis pairs (dimension 1 of ovlpXfn array)
+  !! @param[in] n_loc_basbas: Number of auxiliary basis fuctions (dimension 2 of ovlp3fn array)
+  !! @param[in] n_rk_points: Number of real-space grid points (dimension 2 of ovlp2fn and
+  !!                         wave arrays )
+  !! @param[in] n_states: Number of Kohn-Sham states (dimension 1 of eingenvalues and wave
+  !!                      arrays  and dimension 2 of the eigenvectors array) 
+  !! param[in] eigenvalues: real array, the Kohn-Shan eigenvalues from the SCF calculation
+  !! param[in] eigenvectors: real array, the Kohn-Sham eigenvectos form the SCF calculation
+  !! param[in] ovlp_2fn: real array, the product of two NAO basis functions
+  !! param[in] ovlp_3fn: real array, the three-center overlap integral over two
+  !!                       NAO basis functions and one auxiliary basis function.
+  !! param[in] wave: real array, the Kohn-Sham wave function in the real-space grid
+  !! param[out] error: real number, maximum error between Coulomb and real-space resolution of
+  !!                   the identity fitting coefficients.          
+  subroutine get_rirs_polarizability(pi_pq, n_basis, n_basis_pairs, n_basbas, n_rk_points, & 
+                                     n_states, eigenvalues, eigenvectors, ovlp2fn, ovlp3fn, wave)
+
+    type(polarizability_types)                           :: pi_pq
+                             
+
+    integer                                              :: n_basis, n_basis_pairs, &
+                                                            n_basbas, n_states, n_rk_points
+
+    real(kind=dp), dimension(n_states)                   :: eigenvalues
+    real(kind=dp), dimension(n_basis, n_states)          :: eigenvectors
+    real(kind=dp), dimension(n_basis_pairs, n_rk_points) :: ovlp2fn
+    real(kind=dp), dimension(n_basis_pairs, n_basbas)    :: ovlp3fn
+    real(kind=dp), dimension(n_states, n_rk_points)      :: wave
+
+    ! Local variables
+
+    logical                                              :: keep_pi=.true.
+
+    ! Get the separable RI coefficients 
+    call get_rirs_coefficients(pi_pq%ri_rs, n_basis_pairs, n_basbas, n_rk_points, &
+                               ovlp2fn, ovlp3fn)
+
+    ! Get the Kohn-Sham wave function in the real-space grid
+    call get_ks_wave(pi_pq, n_basis, n_states, n_rk_points, eigenvalues, &
+                     eigenvectors, wave)
+
+    ! Get minimax time-frequency grid and tranformation matrix from GreenX
+    call get_minimax_grids(pi_pq)
+
+    ! Initialize space-time RPA working arrays
+    call initialize_polarizability(pi_pq)
+
+    ! Evaluate the polarizability [pi_PQ](iw)
+    call evaluate_polarizability(pi_pq)
+
+    ! Deallocate working arrays
+    call deallocate_polarizability(pi_pq, keep_pi)
+
+  end subroutine get_rirs_polarizability
+
 
   !> brief Compute the irreducible polarizability [PI(iw)]_PQ using 
   !>       the separable resolution of the identity method
@@ -101,7 +173,7 @@ module polarizability
     pi_pq%ks%wave(:,:,1)         = wave(:,:)
 
   end subroutine get_ks_wave
-
+! **********************************************************************
 !> brief get frequency-time minimax grids 
 !  param[inout] pi_pq:  polarizability environment
 ! **********************************************************************
@@ -113,13 +185,13 @@ module polarizability
     !Local variables
 
     integer                                   :: info, n_points
-    real(kind=8)                              :: e_tran_max, e_tran_min, duality_error
-    real(kind=8), dimension(3)                :: max_errors
-    real(kind=8), dimension(:),   allocatable :: freq_mesh, freq_weights
-    real(kind=8), dimension(:),   allocatable :: tau_mesh, tau_weights
-    real(kind=8), dimension(:,:), allocatable :: cos_tau_to_freq_weights
-    real(kind=8), dimension(:,:), allocatable :: cos_freq_to_tau_weights
-    real(kind=8), dimension(:,:), allocatable :: sinft_tau_to_freq_weights
+    real(kind=dp)                              :: e_tran_max, e_tran_min, duality_error
+    real(kind=dp), dimension(3)                :: max_errors
+    real(kind=dp), dimension(:),   allocatable :: freq_mesh, freq_weights
+    real(kind=dp), dimension(:),   allocatable :: tau_mesh, tau_weights
+    real(kind=dp), dimension(:,:), allocatable :: cos_tau_to_freq_weights
+    real(kind=dp), dimension(:,:), allocatable :: cos_freq_to_tau_weights
+    real(kind=dp), dimension(:,:), allocatable :: sinft_tau_to_freq_weights
 
     ! Initialization
 
@@ -130,10 +202,10 @@ module polarizability
     ! call get_minimal_maximal_transition_energy(e_tran_min, e_tran_max)
       ! Hard coded for now
       n_points = pi_pq%minimax%n_points
-      e_tran_max = 0.260
-      e_tran_min = 31.725
+      e_tran_max = 0.260_dp
+      e_tran_min = 31.725_dp
 
-    if (e_tran_min .le. 0.d0) then
+    if (e_tran_min .le. 0.0_dp) then
        call register_exc("Detected metal system, not supported in minimax grid")
        return
     end if
@@ -310,20 +382,20 @@ module polarizability
     type(polarizability_types) :: pi_pq
 
     ! Local variables
-    real(kind=8), dimension(:,:), allocatable :: mat_aux
+    real(kind=dp), dimension(:,:), allocatable :: mat_aux
 
     allocate(mat_aux(pi_pq%ri_rs%n_points,pi_pq%ri_rs%basis%n_basbas))
 
     ! right multiplication [mat_A]_kQ = [chi_0]kk' Z_Qk'
     call dgemm("n","t",pi_pq%ri_rs%n_points, pi_pq%ri_rs%basis%n_basbas, & 
-               pi_pq%ri_rs%n_points,1.d0, pi_pq%chi%matrix, pi_pq%ri_rs%n_points, &
-               pi_pq%ri_rs%z_coeff, pi_pq%ri_rs%basis%n_basbas,0.d0, & 
+               pi_pq%ri_rs%n_points,1.0_dp, pi_pq%chi%matrix, pi_pq%ri_rs%n_points, &
+               pi_pq%ri_rs%z_coeff, pi_pq%ri_rs%basis%n_basbas,0.0_dp, & 
                mat_aux, pi_pq%ri_rs%n_points)
 
     ! left multiplication [Pi]_PQ = Z_Pk [mat_A]_kQ
     call dgemm("n","n",pi_pq%ri_rs%basis%n_basbas, pi_pq%ri_rs%basis%n_basbas, & 
-               pi_pq%ri_rs%n_points,1.d0, pi_pq%ri_rs%z_coeff, pi_pq%ri_rs%basis%n_basbas, &
-               mat_aux, pi_pq%ri_rs%n_points,0.d0, pi_pq%tau,pi_pq%ri_rs%basis%n_basbas)
+               pi_pq%ri_rs%n_points,1.0_dp, pi_pq%ri_rs%z_coeff, pi_pq%ri_rs%basis%n_basbas, &
+               mat_aux, pi_pq%ri_rs%n_points,0.0_dp, pi_pq%tau,pi_pq%ri_rs%basis%n_basbas)
 
     deallocate(mat_aux)
 

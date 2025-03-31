@@ -63,13 +63,15 @@ module separable_ri
   subroutine get_rirs_coefficients(ri_rs, n_basis_pairs,n_loc_basbas,n_rk_points, &
                                     ovlp2fn, ovlp3fn)
 
-   type(separable_ri_types) :: ri_rs
+   type(separable_ri_types)                             :: ri_rs
 
    integer                                              :: n_basis_pairs, n_loc_basbas, n_rk_points
+   logical                                              :: keep_coeff = .true.
 
    real(kind=dp), dimension(n_basis_pairs,n_rk_points)  :: ovlp2fn
    real(kind=dp), dimension(n_basis_pairs,n_loc_basbas) :: ovlp3fn
 
+   ! Initialize separable ri arrays
    call initialization(ri_rs)
 
    ! Copy of the overlap matrix
@@ -78,7 +80,8 @@ module separable_ri
    ! Compute the z coefficients 
    call get_coeff_zrs(ri_rs, n_basis_pairs, n_loc_basbas, ovlp3fn)
 
-   call deallocations(ri_rs,.true.)
+   ! Deallocate separable ri arrays
+   call deallocations(ri_rs, keep_coeff)
 
    end subroutine get_rirs_coefficients
 
@@ -128,20 +131,20 @@ module separable_ri
    allocate(aux_matb(ri_rs%n_points,ri_rs%n_points))
 
    ! Compute A = \sum_ij M_ij^P * D_ij^k'
-   call dgemm('T','N',n_loc_basbas,ri_rs%n_points,n_basis_pairs,1.0d0,&
-              ovlp3fn,n_basis_pairs,ri_rs%ovlp2fn,n_basis_pairs,0.0d0,&
+   call dgemm('T','N',n_loc_basbas,ri_rs%n_points,n_basis_pairs,1.0_dp,&
+              ovlp3fn,n_basis_pairs,ri_rs%ovlp2fn,n_basis_pairs,0.0_dp,&
               aux_mata,n_loc_basbas)
 
    ! Compute B = (sum_ij D_ij^k * D_ij^k')^-1
-   call dgemm('T', 'N',ri_rs%n_points,ri_rs%n_points,n_basis_pairs,1.0d0,&
-              ri_rs%ovlp2fn,n_basis_pairs,ri_rs%ovlp2fn,n_basis_pairs,0.d0,&
+   call dgemm('T', 'N',ri_rs%n_points,ri_rs%n_points,n_basis_pairs,1.0_dp,&
+              ri_rs%ovlp2fn,n_basis_pairs,ri_rs%ovlp2fn,n_basis_pairs,0.0_dp,&
               aux_matb,ri_rs%n_points)
 
-   call power_genmat(aux_matb,ri_rs%n_points,-1.d0, 1.d-10) 
+   call power_genmat(aux_matb,ri_rs%n_points,-1.0_dp, 1.0d-10) 
 
    ! Compute Z = A B^-1
-   call dgemm('N', 'N',n_loc_basbas,ri_rs%n_points,ri_rs%n_points,1.0d0,&
-              aux_mata,n_loc_basbas,aux_matb,ri_rs%n_points,0.d0, &              
+   call dgemm('N', 'N',n_loc_basbas,ri_rs%n_points,ri_rs%n_points,1.0_dp,&
+              aux_mata,n_loc_basbas,aux_matb,ri_rs%n_points,0.0_dp, &              
               ri_rs%z_coeff,n_loc_basbas)
 
    deallocate(aux_mata,aux_matb)
