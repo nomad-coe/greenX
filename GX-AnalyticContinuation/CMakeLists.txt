@@ -118,26 +118,30 @@ add_test(
         COMMAND pytest -s test_gx_analytic_continuation_greedy_64bit.py --build-dir ${CMAKE_BINARY_DIR}
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
 )
-add_test(
-        NAME test_gx_analytic_continuation_no-greedy_128bit
-        COMMAND pytest -s test_gx_analytic_continuation_no-greedy_128bit.py --build-dir ${CMAKE_BINARY_DIR}
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
-)
-add_test(
-        NAME test_gx_analytic_continuation_greedy_128bit
-        COMMAND pytest -s test_gx_analytic_continuation_greedy_128bit.py --build-dir ${CMAKE_BINARY_DIR}
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
-)
+if(GMPXX_FOUND)
+        add_test(
+                NAME test_gx_analytic_continuation_no-greedy_128bit
+                COMMAND pytest -s test_gx_analytic_continuation_no-greedy_128bit.py --build-dir ${CMAKE_BINARY_DIR}
+                WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
+        )
+        add_test(
+                NAME test_gx_analytic_continuation_greedy_128bit
+                COMMAND pytest -s test_gx_analytic_continuation_greedy_128bit.py --build-dir ${CMAKE_BINARY_DIR}
+                WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
+        )
+endif()
 add_test(
         NAME test_gx_analytic_continuation_symmetry_64bit
         COMMAND pytest -s test_gx_analytic_continuation_symmetry_64bit.py --build-dir ${CMAKE_BINARY_DIR}
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
 )
-add_test(
-        NAME test_gx_analytic_continuation_symmetry_128bit
-        COMMAND pytest -s test_gx_analytic_continuation_symmetry_128bit.py --build-dir ${CMAKE_BINARY_DIR}
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
-)
+if(GMPXX_FOUND)
+        add_test(
+                NAME test_gx_analytic_continuation_symmetry_128bit
+                COMMAND pytest -s test_gx_analytic_continuation_symmetry_128bit.py --build-dir ${CMAKE_BINARY_DIR}
+                WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
+        )
+endif()
 add_test(
         NAME test_gx_analytic_continuation_reference_0
         COMMAND pytest -s test_gx_analytic_continuation_reference_0.py --build-dir ${CMAKE_BINARY_DIR}

@@ -80,7 +80,7 @@ python plot.py output.dat comparison.png
 The figure is saved as `comparison.png`. Feel free to change some parameters in the `pade_example.f90` script and compile again to see how it is affecting the pade interpolation.
 
 ## Running the regression tests 
-Regression tests of the GX-AC component use the testing framework [pytest](https://docs.pytest.org/en/stable/#). Simply type `ctest` in the build directory after the GreenX library has been build.
+Regression tests of the GX-AC component use the testing framework [pytest](https://docs.pytest.org/en/stable/#). Simply type `ctest` in the build directory after the GreenX library has been build. Note that if you link against the GMP libaray (`-DENABLE_GNU_GMP=ON`), additional regression tests will run that test the behaviour of the AC component in combination with GMP.
 
 For more information please refer to the main [README.md](https://github.com/nomad-coe/greenX/blob/main/README.md) of this repository.
 
