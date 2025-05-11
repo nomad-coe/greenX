@@ -170,14 +170,27 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     FORCE)
 endif()
 
+
 install(
     EXPORT      greenXTargets
     NAMESPACE   greenX::
     FILE        greenXTargets.cmake
-    DESTINATION lib/cmake/greenX
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/greenX"
+)
+
+configure_file("${PROJECT_SOURCE_DIR}/cmake/greenXConfig.cmake.in"
+               "${PROJECT_BINARY_DIR}/greenXConfig.cmake" @ONLY)
+
+install(
+    FILES "${PROJECT_BINARY_DIR}/greenXConfig.cmake"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/greenX"
 )
 
 install(
-    FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/greenXConfig.cmake"
-    DESTINATION lib/cmake/greenX
+  FILES "${PROJECT_SOURCE_DIR}/cmake/Findzofu.cmake"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/greenX"
+)
+install(
+  FILES "${PROJECT_SOURCE_DIR}/cmake/FindGMPXX.cmake"
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/greenX"
 )
