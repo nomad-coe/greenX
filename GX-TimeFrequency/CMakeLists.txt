@@ -29,7 +29,7 @@ target_include_directories(LibGXMiniMax
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/utilities>
 
         # Install-time includes (point to the location where headers/modules land when installed)
-        $<INSTALL_INTERFACE:include/modules>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_Fortran_MODULES}/TimeFrequency/modules>
 )
 # Define source that comprise LibGXMiniMax
 target_sources(LibGXMiniMax PRIVATE
@@ -82,7 +82,7 @@ install(TARGETS LibGXMiniMax
 # Install modules
 # Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in top-level CMake
 install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
-        DESTINATION include)
+        DESTINATION ${CMAKE_INSTALL_Fortran_MODULES}/TimeFrequency)
 
 # Install `Build utility` program
 install(TARGETS GXTabulateGrids

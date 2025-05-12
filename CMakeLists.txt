@@ -8,12 +8,11 @@
 cmake_minimum_required(VERSION 3.15.0)
 
 project(greenX
-  LANGUAGES Fortran
-  VERSION 0.0.1
+  LANGUAGES Fortran CXX
+  VERSION 2.2
+  DESCRIPTION "Library for Many-body Green Functions on HPC"
+  HOMEPAGE_URL "https://nomad-coe.github.io/greenX/"
 )
-
-# Need for Intel MKL and for GNU GMP
-enable_language(CXX)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -22,6 +21,21 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_Fortran_BIN_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_Fortran_LIB_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/modules)
+
+# Set installation location
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(default_install_prefix "${PROJECT_SOURCE_DIR}/install")
+  set(CMAKE_INSTALL_PREFIX ${default_install_prefix}
+    CACHE STRING "Choose the installation directory. Default location is ${default_install_prefix}"
+    FORCE)
+endif()
+
+# the set the include directory where the mod files will be installed. the include directory is compiler dependent.
+if(NOT CMAKE_INSTALL_Fortran_MODULES)
+  set(CMAKE_INSTALL_Fortran_MODULES
+      "${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/${CMAKE_Fortran_COMPILER_ID}-${CMAKE_Fortran_COMPILER_VERSION}"
+  )
+endif()
 
 # Define GNU standard installation directories
 include(GNUInstallDirs)
@@ -124,7 +138,7 @@ if (${COMPILE_SUBMODULES})
   set(IDieL_INSTALL_DIR "${IDieL_SOURCE}/IDieL")
   install(FILES ${IDieL_INSTALL_DIR}/lib/libIDieL.so DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
   install(DIRECTORY ${IDieL_INSTALL_DIR}/include/
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/modules/
+        DESTINATION ${CMAKE_INSTALL_Fortran_MODULES}
         FILES_MATCHING PATTERN "*d")
   else()
     message(FATAL_ERROR "IDieL source directory not found: ${IDieL_SOURCE}. You can obtain it by executing 'git submodule update --init'.")
@@ -148,7 +162,7 @@ if (${PAW_COMPONENT})
    install(FILES ${LIBPAW_INSTALL_DIR}/lib/libabinit_common.a DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
    install(FILES ${LIBPAW_INSTALL_DIR}/lib/libpaw.so DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
    install(DIRECTORY ${LIBPAW_INSTALL_DIR}/include/
-           DESTINATION ${CMAKE_INSTALL_PREFIX}/include/modules/
+           DESTINATION ${CMAKE_INSTALL_Fortran_MODULES}
            FILES_MATCHING PATTERN "*d")
 endif()
 
@@ -162,13 +176,6 @@ if (${ENABLE_GREENX_DOCS})
   add_custom_target(docs COMMAND ${DOXYGEN} ${PROJECT_SOURCE_DIR}/Doxyfile)
 endif ()
 
-# Set installation location
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(default_install_prefix "${PROJECT_SOURCE_DIR}/install")
-  set(CMAKE_INSTALL_PREFIX ${default_install_prefix}
-    CACHE STRING "Choose the installation directory. Default location is ${default_install_prefix}"
-    FORCE)
-endif()
 
 
 install(
