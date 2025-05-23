@@ -32,13 +32,13 @@ target_include_directories(LibGXLBasis
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
 
         # Install-time includes (point to the location where headers/modules land when installed)
-        $<INSTALL_INTERFACE:include/modules>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_Fortran_MODULES}/LocalizedBasis/modules>
 )
 
 # Define source that comprise LibGXLBasis
 target_sources(LibGXLBasis PRIVATE
 	src/separable_ri.f90
-        src/localized_basis_types.f90
+    src/localized_basis_types.f90
 	src/localized_basis_environments.f90
 	src/polarizability.f90
 	src/w_engine.f90
@@ -62,7 +62,7 @@ install(TARGETS LibGXLBasis
 # Install modules
 # Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in top-level CMake
 install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
-        DESTINATION include)
+        DESTINATION ${CMAKE_INSTALL_Fortran_MODULES}/LocalizedBasis)
 
 # -----------------------------------------------
 # Application Testing Set-Up

@@ -3,19 +3,37 @@
 #  GMPXX_FOUND
 #  GMPXX_INCLUDE_DIR
 #  GMPXX_LIBRARIES
-
-find_path(GMPXX_INCLUDE_DIR NAMES gmpxx.h)
-find_library(GMPXX_LIBRARY NAMES gmpxx)
-
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(GMPXX DEFAULT_MSG GMPXX_INCLUDE_DIR GMPXX_LIBRARY)
+find_package(PkgConfig)
 
-if(GMPXX_FOUND)
-  set(GMPXX_INCLUDE_DIRS ${GMPXX_INCLUDE_DIR})
-  set(GMPXX_LIBRARIES ${GMPXX_LIBRARY})
+if (PKG_CONFIG_FOUND)
+  pkg_check_modules(GREENX_GMPXX IMPORTED_TARGET GLOBAL gmpxx)
+  pkg_check_modules(GREENX_GMP IMPORTED_TARGET GLOBAL gmp)
+endif()
+if(NOT GREENX_GMP_FOUND)
+  find_path(GREENX_GMPXX_INCLUDE_DIR NAMES gmpxx.h)
+  find_library(GREENX_GMPXX_LIBRARY NAMES gmpxx)
+  find_library(GREENX_GMP_LIBRARY NAMES gmp)
 else()
-  set(GMPXX_INCLUDE_DIRS)
-  set(GMPXX_LIBRARIES)
+  set(GREENX_GMP_LIBRARY ${GREENX_GMP_LINK_LIBRARIES})
+  set(GREENX_GMPXX_LIBRARY ${GREENX_GMPXX_LINK_LIBRARIES})
+  set(GREENX_GMPXX_INCLUDE_DIR ${GREENX_GMP_INCLUDE_DIRS})
+endif()
+
+find_package_handle_standard_args(GMPXX DEFAULT_MSG GREENX_GMPXX_INCLUDE_DIRS GREENX_GMPXX_LIBRARY GREENX_GMP_LIBRARY)
+
+set(GREENX_GMPXX_LIBRARIES ${GREENX_GMPXX_LIBRARY} ${GREENX_GMP_LIBRARY})
+
+if (NOT TARGET greenX::gmpxx)
+  add_library(greenX::gmpxx INTERFACE IMPORTED)
+  set_target_properties(greenX::gmpxx
+                        PROPERTIES
+                        INTERFACE_LINK_LIBRARIES "${GREENX_GMPXX_LIBRARIES}")
+  if (GREENX_GMPXX_INCLUDE_DIRS)
+    set_target_properties(greenX::gmpxx
+                          PROPERTIES
+                          INTERFACE_INCLUDE_DIRECTORIES ${GREENX_GMPXX_INCLUDE_DIRS})
+  endif()
 endif()
 
 mark_as_advanced(GMPXX_INCLUDE_DIR GMPXX_LIBRARY)

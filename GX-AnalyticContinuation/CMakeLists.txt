@@ -21,13 +21,13 @@ set_target_properties(LibGXAC
 target_include_directories(LibGXAC
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-        $<INSTALL_INTERFACE:include/modules>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_Fortran_MODULES}/AnalyticContinuation/modules>
 )
 if(GMPXX_FOUND)
   add_definitions(-DGMPXX_FOUND)
   target_sources(LibGXAC PRIVATE src/pade_approximant.f90 src/ComplexGMP.cpp src/Symmetry_pade.cpp src/pade_mp.cpp api/gx_ac.F90)
   target_include_directories(LibGXAC PRIVATE ${GMPXX_INCLUDE_DIRS})
-  target_link_libraries(LibGXAC GXCommon ${GMPXX_LIBRARIES} gmp)
+  target_link_libraries(LibGXAC GXCommon greenX::gmpxx)
 else()
   target_sources(LibGXAC PRIVATE src/pade_approximant.f90 api/gx_ac.F90)
   target_link_libraries(LibGXAC GXCommon)
@@ -42,7 +42,7 @@ install(TARGETS LibGXAC EXPORT greenXTargets ARCHIVE DESTINATION lib LIBRARY DES
 
 # Install modules
 # Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in top-level CMake
-install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}  DESTINATION include)
+install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}  DESTINATION ${CMAKE_INSTALL_Fortran_MODULES}/AnalyticContinuation)
 
 
 

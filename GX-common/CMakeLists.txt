@@ -17,7 +17,7 @@ set_target_properties(GXCommon
 target_include_directories(GXCommon
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>  # used when building in the source tree
-        $<INSTALL_INTERFACE:include/modules>                        # used after 'make install'
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_Fortran_MODULES}/common/modules>                        # used after 'make install'
 )
 
 target_sources(GXCommon PRIVATE
@@ -41,7 +41,7 @@ install(TARGETS GXCommon
 # Destination relative to ${CMAKE_INSTALL_PREFIX}, defined in the top-level
 ## CMakeLists.txt
 install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
-        DESTINATION include)
+        DESTINATION ${CMAKE_INSTALL_Fortran_MODULES}/common)
 
 
 # ensure that zofu is build before GXCommon 
