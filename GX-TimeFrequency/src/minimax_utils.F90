@@ -25,6 +25,7 @@ module minimax_utils
   integer, parameter, public :: cosine_tw = 1
   integer, parameter, public :: cosine_wt = 2
   integer, parameter, public :: sine_tw = 3
+  integer, parameter, public :: sine_wt = 4
 
 contains
 

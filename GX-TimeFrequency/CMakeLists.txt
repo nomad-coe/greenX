@@ -113,7 +113,7 @@ add_custom_command(
 # Application Tests
 # -----------------------------------------------
 
-# Add a test target
+# Add a test to tabulate the time/frequency grids and weights
 add_executable(test_gx_minimax_grid)
 
 # Set binary name
@@ -124,23 +124,48 @@ set_target_properties(test_gx_minimax_grid
 # Define source that comprise the binary
 target_sources(test_gx_minimax_grid
         PRIVATE
-        test/test_gx_minimax_grid.f90
-        )
+        test/test_gx_minimax_grid.f90)
 
 # Libraries that the binary links to
 target_link_libraries(test_gx_minimax_grid
         PUBLIC
-        LibGXMiniMax
-        )
+        LibGXMiniMax)
 
+# Add a test target to tabulate cosine/sine the duality error
+add_executable(test_gx_minimax_duality_error)
+
+# Set binary name
+set_target_properties(test_gx_minimax_duality_error
+        PROPERTIES
+        RUNTIME_OUTPUT_NAME test_gx_minimax_duality_error.exe)
+
+# Define source that comprise the binary
+target_sources(test_gx_minimax_duality_error
+        PRIVATE
+        test/test_gx_minimax_duality_error.f90)
+
+# Libraries that the binary links to
+target_link_libraries(test_gx_minimax_duality_error
+        PUBLIC
+        LibGXMiniMax)
+
+# -------------------------------
 # Build location of the binary
-# TODO(Alex) Consider move this to test/, to sit with the python drivers
+# -------------------------------
+
 set_target_properties(test_gx_minimax_grid
         PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_Fortran_BIN_DIRECTORY})
 
+set_target_properties(test_gx_minimax_duality_error
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_Fortran_BIN_DIRECTORY})
+
+# -----------------------------------
 # Copy .py test to the `build/test` directory, such that one can run pytest there
 # where CMAKE_CURRENT_SOURCE_DIR => CMakeLists.txt on this level
+# -----------------------------------
+
 add_custom_command(
         TARGET LibGXMiniMax POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
@@ -148,12 +173,6 @@ add_custom_command(
                 ${CMAKE_CURRENT_SOURCE_DIR}/test/test_gx_minimax_grid.py
                 # Location to copy the test to
                 ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/test_gx_minimax_grid.py)
-
-# Note.
-# The command below would build the test in <BUILD_DIR>/<LIB_NAME>/test:
-#                #  Location to copy the test to
-#                ${CMAKE_CURRENT_BINARY_DIR}/test/test_gx_minimax_grid.py)
-# whereas I am currently opting to put tests in <BUILD_DIR>/tests/<LIB_NAME>
 
 # Add test to ctest
 add_test(
@@ -172,6 +191,38 @@ add_custom_command(
 add_test(
         NAME test_gx_tabulate_minimax
         COMMAND pytest -s test_gx_tabulate_minimax.py --build-dir ${CMAKE_BINARY_DIR}
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
+)
+
+# Add test minimax sine duality error to the ctest
+add_custom_command(
+        TARGET LibGXMiniMax POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                # Test source relative to the time-frequency (this) folder
+                ${CMAKE_CURRENT_SOURCE_DIR}/test/test_gx_minimax_sine_duality_error.py
+                # Location to copy the test to
+                ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/test_gx_minimax_sine_duality_error.py)
+
+# Add test to ctest
+add_test(
+        NAME test_gx_minimax_sine_duality_error
+        COMMAND pytest -s test_gx_minimax_sine_duality_error.py --build-dir ${CMAKE_BINARY_DIR}
+        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
+)
+
+# Add test minimax sine duality error with tikhonov regularization to the ctest
+add_custom_command(
+        TARGET LibGXMiniMax POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                # Test source relative to the time-frequency (this) folder
+                ${CMAKE_CURRENT_SOURCE_DIR}/test/test_gx_minimax_sine_duality_error_tikhonov.py
+                # Location to copy the test to
+                ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}/test_gx_minimax_sine_duality_error_tikhonov.py)
+
+# Add test to ctest
+add_test(
+        NAME test_gx_minimax_sine_duality_error_tikhonov
+        COMMAND pytest -s test_gx_minimax_sine_duality_error_tikhonov.py --build-dir ${CMAKE_BINARY_DIR}
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/test/${TEST_TARGET_DIR}
 )
 
