@@ -7,7 +7,7 @@
 ! ***************************************************************************************************
 module separable_ri
 
-   use kinds,                        only: dp
+   use gx_kinds,                        only: dp
    use lapack_interfaces,            only: dgemm  
    use localized_basis_types,        only: separable_ri_types
    use localized_basis_environments, only: calculate_error, power_genmat, &

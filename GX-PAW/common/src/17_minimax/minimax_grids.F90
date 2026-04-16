@@ -22,7 +22,7 @@ module minimax_grids
 #include "gx_common.h"
   use defs_basis,        only: dp, pi
   use m_errors
-  !use kinds,             only: dp
+  !use gx_kinds,             only: dp
   !use error_handling,    only: register_exc
   !use gx_constants,         only: pi
   use minimax_tau,       only: get_points_weights_tau

@@ -8,7 +8,7 @@
 !> Cannot write python bindings as all grids/weights are allocated in the library
 !> - This should be changed
 program test_gx_minimax_grid
-    use kinds, only: dp
+    use gx_kinds, only: dp
     use gx_minimax, only: gx_minimax_grid
     implicit none
 

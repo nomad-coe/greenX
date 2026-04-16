@@ -8,7 +8,7 @@
 
 module w_engine
 
-  use kinds,                        only: dp
+  use gx_kinds,                        only: dp
   use lapack_interfaces,            only: dgemm
   use localized_basis_types,        only: w_engine_types
   use localized_basis_environments, only: initialize_w_engine, deallocate_w_engine, &

@@ -12,7 +12,7 @@
 !> Available at http://physics.nist.gov/constants,
 !> National Institute of Standards and Technology, Gaithersburg, MD 20899.
 module gx_constants
-    use kinds, only: dp
+    use gx_kinds, only: dp
     implicit none
     private
 

@@ -9,7 +9,7 @@ program gx_tabulate_minimax
 #include "gx_common.h"
 
     use iso_fortran_env, only : std_out => output_unit
-    use kinds,           only : dp
+    use gx_kinds,           only : dp
     use gx_constants,       only:  ch10
     use gx_minimax,      only : gx_minimax_grid, gx_get_error_message, tau_npoints_supported
 
