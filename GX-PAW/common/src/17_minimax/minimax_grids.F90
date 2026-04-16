@@ -24,7 +24,7 @@ module minimax_grids
   use m_errors
   !use kinds,             only: dp
   !use error_handling,    only: register_exc
-  !use constants,         only: pi
+  !use gx_constants,         only: pi
   use minimax_tau,       only: get_points_weights_tau
   use minimax_omega,     only: get_points_weights_omega
   use minimax_utils,     only: cosine_wt, cosine_tw, sine_tw

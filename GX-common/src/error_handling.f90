@@ -1,5 +1,7 @@
 module error_handling
-   use constants, only: ch10, err_len
+
+   use gx_constants, only: ch10, err_len
+
    implicit none
    private
 

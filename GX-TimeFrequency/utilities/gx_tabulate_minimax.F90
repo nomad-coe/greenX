@@ -10,7 +10,7 @@ program gx_tabulate_minimax
 
     use iso_fortran_env, only : std_out => output_unit
     use kinds,           only : dp
-    use constants,       only:  ch10
+    use gx_constants,       only:  ch10
     use gx_minimax,      only : gx_minimax_grid, gx_get_error_message, tau_npoints_supported
 
     implicit none
