@@ -32,7 +32,7 @@ jobs:
         run: pip3 install cmake
 
       - name: Install python dependencies
-        run: pip3 install numpy pytest
+        run: pip3 install numpy "pytest<9"
 
       - name: Install blas, lapack and other dependencies
         run: sudo apt-get install libblas-dev liblapack-dev doxygen libgmp10 libgmpxx4ldbl libgmp-dev libopenblas-dev
