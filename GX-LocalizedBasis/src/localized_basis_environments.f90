@@ -7,7 +7,7 @@
 ! ***************************************************************************************************
 module localized_basis_environments
 
-   use kinds,                 only: dp
+   use gx_kinds,                 only: dp
    use error_handling,        only: register_exc   
    use localized_basis_types, only: separable_ri_types, &
                                     polarizability_types, &

@@ -6,7 +6,7 @@
 
 program test_gx_localized_basis
 
-   use kinds,                           only: dp        
+   use gx_kinds,                           only: dp        
    use gx_localized_basis,              only: gx_rirs_coefficients
 
    implicit none

@@ -6,7 +6,7 @@
 
 !>  Fortran double precision implementation of the thiele pade approximation. 
 module pade_approximant
-   use kinds, only: dp
+   use gx_kinds, only: dp
    implicit none
 
    private

@@ -29,7 +29,7 @@
 !!   PHYSICAL REVIEW B 94, 165109 (2016);
 !!   J. CHEM. THEORY COMPUT. 19, 16, 5450–5464 (2023)
 module gx_ac
-   use kinds, only: dp
+   use gx_kinds, only: dp
    use, intrinsic :: iso_c_binding, only: c_int, c_double_complex, c_ptr
    use pade_approximant, only: evaluate_thiele_pade, thiele_pade, c_zero, c_one
    implicit none

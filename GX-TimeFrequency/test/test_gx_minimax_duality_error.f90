@@ -9,7 +9,7 @@
 
 program test_gx_minimax_duality_error
 
-    use kinds,      only: dp
+    use gx_kinds,      only: dp
     use gx_minimax, only: gx_minimax_grid, tau_npoints_supported
 
     implicit none

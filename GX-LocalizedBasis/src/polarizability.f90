@@ -7,7 +7,7 @@
 ! ***************************************************************************************************
 module polarizability 
 
-  use kinds,                        only: dp
+  use gx_kinds,                        only: dp
   use error_handling,               only: register_exc  
   use lapack_interfaces,            only: dgemm
   use localized_basis_types,        only: polarizability_types
